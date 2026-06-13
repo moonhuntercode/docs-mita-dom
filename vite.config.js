@@ -17,7 +17,7 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      '@mita-docs': path.resolve(__dirname, '../mita-dom')
+      '@mita-docs': 'mita-dom'
     }
   },
 
