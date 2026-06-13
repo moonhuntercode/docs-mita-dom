@@ -1,0 +1,91 @@
+<!-- inicio file: index.html -->
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MitaDOM - App ++Avanzada</title>
+</head>
+
+<body class="tema-oscuro">
+  <!-- Layout estructurado para grid-template-areas -->
+
+  <div id="vt-backdrop" class="vt-backdrop"></div>
+  <header id="main-header">
+    <div class="header-contenido">
+      <h1>🌿 mita-dom SPA</h1>
+      <p>Demostración CSS Grid, Routing Avanzado y Signals</p>
+    </div>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <button id="btn-tema">🌙 Modo Oscuro</button>
+      <!-- Botón de Menú (Mobile Only) -->
+      <button id="btn-menu-mobile" class="menu-btn-mobile">☰ Menú</button>
+    </div>
+  </header>
+
+  <!-- SIDEBAR GLOBAL -->
+  <aside id="sidebar" class="sidebar-cerrado">
+    <nav aria-label="Navegación principal">
+      <a href="/">🏠 Inicio</a>
+      <a href="/perfil">👤 Perfil</a>
+      <a href="/docs">📖 Documentación</a>
+      <a href="/blog">📰 Blog (Novedades)</a>
+      <a href="/acerca">👤 Acerca de Nosotros</a>
+      <a href="/configuracion">⚙️ Configuración</a>
+      <a href="/admin/logs">🛡️ Dashboard Logs</a>
+      <a href="/ruta-falsa">🛑 Probar 404</a>
+      
+      <!-- PORTAL: Navegación Específica de Docs (Se muestra solo en /docs) -->
+      <mita-docs-nav></mita-docs-nav>
+    </nav>
+  </aside>
+
+  <main id="app-container" aria-live="polite">
+    <!-- Vista Inicio -->
+    <div id="vista-inicio" class="vista">
+      <section class="tarjetas-grid">
+        <demo-tarjeta></demo-tarjeta>
+        <demo-tarjeta></demo-tarjeta>
+
+      </section>
+      <section class="formulario-seccion">
+        <h2>Ingresa tus datos</h2>
+        <demo-formulario></demo-formulario>
+      </section>
+
+      <section class="ejemplos-seccion" style="grid-column: 1 / -1; margin-top: 1rem;">
+        <h2>Patrones UI Avanzados</h2>
+        <demo-shopping-list></demo-shopping-list>
+      </section>
+    </div>
+
+    <!-- VISTA: Perfil (Oculto por defecto) -->
+      <demo-shopping-list style="display: none;"></demo-shopping-list>
+      <!-- Vista Documentación Avanzada -->
+      <mita-docs style="display: none;"></mita-docs>
+      <!-- Vista Blog / Novedades -->
+      <mita-blog style="display: none;"></mita-blog>
+      <!-- Vista Acerca de Nosotros -->
+      <demo-acerca style="display: none;"></demo-acerca>
+      <!-- Vista Configuración -->
+      <demo-config style="display: none;"></demo-config>
+    
+    <!-- VISTA: Admin Logs (Oculto por defecto) -->
+    <demo-admin-logs style="display: none;"></demo-admin-logs>
+
+    <!-- VISTA: Error 404 (Oculto por defecto) -->
+    <demo-404></demo-404>
+  </main>
+
+  <footer>
+    <p>Desarrollado con 💚 usando Vanilla JS, MitaDOM y CSS Grid Nativo.</p>
+  </footer>
+
+  <!-- WIDGET DE RENDIMIENTO (Profiler) -->
+  <mita-profiler></mita-profiler>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>

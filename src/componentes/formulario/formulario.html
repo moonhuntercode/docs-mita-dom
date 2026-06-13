@@ -1,0 +1,16 @@
+<form id="form-datos">
+  <label for="input-nombre">Tu Nombre (Reacciona Globalmente)</label>
+  <input type="text" id="input-nombre" name="nombre" placeholder="Ej. Desarrollador Web" required aria-required="true" autocomplete="off" />
+  
+  <div class="form-actions">
+    <button type="submit">Guardar en Global</button>
+    <a href="/perfil" data-link class="btn-secondary">Ver en Perfil ➡️</a>
+  </div>
+  
+  <div class="form-hint">
+    <span class="hint-icon">💡</span>
+    <p>Este componente mutará el <code>estadoAppGlobal</code>. Puedes navegar a otras vistas y comprobar que el estado se mantiene persistido y sincronizado.</p>
+  </div>
+  
+  <p id="feedback" aria-live="polite"></p>
+</form>

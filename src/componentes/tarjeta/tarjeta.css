@@ -1,0 +1,92 @@
+/* @scope permite aislar los estilos nativamente en el Light DOM */
+@scope (demo-tarjeta) {
+
+    /* Mobile First: Estilos base para pantallas pequeñas */
+    .tarjeta-optimizada {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        background-color: #1a1a1a;
+        color: #f0f0f0;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+        border: 1px solid #333;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .tarjeta-header h2 {
+        margin: 0;
+        font-size: 1.25rem;
+        color: #00e676;
+        /* Verde acento vibrante */
+    }
+
+    .tarjeta-body {
+        font-size: 1rem;
+        color: #cccccc;
+    }
+
+    .tarjeta-actions {
+        display: flex;
+        flex-flow: row wrap;
+        place-content: center;
+        place-items: center;
+        place-self: center;
+
+        /* Apilados en móviles */
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+    button {
+        background-color: #38c983;
+        color: #000000;
+        border: none;
+        padding: 0.875rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+        width: 100%;
+        /* Botones de ancho completo en móvil */
+    }
+
+    button:hover {
+        background-color: #00c853;
+    }
+
+    button:active {
+        transform: scale(0.98);
+    }
+
+    /* Responsive: Mejoras para Tablet y Desktop */
+    @media (min-width: 768px) {
+        .tarjeta-optimizada {
+            padding: 1.5rem;
+            max-width: 90%;
+            /* Restricción visual en pantallas grandes */
+        }
+
+        .tarjeta-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .tarjeta-actions {
+            justify-content: flex-end;
+            /* display: flex; */
+            flex-flow: row wrap;
+            place-content: center;
+            place-items: center;
+            place-self: center;
+        }
+
+        button {
+            width: auto;
+            /* Ancho ajustado a su contenido en desktop */
+            padding: 0.6rem 1.25rem;
+        }
+    }
+}

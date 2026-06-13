@@ -1,0 +1,44 @@
+@scope (mita-blog) {
+
+  /* Enfoque Mobile First */
+  .blog-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .blog-header {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .blog-header h2 {
+    margin-top: 0;
+    color: var(--color-primario);
+    font-size: 1.8rem;
+  }
+
+  .blog-header p {
+    margin-bottom: 0;
+    opacity: 0.8;
+    font-size: 0.95rem;
+  }
+
+  .docs-content {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-x: auto;
+    /* Evita roturas de layout en móviles por tablas largas o código */
+  }
+
+  /* --- Layout para Tablet y Desktop --- */
+  @media (min-width: 768px) {
+    .docs-content {
+      padding: 2.5rem;
+    }
+  }
+}

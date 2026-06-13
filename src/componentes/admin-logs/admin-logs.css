@@ -1,0 +1,57 @@
+@scope (demo-admin-logs) {
+  .dashboard-auditoria {
+    padding: 2rem;
+    background: var(--color-superficie);
+    border-radius: var(--borde-radio);
+    border: 1px solid var(--color-borde);
+  }
+
+  .dashboard-header h2 {
+    color: var(--color-primario);
+    margin-top: 0;
+  }
+
+  .filtros {
+    margin: 1.5rem 0;
+    display: flex;
+    gap: 1rem;
+  }
+
+  .filtros button {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--color-borde);
+    background: transparent;
+    color: var(--color-texto);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .filtros button.activo {
+    background: var(--color-primario);
+    color: #000;
+    border-color: var(--color-primario);
+  }
+
+  .tabla-contenedor {
+    overflow-x: auto;
+  }
+
+  .tabla-logs {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .tabla-logs th, .tabla-logs td {
+    border: 1px solid var(--color-borde);
+    padding: 0.75rem;
+    text-align: left;
+  }
+
+  .tabla-logs th {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .nivel-ERROR { color: #ff5252; font-weight: bold; }
+  .nivel-WARN { color: #ffab00; font-weight: bold; }
+  .nivel-INFO { color: #00e676; }
+}

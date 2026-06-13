@@ -1,0 +1,63 @@
+.docs-nav-container {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-borde);
+  display: flex;
+  flex-direction: column;
+}
+
+.docs-nav-container h3 {
+  margin-top: 0;
+  color: var(--color-primario);
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+#docs-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.nav-group h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--color-texto);
+  opacity: 0.6;
+  letter-spacing: 1px;
+}
+
+.btn-doc {
+  background: transparent;
+  color: var(--color-texto);
+  border: 1px solid transparent;
+  text-align: left;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 0.95rem;
+  text-decoration: none;
+  display: block;
+}
+
+.btn-doc:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-borde);
+}
+
+.btn-doc.activo {
+  background: var(--color-primario);
+  color: white;
+  border-color: var(--color-primario);
+  font-weight: bold;
+}

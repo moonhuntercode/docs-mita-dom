@@ -1,0 +1,128 @@
+.profiler-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 300px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid #334155;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  color: #f8fafc;
+  font-family: 'Inter', system-ui, sans-serif;
+  z-index: 9999;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profiler-container.minimized {
+  width: 150px;
+  bottom: 10px;
+}
+
+.profiler-container.minimized .profiler-body {
+  display: none;
+}
+
+.profiler-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+  cursor: grab;
+}
+
+.profiler-title {
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.profiler-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.profiler-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+.profiler-btn:active {
+  transform: translateY(0);
+}
+
+.profiler-body {
+  padding: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.profiler-config {
+  font-size: 0.75rem;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #334155;
+  color: #cbd5e1;
+}
+
+.profiler-config input {
+  width: 50px;
+  background: #0f172a;
+  border: 1px solid #475569;
+  color: #fff;
+  border-radius: 4px;
+  padding: 2px 5px;
+  text-align: right;
+}
+
+.profiler-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profiler-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-family: 'Fira Code', monospace;
+  background: #1e293b;
+  border-left: 4px solid transparent;
+}
+
+/* Semántica de Rendimiento (Vercel Speed Insights clone) */
+.status-green {
+  border-left-color: #10b981;
+  color: #34d399;
+}
+.status-yellow {
+  border-left-color: #f59e0b;
+  color: #fbbf24;
+}
+.status-red {
+  border-left-color: #ef4444;
+  color: #fca5a5;
+  animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+  0% { background: #1e293b; }
+  50% { background: rgba(239, 68, 68, 0.2); }
+  100% { background: #1e293b; }
+}

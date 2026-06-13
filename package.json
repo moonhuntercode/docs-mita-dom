@@ -1,0 +1,30 @@
+{
+  "name": "example-mita-spa-01-js",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:vitest": "vitest run",
+    "test:ui": "vitest --ui"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-legacy": "^8.0.2",
+    "@vitest/ui": "^4.1.8",
+    "eslint": "^10.5.0",
+    "fake-indexeddb": "^6.2.5",
+    "globals": "^17.6.0",
+    "jsdom": "^29.1.1",
+    "terser": "^5.48.0",
+    "vite": "^8.0.12",
+    "vitest": "^4.1.8"
+  },
+  "dependencies": {
+    "marked": "^18.0.5",
+    "mita-dom": "file:../mita-dom"
+  }
+}

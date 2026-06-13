@@ -1,0 +1,50 @@
+<div class="demo-wrapper">
+  <!-- Editor de Código (React Docs Style) -->
+  <div class="code-editor-mock">
+    <div class="editor-header">
+      <div class="mac-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="filename">demo-shopping-list.js</span>
+    </div>
+    <div class="editor-content">
+<pre><code class="language-javascript"><span class="token keyword">import</span> { Signal, ComputedSignal } <span class="token keyword">from</span> <span class="token string">'mita-dom'</span>;
+
+<span class="token keyword">const</span> products = [
+  { title: <span class="token string">'Cabbage'</span>, isFruit: <span class="token boolean">false</span>, id: <span class="token number">1</span> },
+  { title: <span class="token string">'Garlic'</span>, isFruit: <span class="token boolean">false</span>, id: <span class="token number">2</span> },
+  { title: <span class="token string">'Apple'</span>, isFruit: <span class="token boolean">true</span>, id: <span class="token number">3</span> },
+  { title: <span class="token string">'Banana'</span>, isFruit: <span class="token boolean">true</span>, id: <span class="token number">4</span> },
+];
+
+<span class="token keyword">export class</span> <span class="token class-name">DemoShoppingList</span> <span class="token keyword">extends</span> <span class="token class-name">MitaElement</span> {
+  <span class="token function">constructor</span>() {
+    <span class="token keyword">super</span>();
+    <span class="token keyword">this</span>.filtroActivo = <span class="token keyword">new</span> <span class="token class-name">Signal</span>(<span class="token string">'todas'</span>);
+    <span class="token keyword">this</span>.productosFiltrados = <span class="token keyword">new</span> <span class="token class-name">ComputedSignal</span>(<span class="token keyword">this</span>.filtroActivo, (filtro) => {
+      <span class="token keyword">if</span> (filtro === <span class="token string">'frutas'</span>) <span class="token keyword">return</span> products.<span class="token function">filter</span>(p => p.isFruit);
+      <span class="token keyword">return</span> products;
+    });
+  }
+}</code></pre>
+    </div>
+  </div>
+
+<div class="shopping-container">
+  <h3>🛒 Lista de Compras</h3>
+  <div class="filtros">
+    <button id="btn-todas" class="activo">Todas</button>
+    <button id="btn-frutas">Solo Frutas</button>
+  </div>
+  
+  <ul id="lista-productos">
+    <!-- Renderizado Dinámico aquí -->
+  </ul>
+  
+  <div class="shopping-hint">
+    <p>💡 <b>A diferencia de React</b>, aquí no hay un Virtual DOM recalculando cada nodo. MitaDOM usa <code>DocumentFragment</code> para inyectar listas complejas en 0ms.</p>
+  </div>
+</div>
+</div>

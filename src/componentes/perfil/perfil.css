@@ -1,0 +1,35 @@
+@scope (demo-perfil) {
+    .perfil-optimizado {
+        background-color: #1a1a1a;
+        color: #f0f0f0;
+        padding: 1rem;
+        border-radius: 12px;
+        border: 1px solid #333;
+        font-family: system-ui, sans-serif;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    h2 {
+        margin-top: 0;
+        color: #ffab00; /* Acento distinto para diferenciar de la tarjeta */
+    }
+
+    .loader {
+        animation: pulso 1.5s infinite;
+        color: #aaa;
+    }
+
+    @keyframes pulso {
+        0% { opacity: 0.5; }
+        50% { opacity: 1; }
+        100% { opacity: 0.5; }
+    }
+
+    @media (min-width: 768px) {
+        .perfil-optimizado {
+            padding: 2rem;
+            max-width: 500px;
+        }
+    }
+}

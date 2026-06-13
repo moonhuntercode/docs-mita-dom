@@ -1,0 +1,99 @@
+@scope (mita-docs) {
+
+  /* Enfoque Mobile First: Layout base en columna */
+  .docs-layout {
+
+    width: 100%;
+    gap: 1.5rem;
+  }
+
+  .docs-sidebar {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  #docs-nav h3 {
+    margin-top: 0;
+    color: var(--color-primario);
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    width: 100%;
+  }
+
+  #docs-nav {
+    display: flex;
+    flex-wrap: wrap;
+    /* En móvil, los botones fluyen a los lados si hay espacio */
+    gap: 0.5rem;
+  }
+
+  #docs-nav button {
+    background: rgba(0, 0, 0, 0.2);
+    color: var(--color-texto);
+    border: 1px solid var(--color-borde);
+    text-align: center;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    width: 100%;
+    /* Botones bloque entero en móvil */
+    font-size: 1rem;
+  }
+
+  #docs-nav button:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  #docs-nav button.activo {
+    background: var(--color-primario);
+    color: white;
+    border-color: var(--color-primario);
+    font-weight: bold;
+  }
+
+  .docs-content {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 1.2rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-x: auto;
+
+    /* Previene que tablas rompan el layout en móvil */
+  }
+
+  /* --- Layout para Tablet y Desktop --- */
+  @media (min-width: 768px) {
+    .docs-layout {
+      gap: 2rem;
+      /* place-items: start center; */
+    }
+
+    .docs-sidebar {
+      /* visibility: hidden; */
+      grid-area: sidebar;
+      /* position: sticky; */
+      top: 2rem;
+      padding: 1.5rem;
+    }
+
+    #docs-nav {
+      flex-direction: column;
+      flex-wrap: nowrap;
+    }
+
+    #docs-nav button {
+      text-align: left;
+      background: transparent;
+      border: none;
+      padding: 0.5rem;
+    }
+
+    .docs-content {
+      padding: 2.5rem;
+    }
+  }
+}

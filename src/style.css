@@ -1,0 +1,274 @@
+/* Variables Globales (Tema Oscuro por Defecto) */
+:root {
+  --color-fondo: #121212;
+  --color-superficie: #1e1e1e;
+  --color-texto: #ffffff;
+  --color-primario: #00e676;
+  --color-acento: #ffab00;
+  --color-borde: rgba(255, 255, 255, 0.1);
+  --borde-radio: 12px;
+  --espaciado-base: 1rem;
+}
+
+/* Tema Claro (Inyección por Clase en el body) */
+body.tema-claro {
+  --color-fondo: #f5f5f5;
+  --color-superficie: #ffffff;
+  --color-texto: #333333;
+  --color-primario: #00b050;
+  --color-acento: #e65100;
+  --color-borde: rgba(0, 0, 0, 0.1);
+}
+
+/* Reset Básico y Tipografía */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  line-height: 1.5;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+  /* GRID LAYOUT NATIVO (Mobile First) */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
+  grid-template-rows: auto auto 1fr auto;
+  /* 4 filas: Header, Sidebar(Nav), Main, Footer */
+  grid-template-areas:
+    "header"
+    "sidebar"
+    "main"
+    "footer";
+  gap: 1rem;
+}
+
+/* --- ÁREAS DEL GRID --- */
+header {
+  grid-area: header;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--color-borde);
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background-color: var(--color-fondo);
+}
+
+/* Menú Hamburguesa en Mobile */
+.menu-btn-mobile {
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  border: 1px solid var(--color-borde);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* BACKDROP OSCURO (Vue Docs Style) */
+.vt-backdrop {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 45;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.vt-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+#sidebar {
+  grid-area: sidebar;
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+  
+  /* Off-canvas en Mobile */
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 50;
+  background-color: var(--color-superficie);
+  width: calc(100vw - 64px);
+  max-width: 320px;
+  padding: 2rem 1.5rem;
+  overflow-y: auto;
+  box-shadow: 0 14px 44px rgba(0,0,0,0.2);
+  
+  transform: translate(-100%);
+  transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* Estado abierto en móvil (cuando NO tiene sidebar-cerrado o tiene .open) */
+#sidebar:not(.sidebar-cerrado) {
+  transform: translate(0);
+}
+
+main {
+  grid-area: main;
+  padding: 1rem;
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+footer {
+  grid-area: footer;
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+  color: #888;
+  border-top: 1px solid var(--color-borde);
+}
+
+/* RESPONSIVE: TABLET & DESKTOP (Aplicando el mapa visual real) */
+@media (min-width: 768px) {
+  body {
+    /* background: #021b0d11; */
+    grid-template-columns: minmax(250px, 200px) minmax(500px, 1fr);
+    /* Columna Izquierda: Sidebar, Derecha: Main */
+    grid-template-rows: auto 1fr auto;
+    /* Mapa Visual (2 columnas) */
+    grid-template-areas:
+      "header header"
+      "sidebar main"
+      "footer footer";
+  }
+
+  header {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+  }
+
+  .menu-btn-mobile {
+    display: none; /* Ocultar botón hamburguesa en desktop */
+  }
+
+  #sidebar {
+    justify-content: flex-start;
+    border-right: 1px solid var(--color-borde);
+    /* Restaurar posicionamiento en grid para desktop */
+    position: static !important;
+    transform: translate(0) !important;
+    left: auto !important;
+    right: auto !important;
+    width: 100%;
+    max-width: none;
+    box-shadow: none;
+    padding: 1rem;
+    z-index: 1;
+    background-color: transparent;
+  }
+
+  .vt-backdrop {
+    display: none !important;
+  }
+
+  nav {
+    flex-direction: column; /* Botones apilados verticalmente en desktop */
+    width: 100%;
+  }
+}
+
+/* Elementos Internos */
+header h1 {
+  color: var(--color-primario);
+}
+
+header p {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+#btn-tema {
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  border: 1px solid var(--color-borde);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+#btn-tema:hover {
+  opacity: 0.8;
+}
+
+nav {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+nav a {
+  color: var(--color-acento);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+nav a:hover,
+nav a:focus {
+  background-color: var(--color-superficie);
+  border-color: var(--color-acento);
+}
+
+.vista {
+  animation: fade-in 0.3s ease-in-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tarjetas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.formulario-seccion {
+  background-color: var(--color-superficie);
+  padding: 1.5rem;
+  border-radius: var(--borde-radio);
+  border: 1px solid var(--color-borde);
+  margin-top: 1rem;
+}
+
+.formulario-seccion h2 {
+  color: var(--color-primario);
+  margin-bottom: 1rem;
+}

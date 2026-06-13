@@ -1,0 +1,30 @@
+<div class="dashboard-auditoria">
+  <header class="dashboard-header">
+    <h2>🛡️ Panel de Auditoría Local (IndexedDB)</h2>
+    <p>Este panel es estrictamente local. Lee directamente desde la base de datos interna del navegador.</p>
+  </header>
+
+  <div class="filtros">
+    <button id="btn-filtro-todos" class="activo">Todos</button>
+    <button id="btn-filtro-errores">Solo Errores</button>
+    <button id="btn-filtro-info">Solo Info</button>
+    <button id="btn-limpiar-logs" style="background-color: var(--danger-color); color: white; margin-left: auto;">Limpiar Logs</button>
+  </div>
+
+  <div class="tabla-contenedor">
+    <table class="tabla-logs">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nivel</th>
+          <th>Fecha</th>
+          <th>Mensaje</th>
+          <th>Detalles</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-body">
+        <tr><td colspan="5" style="text-align: center;">Cargando logs...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
