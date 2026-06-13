@@ -1,30 +1,63 @@
-<div class="dashboard-auditoria">
-  <header class="dashboard-header">
-    <h2>🛡️ Panel de Auditoría Local (IndexedDB)</h2>
-    <p>Este panel es estrictamente local. Lee directamente desde la base de datos interna del navegador.</p>
-  </header>
+<div class="demo-wrapper">
+  <!-- Editor de Código -->
+  <div class="code-editor-mock">
+    <div class="editor-header">
+      <div class="mac-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="filename">admin-logs.js</span>
+    </div>
+    <div class="editor-content">
+<pre><code class="language-javascript"><span class="token keyword">import</span> { StorageAdapter } <span class="token keyword">from</span> <span class="token string">'mita-dom'</span>;
 
-  <div class="filtros">
-    <button id="btn-filtro-todos" class="activo">Todos</button>
-    <button id="btn-filtro-errores">Solo Errores</button>
-    <button id="btn-filtro-info">Solo Info</button>
-    <button id="btn-limpiar-logs" style="background-color: var(--danger-color); color: white; margin-left: auto;">Limpiar Logs</button>
+<span class="token keyword">export class</span> <span class="token class-name">DemoAdminLogs</span> <span class="token keyword">extends</span> <span class="token class-name">MitaElement</span> {
+  <span class="token function">iniciarLogica</span>() {
+    <span class="token keyword">const</span> db = <span class="token keyword">new</span> <span class="token class-name">StorageAdapter</span>(<span class="token string">'mita_logs'</span>);
+    
+    <span class="token keyword">this</span>.$btnLimpiar.<span class="token function">addEventListener</span>(<span class="token string">'click'</span>, <span class="token keyword">async</span> () => {
+      <span class="token keyword">await</span> db.<span class="token function">clear</span>();
+      <span class="token keyword">this</span>.<span class="token function">cargarLogs</span>();
+    });
+
+    <span class="token keyword">this</span>.<span class="token function">cargarLogs</span>();
+  }
+}</code></pre>
+    </div>
   </div>
 
-  <div class="tabla-contenedor">
-    <table class="tabla-logs">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nivel</th>
-          <th>Fecha</th>
-          <th>Mensaje</th>
-          <th>Detalles</th>
-        </tr>
-      </thead>
-      <tbody id="tabla-body">
-        <tr><td colspan="5" style="text-align: center;">Cargando logs...</td></tr>
-      </tbody>
-    </table>
+  <!-- Resultado Visual -->
+  <div style="background: var(--color-superficie); border-top: 1px solid var(--color-borde);">
+    <div class="dashboard-auditoria">
+      <header class="dashboard-header">
+        <h2>🛡️ Panel de Auditoría Local (IndexedDB)</h2>
+        <p>Este panel es estrictamente local. Lee directamente desde la base de datos interna del navegador.</p>
+      </header>
+
+      <div class="filtros">
+        <button id="btn-filtro-todos" class="activo">Todos</button>
+        <button id="btn-filtro-errores">Solo Errores</button>
+        <button id="btn-filtro-info">Solo Info</button>
+        <button id="btn-limpiar-logs" style="background-color: var(--danger-color); color: white; margin-left: auto;">Limpiar Logs</button>
+      </div>
+
+      <div class="tabla-contenedor">
+        <table class="tabla-logs">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nivel</th>
+              <th>Fecha</th>
+              <th>Mensaje</th>
+              <th>Detalles</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-body">
+            <tr><td colspan="5" style="text-align: center;">Cargando logs...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>

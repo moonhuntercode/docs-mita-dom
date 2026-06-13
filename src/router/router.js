@@ -12,59 +12,84 @@ import { estadoDocActivo } from '../store/docsStore.js';
 export function iniciarRouter() {
   Logger.info('Iniciando enrutador visual de MitaDOM...');
 
-  const $inicio = document.getElementById('vista-inicio');
-  const $perfil = document.querySelector('demo-perfil');
-  const $adminLogs = document.querySelector('demo-admin-logs');
-  const $mitaDocs = document.querySelector('mita-docs');
-  const $mitaBlog = document.querySelector('mita-blog');
-  const $acerca = document.querySelector('demo-acerca');
-  const $config = document.querySelector('demo-config');
-  const $error404 = document.querySelector('demo-404');
+  // Catálogo de rutas permitidas mapeadas a sus componentes
+  const componentesPorRuta = {
+    '/': document.getElementById('vista-inicio'),
+    '/perfil': document.querySelector('demo-perfil'),
+    '/admin/logs': document.querySelector('demo-admin-logs'),
+    '/blog': document.querySelector('mita-blog'),
+    '/acerca': document.querySelector('demo-acerca'),
+    '/configuracion': document.querySelector('demo-config')
+  };
 
-    // Catálogo de rutas permitidas
-    const rutasRegistradas = ['/', '/perfil', '/admin/logs', '/blog', '/acerca', '/configuracion'];
+  const $mitaDocs = document.querySelector('mita-docs');
+  const $error404 = document.querySelector('demo-404');
   
-    // Configuración para URLPattern
-    const patternDocs = new URLPattern({ pathname: '/docs/:id' });
-  
-    rutaActual.suscribir(ruta => {
-      Logger.info(`Navegando a ruta: ${ruta}`);
-      
-      const matchDocs = patternDocs.exec({ pathname: ruta });
-      const esSeccionDocs = !!matchDocs || ruta === '/docs' || ruta === '/docs/';
-  
-      if ($inicio) $inicio.style.display = (ruta === '/') ? 'block' : 'none';
-      // @ts-ignore
-      if ($perfil) $perfil.style.display = (ruta === '/perfil') ? 'block' : 'none';
-      // @ts-ignore
-      if ($adminLogs) $adminLogs.style.display = (ruta === '/admin/logs') ? 'block' : 'none';
-      // @ts-ignore
-      if ($mitaDocs) {
-        $mitaDocs.style.display = esSeccionDocs ? 'block' : 'none';
-        
-        // Si entra a una subruta, actualizamos el estadoDocActivo para que <mita-docs> lo renderice
-        if (matchDocs && matchDocs.pathname.groups.id) {
-            estadoDocActivo.set(matchDocs.pathname.groups.id);
-        } else if (ruta === '/docs' || ruta === '/docs/') {
-            estadoDocActivo.set('readme'); // Fallback por defecto
-        }
+  // Configuración para URLPattern
+  const patternDocs = new URLPattern({ pathname: '/docs/:id' });
+
+  // 🛡️ Error Boundary: Verifica que el componente exista en el Light DOM
+  function verificarComponente(ruta, $elemento) {
+      if (!$elemento) {
+          const errMsg = `[Error Boundary] Componente no encontrado en el Light DOM para la ruta: ${ruta}`;
+          Logger.error(errMsg);
+          
+          // Mostrar Toast de Error UI para ayudar al DX (Developer Experience)
+          const $toast = document.createElement('div');
+          $toast.className = 'mita-error-toast';
+          $toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#f44336;color:white;padding:1rem 1.5rem;border-radius:8px;z-index:9999;font-weight:bold;box-shadow:0 10px 30px rgba(0,0,0,0.3);animation:fade-in 0.3s;transition:opacity 0.3s;';
+          $toast.innerHTML = `🚨 <b>Error Boundary (Router):</b><br>La ruta <code>${ruta}</code> no tiene un componente válido renderizado en <code>index.html</code>.`;
+          document.body.appendChild($toast);
+          
+          setTimeout(() => {
+              $toast.style.opacity = '0';
+              setTimeout(() => $toast.remove(), 300);
+          }, 6000);
       }
-      
-      // @ts-ignore
-      if ($mitaBlog) $mitaBlog.style.display = (ruta === '/blog') ? 'block' : 'none';
-      // @ts-ignore
-      if ($acerca) $acerca.style.display = (ruta === '/acerca') ? 'block' : 'none';
-      // @ts-ignore
-      if ($config) $config.style.display = (ruta === '/configuracion') ? 'block' : 'none';
-  
-      // B. Catch-All: Detectar rutas no registradas (404)
-      if ($error404) {
-        if (!rutasRegistradas.includes(ruta) && !esSeccionDocs) {
-          Logger.warn(`Ruta 404 interceptada: ${ruta}`);
-          $error404.style.display = 'block';
-        } else {
-          $error404.style.display = 'none';
-        }
-      }
+  }
+
+  rutaActual.suscribir(ruta => {
+    Logger.info(`Navegando a ruta: ${ruta}`);
+    
+    const matchDocs = patternDocs.exec({ pathname: ruta });
+    const esSeccionDocs = !!matchDocs || ruta === '/docs' || ruta === '/docs/';
+
+    // 1. Ocultar todos los componentes del Light DOM primero
+    Object.values(componentesPorRuta).forEach($el => {
+        if ($el) $el.style.display = 'none';
     });
+    if ($mitaDocs) $mitaDocs.style.display = 'none';
+    if ($error404) $error404.style.display = 'none';
+
+    // 2. Mostrar el componente que corresponde a la ruta actual
+    let rutaReconocida = false;
+
+    if (esSeccionDocs) {
+        rutaReconocida = true;
+        verificarComponente('/docs', $mitaDocs);
+        if ($mitaDocs) {
+            $mitaDocs.style.display = 'block';
+            if (matchDocs && matchDocs.pathname.groups.id) {
+                estadoDocActivo.set(matchDocs.pathname.groups.id);
+            } else {
+                estadoDocActivo.set('readme');
+            }
+        }
+    } else if (componentesPorRuta[ruta] !== undefined) {
+        rutaReconocida = true;
+        const $el = componentesPorRuta[ruta];
+        verificarComponente(ruta, $el);
+        if ($el) $el.style.display = 'block';
+    }
+
+    // 3. Catch-All: Detectar rutas no registradas (404)
+    if (!rutaReconocida) {
+        Logger.warn(`Ruta 404 interceptada: ${ruta}`);
+        if ($error404) {
+            $error404.style.display = 'block';
+        } else {
+            verificarComponente('404', $error404);
+        }
+    }
+  });
 }

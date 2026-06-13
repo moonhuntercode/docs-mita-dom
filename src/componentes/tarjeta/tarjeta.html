@@ -1,18 +1,53 @@
-<div class="tarjeta-optimizada">
-    <div class="tarjeta-header">
-        <h2>Estado Global: <span id="valor-global">0</span></h2>
+<div class="demo-wrapper">
+  <!-- Editor de Código -->
+  <div class="code-editor-mock">
+    <div class="editor-header">
+      <div class="mac-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="filename">demo-tarjeta.js</span>
     </div>
-    <div class="tarjeta-body">
-        <p>Estado Local (Visita): <strong id="valor-local">0</strong></p>
-    </div>
-    <div class="tarjeta-actions">
-        <button id="btn-local-add">Subir Local</button>
-        <button id="btn-local-rem">Disminuir Local</button>
-        <button id="btn-global-add">Subir Global</button>
-        <button id="btn-global-rem">Disminuir Global</button>
-        <button id="btn-reset-all">Reiniciar All State, local y Global</button>
-        <button id="btn-reset-global">Reiniciar State Global</button>
-        <button id="btn-reset-local">Reiniciar State Local</button>
+    <div class="editor-content">
+<pre><code class="language-javascript"><span class="token keyword">import</span> { Signal } <span class="token keyword">from</span> <span class="token string">'mita-dom'</span>;
+<span class="token keyword">import</span> { estadoAppGlobal } <span class="token keyword">from</span> <span class="token string">'../../store/appStore.js'</span>;
 
+<span class="token keyword">export class</span> <span class="token class-name">MitaTarjeta</span> <span class="token keyword">extends</span> <span class="token class-name">MitaElement</span> {
+  <span class="token function">constructor</span>() {
+    <span class="token keyword">super</span>();
+    <span class="token keyword">this</span>.estadoLocal = <span class="token keyword">new</span> <span class="token class-name">Signal</span>(<span class="token number">0</span>);
+  }
+
+  <span class="token function">iniciarLogica</span>() {
+    estadoAppGlobal.<span class="token function">suscribir</span>(estado => {
+      <span class="token keyword">this</span>.$valorGlobal.textContent = estado.visitas;
+    });
+
+    <span class="token keyword">this</span>.estadoLocal.<span class="token function">suscribir</span>(valor => {
+      <span class="token keyword">this</span>.$valorLocal.textContent = valor;
+    });
+  }
+}</code></pre>
     </div>
+  </div>
+
+  <!-- Resultado Visual -->
+  <div class="tarjeta-optimizada" style="border-radius: 0; border: none; border-top: 1px solid var(--color-borde);">
+      <div class="tarjeta-header">
+          <h2>Estado Global: <span id="valor-global">0</span></h2>
+      </div>
+      <div class="tarjeta-body">
+          <p>Estado Local (Visita): <strong id="valor-local">0</strong></p>
+      </div>
+      <div class="tarjeta-actions">
+          <button id="btn-local-add">Subir Local</button>
+          <button id="btn-local-rem">Disminuir Local</button>
+          <button id="btn-global-add">Subir Global</button>
+          <button id="btn-global-rem">Disminuir Global</button>
+          <button id="btn-reset-all">Reiniciar All State, local y Global</button>
+          <button id="btn-reset-global">Reiniciar State Global</button>
+          <button id="btn-reset-local">Reiniciar State Local</button>
+      </div>
+  </div>
 </div>

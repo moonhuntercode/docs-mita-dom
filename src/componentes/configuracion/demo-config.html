@@ -1,29 +1,61 @@
-<div class="config-container">
-  <h2>⚙️ Configuración Personalizada</h2>
-  <p>Aquí puedes personalizar la experiencia de la SPA. Los datos se guardan usando persistencia nativa con IndexedDB/LocalStorage y Signals de MitaDOM.</p>
+<div class="demo-wrapper">
+  <!-- Editor de Código -->
+  <div class="code-editor-mock">
+    <div class="editor-header">
+      <div class="mac-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="filename">demo-config.js</span>
+    </div>
+    <div class="editor-content">
+<pre><code class="language-javascript"><span class="token keyword">import</span> { estadoConfiguracion } <span class="token keyword">from</span> <span class="token string">'../../store/docsStore.js'</span>;
 
-  <div class="card-config">
-    <h3>📱 Posición del Menú Móvil</h3>
-    <p>Elige desde dónde quieres que aparezca el Sidebar cuando estás en un dispositivo móvil.</p>
+<span class="token keyword">export class</span> <span class="token class-name">DemoConfig</span> <span class="token keyword">extends</span> <span class="token class-name">MitaElement</span> {
+  <span class="token function">iniciarLogica</span>() {
+    <span class="token keyword">const</span> pos = estadoConfiguracion.<span class="token function">get</span>().sidebarPos;
     
-    <div class="radio-group">
-      <label class="radio-option">
-        <input type="radio" name="menu-pos" value="left" id="pos-left">
-        <span class="radio-custom"></span>
-        Deslizar desde la Izquierda (Vue Docs Style)
-      </label>
-      
-      <label class="radio-option">
-        <input type="radio" name="menu-pos" value="right" id="pos-right">
-        <span class="radio-custom"></span>
-        Deslizar desde la Derecha
-      </label>
+    <span class="token keyword">this</span>.$radios.<span class="token function">forEach</span>(radio => {
+      radio.<span class="token function">addEventListener</span>(<span class="token string">'change'</span>, (e) => {
+        estadoConfiguracion.<span class="token function">patch</span>({ sidebarPos: e.target.value });
+      });
+    });
+  }
+}</code></pre>
     </div>
   </div>
 
-  <div class="card-config">
-    <h3>👁️ Modo de Vista (Opcional)</h3>
-    <p>Guarda preferencias adicionales que se recuperarán en futuras visitas.</p>
-    <button id="btn-guardar-config" class="btn-primario">Guardar Preferencias Manualmente</button>
+  <!-- Resultado Visual -->
+  <div style="background: var(--color-superficie); border-top: 1px solid var(--color-borde);">
+    <div class="config-container">
+      <h2>⚙️ Configuración Personalizada</h2>
+      <p>Aquí puedes personalizar la experiencia de la SPA. Los datos se guardan usando persistencia nativa con IndexedDB/LocalStorage y Signals de MitaDOM.</p>
+
+      <div class="card-config">
+        <h3>📱 Posición del Menú Móvil</h3>
+        <p>Elige desde dónde quieres que aparezca el Sidebar cuando estás en un dispositivo móvil.</p>
+        
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="menu-pos" value="left" id="pos-left">
+            <span class="radio-custom"></span>
+            Deslizar desde la Izquierda (Vue Docs Style)
+          </label>
+          
+          <label class="radio-option">
+            <input type="radio" name="menu-pos" value="right" id="pos-right">
+            <span class="radio-custom"></span>
+            Deslizar desde la Derecha
+          </label>
+        </div>
+      </div>
+
+      <div class="card-config">
+        <h3>👁️ Modo de Vista (Opcional)</h3>
+        <p>Guarda preferencias adicionales que se recuperarán en futuras visitas.</p>
+        <button id="btn-guardar-config" class="btn-primario">Guardar Preferencias Manualmente</button>
+      </div>
+    </div>
   </div>
 </div>

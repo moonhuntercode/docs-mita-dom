@@ -272,3 +272,69 @@ nav a:focus {
   color: var(--color-primario);
   margin-bottom: 1rem;
 }
+
+/* --- MOCK EDITOR ESTILO VSCODE / REACT DOCS --- */
+.demo-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-top: 2rem;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.code-editor-mock {
+  background: #1e1e1e;
+}
+
+.editor-header {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1.2rem;
+  background: #252526;
+  border-bottom: 1px solid #111;
+}
+
+.mac-dots {
+  display: flex;
+  gap: 8px;
+  margin-right: 1.5rem;
+}
+
+.mac-dots .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.dot.red { background: #ff5f56; }
+.dot.yellow { background: #ffbd2e; }
+.dot.green { background: #27c93f; }
+
+.filename {
+  color: #9cdcfe;
+  font-family: 'Fira Code', Consolas, monospace;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.editor-content {
+  padding: 1.5rem;
+  overflow-x: auto;
+  font-family: 'Fira Code', Consolas, monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #d4d4d4;
+  margin: 0;
+}
+
+.editor-content pre {
+  margin: 0;
+}
+
+.token.keyword { color: #569cd6; }
+.token.string { color: #ce9178; }
+.token.boolean, .token.number { color: #b5cea8; }
+.token.class-name { color: #4ec9b0; }
+.token.function { color: #dcdcaa; }

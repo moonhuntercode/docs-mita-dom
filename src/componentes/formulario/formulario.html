@@ -1,16 +1,52 @@
-<form id="form-datos">
-  <label for="input-nombre">Tu Nombre (Reacciona Globalmente)</label>
-  <input type="text" id="input-nombre" name="nombre" placeholder="Ej. Desarrollador Web" required aria-required="true" autocomplete="off" />
-  
-  <div class="form-actions">
-    <button type="submit">Guardar en Global</button>
-    <a href="/perfil" data-link class="btn-secondary">Ver en Perfil ➡️</a>
+<div class="demo-wrapper">
+  <!-- Editor de Código -->
+  <div class="code-editor-mock">
+    <div class="editor-header">
+      <div class="mac-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="filename">formulario.js</span>
+    </div>
+    <div class="editor-content">
+<pre><code class="language-javascript"><span class="token keyword">import</span> { estadoAppGlobal } <span class="token keyword">from</span> <span class="token string">'../../store/appStore.js'</span>;
+
+<span class="token keyword">export class</span> <span class="token class-name">MitaFormulario</span> <span class="token keyword">extends</span> <span class="token class-name">MitaElement</span> {
+  <span class="token function">iniciarLogica</span>() {
+    <span class="token keyword">this</span>.$form.<span class="token function">addEventListener</span>(<span class="token string">'submit'</span>, (e) => {
+      e.<span class="token function">preventDefault</span>();
+      <span class="token keyword">const</span> nombre = <span class="token keyword">this</span>.$input.<span class="token property">value</span>;
+
+      <span class="token comment">// Mutación Granular y Segura del Estado Global</span>
+      estadoAppGlobal.<span class="token function">patch</span>({ 
+        usuario: { nombre: nombre } 
+      });
+      
+      <span class="token keyword">this</span>.<span class="token function">mostrarFeedback</span>(<span class="token string">'¡Estado Global Actualizado!'</span>);
+    });
+  }
+}</code></pre>
+    </div>
   </div>
-  
-  <div class="form-hint">
-    <span class="hint-icon">💡</span>
-    <p>Este componente mutará el <code>estadoAppGlobal</code>. Puedes navegar a otras vistas y comprobar que el estado se mantiene persistido y sincronizado.</p>
+
+  <!-- Resultado Visual -->
+  <div style="background: var(--color-superficie); padding: 1.5rem; border-top: 1px solid var(--color-borde);">
+    <form id="form-datos">
+      <label for="input-nombre">Tu Nombre (Reacciona Globalmente)</label>
+      <input type="text" id="input-nombre" name="nombre" placeholder="Ej. Desarrollador Web" required aria-required="true" autocomplete="off" />
+      
+      <div class="form-actions">
+        <button type="submit">Guardar en Global</button>
+        <a href="/perfil" data-link class="btn-secondary">Ver en Perfil ➡️</a>
+      </div>
+      
+      <div class="form-hint">
+        <span class="hint-icon">💡</span>
+        <p>Este componente mutará el <code>estadoAppGlobal</code>. Puedes navegar a otras vistas y comprobar que el estado se mantiene persistido y sincronizado.</p>
+      </div>
+      
+      <p id="feedback" aria-live="polite"></p>
+    </form>
   </div>
-  
-  <p id="feedback" aria-live="polite"></p>
-</form>
+</div>

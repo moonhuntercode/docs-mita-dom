@@ -1,16 +1,54 @@
-<div class="perfil-optimizado">
-    <h2>Perfil de Usuario Remoto</h2>
-    <div id="perfil-estado">
-        <!-- Skeleton o loader -->
-        <p class="loader">Cargando datos desde la API...</p>
+<div class="demo-wrapper">
+  <!-- Editor de Código -->
+  <div class="code-editor-mock">
+    <div class="editor-header">
+      <div class="mac-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="filename">perfil.js</span>
     </div>
-    
-    <div id="perfil-contenido" style="display: none;">
-        <p><strong>Nombre:</strong> <span id="perfil-nombre"></span></p>
-        <p><strong>Email:</strong> <span id="perfil-email"></span></p>
-    </div>
+    <div class="editor-content">
+<pre><code class="language-javascript"><span class="token keyword">import</span> { crearRecurso } <span class="token keyword">from</span> <span class="token string">'mita-dom'</span>;
 
-    <div id="perfil-error" style="display: none; color: #ff5252;">
-        <p>Error al cargar el perfil.</p>
+<span class="token keyword">export class</span> <span class="token class-name">MitaPerfil</span> <span class="token keyword">extends</span> <span class="token class-name">MitaElement</span> {
+  <span class="token function">constructor</span>() {
+    <span class="token keyword">super</span>();
+    <span class="token keyword">this</span>.recursoPerfil = <span class="token function">crearRecurso</span>(<span class="token keyword">async</span> () => {
+      <span class="token keyword">const</span> res = <span class="token keyword">await</span> <span class="token function">fetch</span>(<span class="token string">'https://jsonplaceholder.typicode.com/users/1'</span>);
+      <span class="token keyword">return</span> <span class="token keyword">await</span> res.<span class="token function">json</span>();
+    });
+  }
+
+  <span class="token function">iniciarLogica</span>() {
+    <span class="token keyword">this</span>.recursoPerfil.<span class="token function">suscribir</span>(estado => {
+      <span class="token keyword">if</span> (estado.loading) <span class="token keyword">this</span>.<span class="token function">mostrarLoader</span>();
+      <span class="token keyword">else if</span> (estado.error) <span class="token keyword">this</span>.<span class="token function">mostrarError</span>();
+      <span class="token keyword">else</span> <span class="token keyword">this</span>.<span class="token function">renderData</span>(estado.data);
+    });
+  }
+}</code></pre>
     </div>
+  </div>
+
+  <!-- Resultado Visual -->
+  <div style="background: var(--color-superficie); padding: 1.5rem; border-top: 1px solid var(--color-borde);">
+    <div class="perfil-optimizado">
+        <h2>Perfil de Usuario Remoto</h2>
+        <div id="perfil-estado">
+            <!-- Skeleton o loader -->
+            <p class="loader">Cargando datos desde la API...</p>
+        </div>
+        
+        <div id="perfil-contenido" style="display: none;">
+            <p><strong>Nombre:</strong> <span id="perfil-nombre"></span></p>
+            <p><strong>Email:</strong> <span id="perfil-email"></span></p>
+        </div>
+
+        <div id="perfil-error" style="display: none; color: #ff5252;">
+            <p>Error al cargar el perfil.</p>
+        </div>
+    </div>
+  </div>
 </div>

@@ -1,32 +1,59 @@
-<div class="acerca-container">
-  <div class="acerca-header">
-    <h2>👤 Acerca del Creador</h2>
-    <p>Impulsando la web nativa, un Signal a la vez.</p>
-  </div>
-  
-  <div class="acerca-content">
-    <div class="perfil-card">
-      <img src="https://github.com/moonhuntercode.png" alt="Victor Code Avatar" class="avatar" />
-      <h3>Victor Code</h3>
-      <p class="rol">Arquitecto Frontend & Creador de MitaDOM</p>
-      
-      <div class="redes-sociales">
-        <a href="https://github.com/moonhuntercode" target="_blank" rel="noopener noreferrer" class="btn-social github">
-          💻 GitHub
-        </a>
-        <a href="https://www.instagram.com/victorcode_/" target="_blank" rel="noopener noreferrer" class="btn-social instagram">
-          📸 Instagram
-        </a>
-        <a href="https://victorcode.tecnologia.bo/" target="_blank" rel="noopener noreferrer" class="btn-social web">
-          🌐 Sitio Web Oficial
-        </a>
+<div class="demo-wrapper">
+  <!-- Editor de Código -->
+  <div class="code-editor-mock">
+    <div class="editor-header">
+      <div class="mac-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
       </div>
+      <span class="filename">demo-acerca.js</span>
     </div>
+    <div class="editor-content">
+<pre><code class="language-javascript"><span class="token keyword">import</span> { MitaElement } <span class="token keyword">from</span> <span class="token string">'mita-dom'</span>;
 
-    <div class="info-card">
-      <h3>🚀 La Visión</h3>
-      <p>MitaDOM no es solo código, es una declaración de intenciones. Creado con la firme convicción de que la web moderna no necesita ser pesada ni depender de cajas negras para ser interactiva, veloz y escalable.</p>
-      <p>A través del dominio de las Web APIs nativas, la Reactividad Quirúrgica (Signals) y el Mobile First, buscamos devolverle el control total al desarrollador.</p>
+<span class="token keyword">export class</span> <span class="token class-name">DemoAcerca</span> <span class="token keyword">extends</span> <span class="token class-name">MitaElement</span> {
+  <span class="token function">render</span>() {
+    <span class="token comment">// Renderizado estático sin Signals, 100% Nativo</span>
+    <span class="token keyword">this</span>.innerHTML = templateHTML;
+  }
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- Resultado Visual -->
+  <div style="background: var(--color-superficie); border-top: 1px solid var(--color-borde);">
+    <div class="acerca-container">
+      <div class="acerca-header">
+        <h2>👤 Acerca del Creador</h2>
+        <p>Impulsando la web nativa, un Signal a la vez.</p>
+      </div>
+      
+      <div class="acerca-content">
+        <div class="perfil-card">
+          <img src="https://github.com/moonhuntercode.png" alt="Victor Code Avatar" class="avatar" />
+          <h3>Victor Code</h3>
+          <p class="rol">Arquitecto Frontend & Creador de MitaDOM</p>
+          
+          <div class="redes-sociales">
+            <a href="https://github.com/moonhuntercode" target="_blank" rel="noopener noreferrer" class="btn-social github">
+              💻 GitHub
+            </a>
+            <a href="https://www.instagram.com/victorcode_/" target="_blank" rel="noopener noreferrer" class="btn-social instagram">
+              📸 Instagram
+            </a>
+            <a href="https://victorcode.tecnologia.bo/" target="_blank" rel="noopener noreferrer" class="btn-social web">
+              🌐 Sitio Web Oficial
+            </a>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h3>🚀 La Visión</h3>
+          <p>MitaDOM no es solo código, es una declaración de intenciones. Creado con la firme convicción de que la web moderna no necesita ser pesada ni depender de cajas negras para ser interactiva, veloz y escalable.</p>
+          <p>A través del dominio de las Web APIs nativas, la Reactividad Quirúrgica (Signals) y el Mobile First, buscamos devolverle el control total al desarrollador.</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
