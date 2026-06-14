@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'vite';
 import path from 'path';
+import fs from 'fs';
 
 import { mitaHmrPlugin } from 'mita-dom';
 import legacy from '@vitejs/plugin-legacy';
@@ -17,7 +18,9 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      '@mita-docs': path.resolve(__dirname, '../mita-dom')
+      '@mita-docs': fs.existsSync(path.resolve(__dirname, '../mita-dom/package.json'))
+        ? path.resolve(__dirname, '../mita-dom')
+        : path.resolve(__dirname, 'node_modules/mita-dom')
     }
   },
 

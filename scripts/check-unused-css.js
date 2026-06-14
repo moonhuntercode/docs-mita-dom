@@ -38,7 +38,7 @@ function getFilesRecursively(dir) {
         const fullPath = path.join(dir, entry.name);
         if (entry.isDirectory()) {
             files.push(...getFilesRecursively(fullPath));
-        } else if (entry.name.endsWith('.js') || entry.name.endsWith('.html')) {
+        } else if (entry.name.endsWith('.js') || entry.name.endsWith('.html') || entry.name.endsWith('.md')) {
             files.push(fullPath);
         }
     }
