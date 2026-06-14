@@ -29,17 +29,17 @@ export class MitaDocs extends MitaElement {
         this.$container.innerHTML = '<h3>Cargando Registro de Cambios...</h3>';
         try {
           let fullChangelog = '# 🔄 Registro de Cambios (Changelog)\n\nHistorial completo de versiones de MitaDOM extraído automáticamente.\n\n';
-          
+
           // Ordenamos los archivos por nombre (fecha) de forma descendente (más nuevo primero)
           const paths = Object.keys(changelogFiles).sort().reverse();
-          
+
           for (const path of paths) {
             const getMarkdown = changelogFiles[path];
             // @ts-ignore
             const mdContent = await getMarkdown();
             fullChangelog += mdContent + '\n\n---\n\n';
           }
-          
+
           this.$container.innerHTML = marked.parse(fullChangelog);
         } catch (err) {
           console.error(err);
@@ -49,11 +49,23 @@ export class MitaDocs extends MitaElement {
       }
 
       const contenidoRaw = DOCS_MAP[idDoc];
-      
+
       if (!contenidoRaw) {
-        const errorDetails = new Error(`El documento con ID "${idDoc}" no existe en el registro DOCS_MAP. Asegúrate de que el archivo .md esté presente y no haya sido filtrado.`);
-        errorDetails.name = 'DocumentNotFoundError';
-        this.renderErrorUI(errorDetails, '📄 Documento no encontrado');
+        this.$container.innerHTML = `
+          <div style="text-align: center; padding: 3rem 1rem;">
+            <h1 style="font-size: 4rem; margin: 0; color: var(--color-primario);">404</h1>
+            <h2 style="margin-top: 0.5rem; margin-bottom: 2rem;">Documento no encontrado</h2>
+            <p style="opacity: 0.8; margin-bottom: 2rem;">
+              El documento <strong>"${idDoc}.md"</strong> no existe o no ha sido sincronizado en el registro de documentación.
+            </p>
+            <button onclick="window.navigation.navigate('/')" class="btn-primario" style="padding: 0.8rem 1.5rem; font-size: 1.1rem; cursor: pointer;">
+              🏠 Volver al Inicio
+            </button>
+            <button onclick="window.navigation.navigate('/docs/readme')" class="btn-doc" style="margin-left: 1rem; padding: 0.8rem 1.5rem; font-size: 1.1rem; cursor: pointer; background: transparent; border: 1px solid var(--color-borde); color: var(--color-texto);">
+              📚 Ver Índice
+            </button>
+          </div>
+        `;
         return;
       }
 
@@ -78,11 +90,11 @@ export class MitaDocs extends MitaElement {
       if (!$enlace) return;
 
       const href = $enlace.getAttribute('href');
-      
+
       // Si es un enlace interno a otro Markdown (ej. "./FILOSOFIA.md" o "../FUNDAMENTOS.md")
       if (href && href.toLowerCase().endsWith('.md')) {
         e.preventDefault(); // Detenemos la navegación por defecto (que daría 404)
-        
+
         // Extraemos solo el nombre base sin extensión y lo pasamos a minúsculas
         // Ej: "./FILOSOFIA.md" -> "filosofia"
         const partes = href.split('/');
@@ -111,7 +123,7 @@ export class MitaDocs extends MitaElement {
    */
   renderErrorUI(error, titulo) {
     const stackTrace = error.stack || error.message || 'Error desconocido sin stacktrace.';
-    
+
     this.$container.innerHTML = `
       <div class="docs-error-container" style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
         <h2 style="color: #ef4444; margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
@@ -138,7 +150,7 @@ export class MitaDocs extends MitaElement {
           btnCopy.style.background = '#10b981';
           setTimeout(() => {
             btnCopy.innerHTML = '📋 Copiar Stacktrace';
-            btnCopy.style.background = 'rgba(0,0,0,0.5)';
+            btnCopy.style.background = 'rgba(0,0,0,0.1)';
           }, 2000);
         }).catch(err => {
           console.error('Error al copiar:', err);

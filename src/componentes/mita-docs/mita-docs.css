@@ -97,3 +97,9 @@
     }
   }
 }
+
+button#btn-copy-error {
+  cursor: pointer;
+  color: white;
+
+}
