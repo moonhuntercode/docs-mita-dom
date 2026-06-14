@@ -21,7 +21,7 @@ export class MitaDocs extends MitaElement {
     this.$container = this.querySelector('#markdown-container');
 
     // Cargar Changelogs dinámicamente usando Vite Glob Imports
-    const changelogFiles = import.meta.glob('@mita-docs/changelogs/*.md', { query: '?raw', import: 'default' });
+    const changelogFiles = import.meta.glob('../../assets/mita-docs-cache/changelogs/*.md', { query: '?raw', import: 'default' });
 
     // Suscribirse al Estado Global para Renderizar Markdown Quirúrgicamente
     estadoDocActivo.suscribir(async (idDoc) => {
@@ -43,21 +43,32 @@ export class MitaDocs extends MitaElement {
           this.$container.innerHTML = marked.parse(fullChangelog);
         } catch (err) {
           console.error(err);
-          this.$container.innerHTML = '<h3>Error al cargar los changelogs.</h3>';
+          this.renderErrorUI(err, 'Error al cargar los changelogs.');
         }
         return;
       }
 
-      // Parsear MD a HTML
-      const rawMarkdown = DOCS_MAP[idDoc] || '# Documento no encontrado';
+      const contenidoRaw = DOCS_MAP[idDoc];
       
-      let html = marked.parse(rawMarkdown);
-      // Reemplazar bloques de código generados por Marked.js por nuestro <mita-code-editor>
-      html = html.replace(/<pre><code class="language-([^"]+)">([\s\S]*?)<\/code><\/pre>/g, (match, lang, code) => {
-        return `<mita-code-editor lenguaje="${lang}" archivo="ejemplo.${lang}"><pre><code class="language-${lang}">${code}</code></pre></mita-code-editor>`;
-      });
+      if (!contenidoRaw) {
+        const errorDetails = new Error(`El documento con ID "${idDoc}" no existe en el registro DOCS_MAP. Asegúrate de que el archivo .md esté presente y no haya sido filtrado.`);
+        errorDetails.name = 'DocumentNotFoundError';
+        this.renderErrorUI(errorDetails, '📄 Documento no encontrado');
+        return;
+      }
 
-      this.$container.innerHTML = html;
+      try {
+        let html = marked.parse(contenidoRaw);
+        // Reemplazar bloques de código generados por Marked.js por nuestro <mita-code-editor>
+        html = html.replace(/<pre><code class="language-([^"]+)">([\s\S]*?)<\/code><\/pre>/g, (match, lang, code) => {
+          return `<mita-code-editor lenguaje="${lang}" archivo="ejemplo.${lang}"><pre><code class="language-${lang}">${code}</code></pre></mita-code-editor>`;
+        });
+
+        this.$container.innerHTML = html;
+      } catch (err) {
+        console.error(err);
+        this.renderErrorUI(err, `Error al parsear el documento "${idDoc}"`);
+      }
     });
 
     // Event Delegation: Interceptar clics en enlaces nativos de Markdown
@@ -93,6 +104,48 @@ export class MitaDocs extends MitaElement {
         }
       }
     });
+  }
+
+  /**
+   * Renderiza una interfaz de error robusta con Stack Trace y botón de copiar
+   */
+  renderErrorUI(error, titulo) {
+    const stackTrace = error.stack || error.message || 'Error desconocido sin stacktrace.';
+    
+    this.$container.innerHTML = `
+      <div class="docs-error-container" style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+        <h2 style="color: #ef4444; margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
+          ⚠️ ${titulo}
+        </h2>
+        <p style="color: var(--color-texto); opacity: 0.9; margin-bottom: 1rem;">
+          Se ha producido un error técnico. Si eres desarrollador, revisa los detalles a continuación:
+        </p>
+        <div style="position: relative;">
+          <button id="btn-copy-error" class="btn-primario" style="position: absolute; top: 0.5rem; right: 0.5rem; padding: 0.3rem 0.6rem; font-size: 0.8rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);">
+            📋 Copiar Stacktrace
+          </button>
+          <pre style="background: #111827; padding: 1rem; border-radius: 6px; overflow-x: auto; color: #f87171; font-family: monospace; font-size: 0.85rem; margin: 0; white-space: pre-wrap;"><code>${stackTrace}</code></pre>
+        </div>
+      </div>
+    `;
+
+    // Lógica para copiar al portapapeles
+    const btnCopy = this.$container.querySelector('#btn-copy-error');
+    if (btnCopy) {
+      btnCopy.addEventListener('click', () => {
+        navigator.clipboard.writeText(stackTrace).then(() => {
+          btnCopy.innerHTML = '✅ ¡Copiado!';
+          btnCopy.style.background = '#10b981';
+          setTimeout(() => {
+            btnCopy.innerHTML = '📋 Copiar Stacktrace';
+            btnCopy.style.background = 'rgba(0,0,0,0.5)';
+          }, 2000);
+        }).catch(err => {
+          console.error('Error al copiar:', err);
+          btnCopy.innerHTML = '❌ Error';
+        });
+      });
+    }
   }
 }
 

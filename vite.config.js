@@ -16,13 +16,7 @@ export default defineConfig({
     })
   ],
 
-  resolve: {
-    alias: {
-      '@mita-docs': fs.existsSync(path.resolve(__dirname, '../mita-dom/package.json'))
-        ? path.resolve(__dirname, '../mita-dom')
-        : path.resolve(__dirname, 'node_modules/mita-dom')
-    }
-  },
+  // Resolve removido porque la sincronización es explícita
 
   // Evitar que Vite limpie la consola constantemente, así podemos leer advertencias/errores
   clearScreen: false,

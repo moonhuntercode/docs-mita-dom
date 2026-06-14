@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "node scripts/sync-docs.js",
     "dev": "vite",
+    "prebuild": "node scripts/sync-docs.js",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",

@@ -30,9 +30,12 @@ Adicionalmente, si el *build* llegaba a pasar (por haber omitido la importación
 4. **Archivos Excluidos en la Publicación a NPM**
    Cuando se migró a usar la dependencia de NPM, Vite comenzó a compilar bien, pero `DOCS_MAP` seguía vacío. Esto ocurrió porque el archivo `package.json` de `mita-dom` original tenía su propiedad `"files": ["*.md"]`, lo que empaquetaba `README.md` pero **excluía por completo las carpetas `docs/` y `changelogs/`** del tarball publicado en NPM. Vercel descargaba la librería vacía de documentación.
 
+5. **El Filtrado Inevitable de fast-glob sobre `node_modules`**
+   Incluso después de subir la versión de NPM, el Glob Import seguía regresando vacío. Descubrimos que `import.meta.glob` (usando `fast-glob` por detrás) **excluye siempre la carpeta `node_modules/` por defecto**. Era imposible decirle a Vite que extrajera los `.md` de una dependencia alojada en Vercel.
+
 ---
 
-## 🛠️ La Solución en Cuatro Pasos
+## 🛠️ La Solución Definitiva en Cinco Pasos
 
 Para estabilizar el despliegue y mantener la excelente Experiencia de Desarrollo (DX) en local, aplicamos las siguientes correcciones:
 
@@ -82,6 +85,9 @@ Se forzó a NPM a reescribir la procedencia del paquete ejecutando localmente:
 ```bash
 npm install mita-dom@2.3.2
 ```
-Esto eliminó el rastro de `link: true` del `package-lock.json` y actualizó la versión, garantizando que Vercel hiciera un fetch del registro global con todas las carpetas MD intactas.
 
-✅ **Resultado Final:** Vercel instala exitosamente la librería con todas sus carpetas, Vite procesa el alias dinámico, y el Glob Import indexa el 100% de los archivos Markdown. La página `/docs` y toda la navegación lateral renderiza la documentación a la perfección.
+### 5. Script de Sincronización Pre-Build (La Bala de Plata)
+Dado que Vite siempre bloquea la lectura de `node_modules/` en sus Glob Imports, creamos un script (`scripts/sync-docs.js`) que se dispara en los ciclos `predev` y `prebuild`. Este script copia automáticamente los `.md` desde la ruta en la que estén instalados (sea en local o Vercel) y los inyecta en `src/assets/mita-docs-cache/`. 
+Con esto, `docsRegistry.js` hace `import.meta.glob` de forma local, **eludiendo todas las restricciones de seguridad** y asegurando el despliegue al 100%.
+
+✅ **Resultado Final:** Vercel instala exitosamente la librería con todas sus carpetas, sincroniza los `.md` a una carpeta local permitida antes de compilar, y el Glob Import indexa el 100% de los archivos Markdown. La SPA nunca vuelve a mostrar "Documento no encontrado".
