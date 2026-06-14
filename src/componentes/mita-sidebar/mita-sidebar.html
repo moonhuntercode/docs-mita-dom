@@ -1,0 +1,20 @@
+<aside id="sidebar" class="sidebar-cerrado">
+  <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--color-borde);">
+    <h3 style="margin: 0; color: var(--color-primario);">Navegación</h3>
+    <!-- Renderizado Condicional: Este botón se mostrará/ocultará vía JS -->
+    <button id="btn-cerrar-sidebar" style="display: none; background: transparent; border: none; font-size: 1.2rem; cursor: pointer; color: var(--color-texto);">✕</button>
+  </div>
+  <nav aria-label="Navegación principal">
+    <a href="/">🏠 Inicio</a>
+    <a href="/perfil">👤 Perfil</a>
+    <a href="/docs">📖 Documentación</a>
+    <a href="/blog">📰 Blog (Novedades)</a>
+    <a href="/acerca">👤 Acerca de Nosotros</a>
+    <a href="/configuracion">⚙️ Configuración</a>
+    <a href="/admin/logs">🛡️ Dashboard Logs</a>
+    <a href="/ruta-falsa">🛑 Probar 404</a>
+    
+    <!-- PORTAL: Navegación Específica de Docs (Se muestra solo en /docs) -->
+    <mita-docs-nav></mita-docs-nav>
+  </nav>
+</aside>

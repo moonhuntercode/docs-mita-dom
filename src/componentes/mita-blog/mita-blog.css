@@ -37,7 +37,7 @@
   }
 
   /* --- Layout para Tablet y Desktop --- */
-  @media (min-width: 768px) {
+  @media (min-width: 766px) {
     .docs-content {
       padding: 2.5rem;
     }

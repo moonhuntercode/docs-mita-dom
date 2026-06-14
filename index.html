@@ -11,7 +11,7 @@
 <body class="tema-oscuro">
   <!-- Layout estructurado para grid-template-areas -->
 
-  <div id="vt-backdrop" class="vt-backdrop"></div>
+  <!-- Layout estructurado para grid-template-areas -->
   <header id="main-header">
     <div class="header-contenido">
       <h1>🌿 mita-dom SPA</h1>
@@ -24,22 +24,8 @@
     </div>
   </header>
 
-  <!-- SIDEBAR GLOBAL -->
-  <aside id="sidebar" class="sidebar-cerrado">
-    <nav aria-label="Navegación principal">
-      <a href="/">🏠 Inicio</a>
-      <a href="/perfil">👤 Perfil</a>
-      <a href="/docs">📖 Documentación</a>
-      <a href="/blog">📰 Blog (Novedades)</a>
-      <a href="/acerca">👤 Acerca de Nosotros</a>
-      <a href="/configuracion">⚙️ Configuración</a>
-      <a href="/admin/logs">🛡️ Dashboard Logs</a>
-      <a href="/ruta-falsa">🛑 Probar 404</a>
-      
-      <!-- PORTAL: Navegación Específica de Docs (Se muestra solo en /docs) -->
-      <mita-docs-nav></mita-docs-nav>
-    </nav>
-  </aside>
+  <!-- SIDEBAR GLOBAL (Componente con Teleport y Conditional Render) -->
+  <mita-sidebar></mita-sidebar>
 
   <main id="app-container" aria-live="polite">
     <!-- Vista Inicio -->
