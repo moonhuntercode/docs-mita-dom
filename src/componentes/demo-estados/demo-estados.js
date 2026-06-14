@@ -24,31 +24,31 @@ export class DemoEstados extends MitaElement {
         this.innerHTML = `
             <section class="tarjetas-grid">
                 <!-- DEMO 1: ESTADO GLOBAL -->
-                <demo-tarjeta>
+                <div class="tarjeta-optimizada" style="background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden;">
                     <div class="tarjeta-optimizada">
-                        <div class="tarjeta-header" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                            <h2>🌍 Arquitectura de Estado Global</h2>
+                        <div class="tarjeta-header" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 1rem; color: white;">
+                            <h2 style="margin: 0; font-size: 1.25rem;">🌍 Arquitectura de Estado Global</h2>
                         </div>
-                        <div class="tarjeta-body">
+                        <div class="tarjeta-body" style="padding: 1rem;">
                             <p>Este componente reacciona a un <code>crearEstadoGlobal</code>. La persistencia mantiene los datos aunque recargues la página.</p>
                             <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
                                 <strong>Lectura Reactiva (Snapshot):</strong>
-                                <pre><code id="codebase-global">...</code></pre>
+                                <pre style="margin: 0.5rem 0 0 0; overflow-x: auto;"><code id="codebase-global">...</code></pre>
                             </div>
                         </div>
-                        <div class="tarjeta-actions">
-                            <button id="btn-mutar-global">Simular Mutación Global (+1 Acceso)</button>
+                        <div class="tarjeta-actions" style="padding: 1rem; border-top: 1px solid var(--border-color); background: rgba(0,0,0,0.02);">
+                            <button id="btn-mutar-global" class="btn-primario" style="width: 100%;">Simular Mutación Global (+1 Acceso)</button>
                         </div>
                     </div>
-                </demo-tarjeta>
+                </div>
 
                 <!-- DEMO 2: RENDERIZADO CONDICIONAL Y FEEDBACK UI -->
-                <demo-tarjeta>
+                <div class="tarjeta-optimizada" style="background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden;">
                     <div class="tarjeta-optimizada">
-                        <div class="tarjeta-header" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
-                            <h2>🔀 Renderizado Condicional Avanzado</h2>
+                        <div class="tarjeta-header" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 1rem; color: white;">
+                            <h2 style="margin: 0; font-size: 1.25rem;">🔀 Renderizado Condicional Avanzado</h2>
                         </div>
-                        <div class="tarjeta-body">
+                        <div class="tarjeta-body" style="padding: 1rem;">
                             <p>Este componente simula un <code>fetch()</code> con Feedback visual (UX) y telemetría en Consola.</p>
                             
                             <!-- Contenedores de Feedback UI -->
@@ -56,15 +56,15 @@ export class DemoEstados extends MitaElement {
                                 <div style="color: var(--text-secondary); text-align: center;">Esperando acción...</div>
                             </div>
                             
-                            <div id="ui-contenido" style="display: none; background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                            <div id="ui-contenido" style="display: none; background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; margin-top: 1rem; overflow-x: auto;">
                             </div>
                         </div>
-                        <div class="tarjeta-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                            <button id="btn-fetch-exito">Cargar Datos (Éxito)</button>
-                            <button id="btn-fetch-error" class="btn-peligro">Cargar Datos (Fallo)</button>
+                        <div class="tarjeta-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap; padding: 1rem; border-top: 1px solid var(--border-color); background: rgba(0,0,0,0.02);">
+                            <button id="btn-fetch-exito" class="btn-primario" style="flex: 1;">Cargar Datos (Éxito)</button>
+                            <button id="btn-fetch-error" class="btn-peligro" style="flex: 1;">Cargar Datos (Fallo)</button>
                         </div>
                     </div>
-                </demo-tarjeta>
+                </div>
             </section>
         `;
         

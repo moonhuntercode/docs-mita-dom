@@ -21,7 +21,7 @@ export class MitaElement extends HTMLElement {
   fallbackUI(error) {
     this.innerHTML = `
       <div style="padding: 1rem; border: 2px dashed #ff5252; background: rgba(255,82,82,0.1); border-radius: 8px;">
-        <h4 style="color: #ff5252; margin:0 0 0.5rem 0;">⚠️ Fallo en componente <${this.tagName.toLowerCase()}></h4>
+        <h4 style="color: #ff5252; margin:0 0 0.5rem 0;">⚠️ Fallo en componente &lt;${this.tagName.toLowerCase()}&gt;</h4>
         <p style="margin:0; font-size: 0.9em; color: #ccc;">${error.message}</p>
       </div>
     `;
