@@ -19,7 +19,8 @@ export function iniciarRouter() {
     '/admin/logs': document.querySelector('demo-admin-logs'),
     '/blog': document.querySelector('mita-blog'),
     '/acerca': document.querySelector('demo-acerca'),
-    '/configuracion': document.querySelector('demo-config')
+    '/configuracion': document.querySelector('demo-config'),
+    '/estados': document.querySelector('demo-estados')
   };
 
   const $mitaDocs = document.querySelector('mita-docs');

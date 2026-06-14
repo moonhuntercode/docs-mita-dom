@@ -42,6 +42,7 @@ import './componentes/mita-docs-nav/mita-docs-nav.js';
 import './componentes/mita-blog/mita-blog.js';
 import './componentes/acerca/demo-acerca.js';
 import './componentes/configuracion/demo-config.js';
+import './componentes/demo-estados/demo-estados.js';
 import './componentes/mita-sidebar/mita-sidebar.js';
 
 // 5. Inicialización de la Interfaz Estática (Botón Tema y Menú Mobile)
