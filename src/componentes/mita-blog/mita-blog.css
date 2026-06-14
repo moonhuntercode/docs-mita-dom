@@ -12,6 +12,7 @@
     padding: 1.5rem;
     border-radius: 12px;
     text-align: center;
+    z-index: 1;
   }
 
   .blog-header h2 {
