@@ -1,6 +1,7 @@
 import { MitaElement } from '../../utils/MitaElement.js';
 import { Logger } from '../../utils/logger.js';
 import { crearEstadoGlobal, crearEstadoLocal } from 'mita-dom';
+import '../ui/mita-dialog.js';
 
 // 1. Estado Global Dedicado (Simulando un Store de Sesión)
 export const demoGlobalState = crearEstadoGlobal({
@@ -65,11 +66,80 @@ export class DemoEstados extends MitaElement {
                         </div>
                     </div>
                 </div>
+                
+                <!-- DEMO 3: SINCRONIZACIÓN MULTI-COMPONENTE Y CRUD -->
+                <div class="tarjeta-optimizada" style="grid-column: 1 / -1; background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden;">
+                    <div class="tarjeta-header" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 1rem; color: white;">
+                        <h2 style="margin: 0; font-size: 1.25rem;">🔄 Demo 3: Sincronización Multi-Componente (CRUD)</h2>
+                        <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Dos Cajas independientes leyendo y mutando el mismo Estado Global simultáneamente, sin props ni Virtual DOM.</p>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; padding: 1rem;">
+                        <!-- CAJA A -->
+                        <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);">
+                            <h3 style="margin-top: 0; color: #3b82f6;">📦 Componente A</h3>
+                            <pre style="background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 4px; overflow-x: auto; min-height: 120px;"><code id="caja-a-code">...</code></pre>
+                            
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
+                                <button id="btn-crear-a" class="btn-primario" style="flex: 1; font-size: 0.8rem;">Crear/Reset</button>
+                                <button id="btn-update-a" class="btn-secundario" style="flex: 1; font-size: 0.8rem;">+1 Accesos</button>
+                                <button id="btn-borrar-a" class="btn-peligro" style="flex: 1; font-size: 0.8rem;">Borrar Acc.</button>
+                            </div>
+                        </div>
+
+                        <!-- CAJA B -->
+                        <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; border: 1px solid rgba(168, 85, 247, 0.3);">
+                            <h3 style="margin-top: 0; color: #a855f7;">📦 Componente B</h3>
+                            <pre style="background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 4px; overflow-x: auto; min-height: 120px;"><code id="caja-b-code">...</code></pre>
+                            
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
+                                <button id="btn-crear-b" class="btn-primario" style="flex: 1; font-size: 0.8rem; background: #a855f7;">Crear/Reset</button>
+                                <button id="btn-update-b" class="btn-secundario" style="flex: 1; font-size: 0.8rem;">Modificar Msg</button>
+                                <button id="btn-borrar-b" class="btn-peligro" style="flex: 1; font-size: 0.8rem;">Vaciar Msg</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DEMO 4: COMPONENTES UI NATIVOS (Dialog) -->
+                <div class="tarjeta-optimizada" style="grid-column: 1 / -1; background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; margin-top: 2rem;">
+                    <div class="tarjeta-header" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); padding: 1rem; color: white;">
+                        <h2 style="margin: 0; font-size: 1.25rem;">🪟 Demo 4: UI Nativa con &lt;mita-dialog&gt;</h2>
+                        <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Demostración del elemento HTML5 &lt;dialog&gt; controlado reactivamente por Signals de MitaDOM.</p>
+                    </div>
+                    
+                    <div style="padding: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button id="btn-abrir-modal-basico" class="btn-primario">Abrir Modal Básico</button>
+                        <button id="btn-abrir-modal-estricto" class="btn-secundario" style="background: #ef4444; border-color: #dc2626;">Abrir Modal Estricto</button>
+                    </div>
+
+                    <!-- Modal Básico (Cierra con click afuera o ESC) -->
+                    <mita-dialog id="modal-basico">
+                        <span slot="titulo">💡 Modal Accesible Nativo</span>
+                        <p>Este modal usa la API <code>&lt;dialog&gt;</code> de HTML5. Intenta presionar la tecla <strong>ESC</strong> o hacer clic en el fondo oscuro para cerrarlo sin usar JavaScript explícito.</p>
+                        <div slot="footer" style="text-align: right;">
+                            <button id="btn-entendido" class="btn-primario">¡Entendido!</button>
+                        </div>
+                    </mita-dialog>
+
+                    <!-- Modal Estricto (Bloquea ESC y click afuera) -->
+                    <mita-dialog id="modal-estricto" estricto>
+                        <span slot="titulo">⚠️ Modal Estricto</span>
+                        <p>Al pasarle el atributo <code>estricto</code>, el componente bloquea el cierre por ESC o clic afuera usando eventos nativos (<code>e.preventDefault()</code>). Debes responder obligatoriamente a la pregunta para continuar.</p>
+                        <p><strong>¿Aceptas los Términos y Condiciones?</strong></p>
+                        <div slot="footer" style="display: flex; gap: 1rem; justify-content: flex-end;">
+                            <button id="btn-rechazar" class="btn-peligro">Rechazar</button>
+                            <button id="btn-aceptar" class="btn-primario">Aceptar</button>
+                        </div>
+                    </mita-dialog>
+                </div>
             </section>
         `;
         
         this.iniciarLogicaGlobal();
         this.iniciarLogicaCondicional();
+        this.iniciarSincronizacionMultiComponente();
+        this.iniciarLogicaModal();
     }
 
     iniciarLogicaGlobal() {
@@ -137,11 +207,89 @@ export class DemoEstados extends MitaElement {
         });
     }
 
+    iniciarSincronizacionMultiComponente() {
+        const $codeA = this.querySelector('#caja-a-code');
+        const $codeB = this.querySelector('#caja-b-code');
+
+        // Suscripción de Caja A
+        this.subA = (estado) => {
+            $codeA.textContent = JSON.stringify(estado, null, 2);
+        };
+        // Suscripción de Caja B
+        this.subB = (estado) => {
+            $codeB.textContent = JSON.stringify(estado, null, 2);
+        };
+        
+        demoGlobalState.suscribir(this.subA);
+        demoGlobalState.suscribir(this.subB);
+
+        // CRUD CAJA A
+        this.querySelector('#btn-crear-a').addEventListener('click', () => {
+            demoGlobalState.set({ accesos: 0, ultimaAccion: 'Reset desde A' });
+        });
+        this.querySelector('#btn-update-a').addEventListener('click', () => {
+            const actual = demoGlobalState.get();
+            if (actual.accesos !== undefined) {
+                demoGlobalState.patch({ accesos: actual.accesos + 1, ultimaAccion: 'Update desde A' });
+            }
+        });
+        this.querySelector('#btn-borrar-a').addEventListener('click', () => {
+            const actual = demoGlobalState.get();
+            const nuevo = { ...actual };
+            delete nuevo.accesos;
+            nuevo.ultimaAccion = 'Borrado desde A';
+            demoGlobalState.set(nuevo);
+        });
+
+        // CRUD CAJA B
+        this.querySelector('#btn-crear-b').addEventListener('click', () => {
+            demoGlobalState.set({ accesos: 0, ultimaAccion: 'Reset desde B' });
+        });
+        this.querySelector('#btn-update-b').addEventListener('click', () => {
+            demoGlobalState.patch({ ultimaAccion: 'HOLA MUNDO desde B' });
+        });
+        this.querySelector('#btn-borrar-b').addEventListener('click', () => {
+            const actual = demoGlobalState.get();
+            const nuevo = { ...actual };
+            delete nuevo.ultimaAccion;
+            demoGlobalState.set(nuevo);
+        });
+    }
+    iniciarLogicaModal() {
+        // Modal Básico
+        const $btnAbrirBasico = this.querySelector('#btn-abrir-modal-basico');
+        const $modalBasico = this.querySelector('#modal-basico');
+        const $btnEntendido = this.querySelector('#btn-entendido');
+
+        $btnAbrirBasico.addEventListener('click', () => $modalBasico.abrir());
+        $btnEntendido.addEventListener('click', () => $modalBasico.cerrar());
+
+        // Modal Estricto
+        const $btnAbrirEstricto = this.querySelector('#btn-abrir-modal-estricto');
+        const $modalEstricto = this.querySelector('#modal-estricto');
+        const $btnAceptar = this.querySelector('#btn-aceptar');
+        const $btnRechazar = this.querySelector('#btn-rechazar');
+
+        $btnAbrirEstricto.addEventListener('click', () => $modalEstricto.abrir());
+        
+        $btnAceptar.addEventListener('click', () => {
+            alert("Has aceptado los términos.");
+            $modalEstricto.cerrar();
+        });
+        
+        $btnRechazar.addEventListener('click', () => {
+            alert("No puedes continuar sin aceptar.");
+            $modalEstricto.cerrar(); // En un caso real podrías redirigir
+        });
+    }
+
     disconnectedCallback() {
         super.disconnectedCallback?.();
         // Prevención de Memory Leaks
         if (this.subGlobal) {
             demoGlobalState.desuscribir(this.subGlobal);
+            demoGlobalState.desuscribir(this.subA);
+            demoGlobalState.desuscribir(this.subB);
         }
         this.estadoRed.destroy();
     }

@@ -1,5 +1,5 @@
 // @ts-check
-import { Signal, ComputedSignal } from 'mita-dom';
+import { Signal, SignalDerivado } from 'mita-dom';
 import { MitaElement } from '../../utils/MitaElement.js';
 import html from './demo-shopping-list.html?raw';
 import './demo-shopping-list.css';
@@ -18,8 +18,8 @@ export class DemoShoppingList extends MitaElement {
     // Estado Local: Almacena el filtro activo ('todas' | 'frutas')
     this.filtroActivo = new Signal('todas');
     
-    // ComputedSignal: Deriva la lista de productos filtrada
-    this.productosFiltrados = new ComputedSignal(this.filtroActivo, (filtro) => {
+    // Derivamos la lista filtrada basándonos en el filtroActivo
+    this.productosFiltrados = new SignalDerivado(this.filtroActivo, (filtro) => {
       if (filtro === 'frutas') return products.filter(p => p.isFruit);
       return products;
     });

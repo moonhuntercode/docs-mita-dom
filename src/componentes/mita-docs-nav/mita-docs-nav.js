@@ -25,6 +25,17 @@ export class MitaDocsNav extends MitaElement {
       this.style.display = (ruta.startsWith('/docs')) ? 'block' : 'none';
     });
 
+    // Evento de Búsqueda
+    const $btnBuscar = this.querySelector('#btn-global-search');
+    if ($btnBuscar) {
+      $btnBuscar.addEventListener('click', () => {
+        const mitaSearch = document.querySelector('mita-search');
+        if (mitaSearch && typeof mitaSearch.abrir === 'function') {
+          mitaSearch.abrir();
+        }
+      });
+    }
+
     // 2. Suscribirse al Estado Global para reflejar el enlace Activo
     estadoDocActivo.suscribir((idDoc) => {
       enlacesNav.forEach($enlace => {

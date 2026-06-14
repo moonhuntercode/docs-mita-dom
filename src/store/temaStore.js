@@ -1,14 +1,21 @@
 // @ts-check
 import { Signal } from 'mita-dom';
+import { IndexedDBAdapter } from '../utils/db.js';
 import { Logger } from '../utils/logger.js';
 
-/**
- * 🎨 Estado Global del Tema (Tema Store)
- * Responsabilidad Única: Manejar el Tema Oscuro/Claro.
- */
-const temaInicial = localStorage.getItem('mita-tema') || 'oscuro';
-export const estadoTemaGlobal = new Signal(temaInicial);
+export const estadoTemaGlobal = new Signal('oscuro', {
+  persistKey: 'tema-mita',
+  storageAdapter: IndexedDBAdapter
+});
 
-if (import.meta.env.DEV) {
-  estadoTemaGlobal.suscribir((val) => Logger.signalUpdate('estadoTemaGlobal', val));
-}
+estadoTemaGlobal.suscribir((temaActual) => {
+  if (import.meta.env.DEV) {
+    Logger.signalUpdate('estadoTemaGlobal', temaActual);
+  }
+  
+  if (temaActual === 'claro') {
+    document.body.classList.add('tema-claro');
+  } else {
+    document.body.classList.remove('tema-claro');
+  }
+});

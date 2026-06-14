@@ -1,25 +1,16 @@
 <div class="demo-wrapper">
   <!-- Editor de Código -->
-  <div class="code-editor-mock">
-    <div class="editor-header">
-      <div class="mac-dots">
-        <span class="dot red"></span>
-        <span class="dot yellow"></span>
-        <span class="dot green"></span>
-      </div>
-      <span class="filename">demo-acerca.js</span>
-    </div>
-    <div class="editor-content">
-<pre><code class="language-javascript"><span class="token keyword">import</span> { MitaElement } <span class="token keyword">from</span> <span class="token string">'mita-dom'</span>;
+  <mita-code-editor archivo="demo-acerca.js" lenguaje="javascript">
+  <pre><code>import { MitaElement } from 'mita-dom';
 
-<span class="token keyword">export class</span> <span class="token class-name">DemoAcerca</span> <span class="token keyword">extends</span> <span class="token class-name">MitaElement</span> {
-  <span class="token function">render</span>() {
-    <span class="token comment">// Renderizado estático sin Signals, 100% Nativo</span>
-    <span class="token keyword">this</span>.innerHTML = templateHTML;
+export class DemoAcerca extends MitaElement {
+  render() {
+    // Renderizado estático sin Signals, 100% Nativo
+    this.innerHTML = templateHTML;
   }
-}</code></pre>
-    </div>
-  </div>
+}
+  </code></pre>
+</mita-code-editor>
 
   <!-- Resultado Visual -->
   <div style="background: var(--color-superficie); border-top: 1px solid var(--color-borde);">
@@ -49,9 +40,23 @@
         </div>
 
         <div class="info-card">
-          <h3>🚀 La Visión</h3>
+          <h3>🚀 La Visión y Filosofía</h3>
           <p>MitaDOM no es solo código, es una declaración de intenciones. Creado con la firme convicción de que la web moderna no necesita ser pesada ni depender de cajas negras para ser interactiva, veloz y escalable.</p>
-          <p>A través del dominio de las Web APIs nativas, la Reactividad Quirúrgica (Signals) y el Mobile First, buscamos devolverle el control total al desarrollador.</p>
+          <div style="background: rgba(16, 185, 129, 0.1); border-left: 4px solid #10b981; padding: 1rem; margin-top: 1rem; border-radius: 4px;">
+            <h4 style="margin-top: 0; color: #10b981;">⚡ ¿Por qué "MitaDOM"?</h4>
+            <p style="margin-bottom: 0.5rem;"><strong>La combinación:</strong> Une <em>Mitay</em> (en quechua, el sistema de turnos de trabajo optimizado en el Potosí colonial) + <em>Mita</em> (en guaraní, que significa "niño/nuevo/nacimiento").</p>
+            <p style="margin-bottom: 0.5rem;"><strong>Lo que comunica:</strong> Significa "Ciclo de renovación eficiente".</p>
+            <p style="margin-bottom: 0;"><strong>Justificación técnica:</strong> Expresa con precisión el ciclo de vida de tus Custom Elements y Signals. Modifica el DOM por "turnos" exactos y optimizados (quechua) para hacer nacer elementos web nativos y limpios (guaraní).</p>
+          </div>
+          <div style="margin-top: 1rem;">
+            <h4>🏆 ¿Por qué elegirnos frente a la competencia?</h4>
+            <p>A diferencia de frameworks pesados basados en Virtual DOM (React, Vue), MitaDOM trabaja **directamente con las APIs nativas del navegador**.</p>
+            <ul style="padding-left: 1.5rem; margin-top: 0.5rem;">
+              <li><strong>Zero Dependencies:</strong> Carga ultrarrápida sin node_modules masivos.</li>
+              <li><strong>Reactividad Quirúrgica:</strong> Los Signals actualizan solo el textNode o atributo necesario (0% re-renders de Layout).</li>
+              <li><strong>Curva de Aprendizaje Plana:</strong> Si sabes HTML, JS y Web Components, sabes MitaDOM.</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

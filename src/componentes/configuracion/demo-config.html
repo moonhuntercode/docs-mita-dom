@@ -1,30 +1,21 @@
 <div class="demo-wrapper">
   <!-- Editor de Código -->
-  <div class="code-editor-mock">
-    <div class="editor-header">
-      <div class="mac-dots">
-        <span class="dot red"></span>
-        <span class="dot yellow"></span>
-        <span class="dot green"></span>
-      </div>
-      <span class="filename">demo-config.js</span>
-    </div>
-    <div class="editor-content">
-<pre><code class="language-javascript"><span class="token keyword">import</span> { estadoConfiguracion } <span class="token keyword">from</span> <span class="token string">'../../store/docsStore.js'</span>;
+  <mita-code-editor archivo="demo-config.js" lenguaje="javascript">
+  <pre><code>import { estadoConfiguracion } from '../../store/docsStore.js';
 
-<span class="token keyword">export class</span> <span class="token class-name">DemoConfig</span> <span class="token keyword">extends</span> <span class="token class-name">MitaElement</span> {
-  <span class="token function">iniciarLogica</span>() {
-    <span class="token keyword">const</span> pos = estadoConfiguracion.<span class="token function">get</span>().sidebarPos;
+export class DemoConfig extends MitaElement {
+  iniciarLogica() {
+    const pos = estadoConfiguracion.get().sidebarPos;
     
-    <span class="token keyword">this</span>.$radios.<span class="token function">forEach</span>(radio => {
-      radio.<span class="token function">addEventListener</span>(<span class="token string">'change'</span>, (e) => {
-        estadoConfiguracion.<span class="token function">patch</span>({ sidebarPos: e.target.value });
+    this.$radios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        estadoConfiguracion.patch({ sidebarPos: e.target.value });
       });
     });
   }
-}</code></pre>
-    </div>
-  </div>
+}
+  </code></pre>
+</mita-code-editor>
 
   <!-- Resultado Visual -->
   <div style="background: var(--color-superficie); border-top: 1px solid var(--color-borde);">

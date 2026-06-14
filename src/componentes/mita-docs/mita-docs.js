@@ -5,38 +5,7 @@ import { estadoDocActivo } from '../../store/docsStore.js';
 import htmlTemplate from './mita-docs.html?raw';
 import './mita-docs.css';
 
-// Importamos los archivos MD como strings gracias a Vite (?raw) y el alias
-import mdReadme from '@mita-docs/README.md?raw';
-import mdComponentes from '@mita-docs/GUIA_COMPONENTES.md?raw';
-import mdEjemplos from '@mita-docs/EJEMPLOS_PRACTICOS.md?raw';
-import mdTesting from '@mita-docs/GUIA_TESTING.md?raw';
-import mdTeleport from '@mita-docs/TELEPORT.md?raw';
-import mdFilosofia from '@mita-docs/FILOSOFIA.md?raw';
-import mdFundamentos from '@mita-docs/FUNDAMENTOS.md?raw';
-import mdArquitectura from '@mita-docs/ARQUITECTURA.md?raw';
-import mdWebComponentsNativos from '@mita-docs/WEB_COMPONENTS_NATIVOS.md?raw';
-import mdConditionalRendering from '@mita-docs/CONDITIONAL_RENDERING.md?raw';
-import mdDatosYApis from '@mita-docs/DATOS_Y_APIS.md?raw';
-import mdEcosistemaVite from '@mita-docs/ECOSISTEMA_VITE.md?raw';
-import mdEnrutamientoSpa from '@mita-docs/ENRUTAMIENTO_SPA.md?raw';
-import mdFundamentosWeb from '@mita-docs/FUNDAMENTOS_WEB.md?raw';
-
-const DOCS_MAP = {
-  readme: mdReadme,
-  componentes: mdComponentes,
-  ejemplos: mdEjemplos,
-  testing: mdTesting,
-  teleport: mdTeleport,
-  filosofia: mdFilosofia,
-  fundamentos: mdFundamentos,
-  arquitectura: mdArquitectura,
-  web_components_nativos: mdWebComponentsNativos,
-  conditional_rendering: mdConditionalRendering,
-  datos_y_apis: mdDatosYApis,
-  ecosistema_vite: mdEcosistemaVite,
-  enrutamiento_spa: mdEnrutamientoSpa,
-  fundamentos_web: mdFundamentosWeb
-};
+import { DOCS_MAP } from './docsRegistry.js';
 
 export class MitaDocs extends MitaElement {
   constructor() {
@@ -51,14 +20,44 @@ export class MitaDocs extends MitaElement {
   iniciarLogica() {
     this.$container = this.querySelector('#markdown-container');
 
+    // Cargar Changelogs dinámicamente usando Vite Glob Imports
+    const changelogFiles = import.meta.glob('@mita-docs/changelogs/*.md', { query: '?raw', import: 'default' });
+
     // Suscribirse al Estado Global para Renderizar Markdown Quirúrgicamente
-    estadoDocActivo.suscribir((idDoc) => {
+    estadoDocActivo.suscribir(async (idDoc) => {
+      if (idDoc === 'changelog') {
+        this.$container.innerHTML = '<h3>Cargando Registro de Cambios...</h3>';
+        try {
+          let fullChangelog = '# 🔄 Registro de Cambios (Changelog)\n\nHistorial completo de versiones de MitaDOM extraído automáticamente.\n\n';
+          
+          // Ordenamos los archivos por nombre (fecha) de forma descendente (más nuevo primero)
+          const paths = Object.keys(changelogFiles).sort().reverse();
+          
+          for (const path of paths) {
+            const getMarkdown = changelogFiles[path];
+            // @ts-ignore
+            const mdContent = await getMarkdown();
+            fullChangelog += mdContent + '\n\n---\n\n';
+          }
+          
+          this.$container.innerHTML = marked.parse(fullChangelog);
+        } catch (err) {
+          console.error(err);
+          this.$container.innerHTML = '<h3>Error al cargar los changelogs.</h3>';
+        }
+        return;
+      }
+
       // Parsear MD a HTML
       const rawMarkdown = DOCS_MAP[idDoc] || '# Documento no encontrado';
       
-      // Sanitizar el Markdown es ideal en prod, pero aquí confiamos en nuestros docs locales.
-      // Insertamos el HTML renderizado de forma ultra rápida
-      this.$container.innerHTML = marked.parse(rawMarkdown);
+      let html = marked.parse(rawMarkdown);
+      // Reemplazar bloques de código generados por Marked.js por nuestro <mita-code-editor>
+      html = html.replace(/<pre><code class="language-([^"]+)">([\s\S]*?)<\/code><\/pre>/g, (match, lang, code) => {
+        return `<mita-code-editor lenguaje="${lang}" archivo="ejemplo.${lang}"><pre><code class="language-${lang}">${code}</code></pre></mita-code-editor>`;
+      });
+
+      this.$container.innerHTML = html;
     });
 
     // Event Delegation: Interceptar clics en enlaces nativos de Markdown

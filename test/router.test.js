@@ -3,57 +3,62 @@ import { iniciarRouter } from '../src/router/router.js';
 import { rutaActual } from 'mita-dom';
 import { Logger } from '../src/utils/logger.js';
 
-describe('Router Error Boundary', () => {
+describe('Advanced Router (Lazy Loading & Guards)', () => {
     beforeEach(() => {
-        // Limpiar mocks para que no se filtre history del test anterior
         vi.clearAllMocks();
         
-        // Limpiar DOM mock
-        document.body.innerHTML = '';
+        // Mock DOM Structure
+        document.body.innerHTML = `
+            <div id="app-container">
+              <div id="vista-inicio"></div>
+            </div>
+        `;
         
-        // Limpiar suscriptores del Signal global de rutas para evitar test pollution
         rutaActual.suscriptores.clear();
-
-        // Mockear Logger.error
-        vi.spyOn(Logger, 'error').mockImplementation(() => {});
+        vi.spyOn(Logger, 'warn').mockImplementation(() => {});
+        vi.spyOn(Logger, 'info').mockImplementation(() => {});
+        localStorage.clear();
+        
+        // Mock window.scrollTo
+        window.scrollTo = vi.fn();
     });
 
-    it('debe registrar un error si el componente de la ruta no existe en el DOM', () => {
-        // Solo inyectamos <demo-tarjeta> pero NO <demo-perfil>
-        document.body.innerHTML = `
-            <div id="vista-inicio"></div>
-        `;
+    it('Navigation Guard: Bloquea el acceso a /admin/logs si no hay token', async () => {
+        // Redefinimos alert para que no trabe el test
+        window.alert = vi.fn();
         
-        // Iniciamos el router
         iniciarRouter();
 
-        // Simulamos navegación a /perfil
-        rutaActual.set('/perfil');
+        // Simulamos navegación a una ruta protegida sin token en localStorage
+        await rutaActual.set('/admin/logs');
 
-        // Verificamos que Logger.error haya sido llamado porque <demo-perfil> falta
-        expect(Logger.error).toHaveBeenCalledWith(
-            expect.stringContaining('[Error Boundary] Componente no encontrado en el Light DOM para la ruta: /perfil')
+        expect(Logger.warn).toHaveBeenCalledWith(
+            expect.stringContaining('[Router Guard] Acceso denegado a /admin/logs')
         );
-
-        // Verificamos que se haya inyectado el Toast en el body
-        const $toast = document.querySelector('.mita-error-toast');
-        expect($toast).not.toBeNull();
-        expect($toast.innerHTML).toContain('/perfil');
+        expect(window.alert).toHaveBeenCalled();
+        
+        // No se debe haber inyectado la vista admin
+        const $admin = document.querySelector('demo-admin-logs');
+        expect($admin).toBeNull();
     });
 
-    it('no debe registrar error si el componente sí existe', () => {
-        // Inyectamos el componente
-        document.body.innerHTML = `
-            <div id="vista-inicio"></div>
-            <demo-perfil></demo-perfil>
-        `;
+    it('Navigation Guard: Permite el acceso a /admin/logs si HAY token', async () => {
+        localStorage.setItem('mita_token', 'true');
+        window.alert = vi.fn();
         
         iniciarRouter();
-        rutaActual.set('/perfil');
 
-        // Logger no debería reportar error para /perfil
-        expect(Logger.error).not.toHaveBeenCalled();
-        const $toast = document.querySelector('.mita-error-toast');
-        expect($toast).toBeNull();
+        rutaActual.set('/admin/logs');
+        await new Promise(r => setTimeout(r, 50));
+
+        // El Guard NO debe haberse disparado (no redirige a perfil)
+        expect(Logger.warn).not.toHaveBeenCalledWith(
+            expect.stringContaining('[Router Guard] Acceso denegado a /admin/logs')
+        );
+        
+        // Se debe haber intentado cargar el chunk diferido
+        expect(Logger.info).toHaveBeenCalledWith(
+            expect.stringContaining('[Router] Lazy Loading Chunk: demo-admin-logs')
+        );
     });
 });

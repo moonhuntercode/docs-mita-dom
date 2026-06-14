@@ -1,6 +1,6 @@
 // @ts-check
 import { estadoProfiler, configuracionProfiler } from '../../store/profilerStore.js';
-import { Signal, ComputedSignal } from 'mita-dom';
+import { Signal, SignalDerivado } from 'mita-dom';
 
 import html from './mita-profiler.html?raw';
 import css from './mita-profiler.css?raw';
@@ -52,9 +52,9 @@ class MitaProfiler extends HTMLElement {
       configuracionProfiler.patch({ umbralRojo: parseFloat(e.target.value) });
     });
 
-    // Suscribirse a las métricas (Derivamos un ComputedSignal para ordernar por las últimas)
-    const metricasInvertidas = new ComputedSignal(estadoProfiler, (metricas) => {
-      return [...metricas].reverse();
+    // Suscribirse a las métricas (Derivamos un SignalDerivado para ordernar por las últimas)
+    const metricasInvertidas = new SignalDerivado(estadoProfiler, (estado) => {
+      return [...(estado.renderizados || [])].reverse();
     });
 
     metricasInvertidas.suscribir((metricas) => {

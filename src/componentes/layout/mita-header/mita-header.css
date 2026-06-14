@@ -1,0 +1,66 @@
+/* mita-header.css */
+.mita-header-container {
+  grid-area: header;
+  background-color: var(--color-superficie);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 50; /* Superior al sidebar para móvil */
+  flex-wrap: wrap; /* Permitir envolver en pantallas pequeñas */
+  gap: 1rem;
+}
+
+.header-contenido h1 {
+  margin: 0;
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  color: var(--color-primario);
+}
+
+.header-contenido p {
+  margin: 0;
+  font-size: clamp(0.7rem, 2vw, 0.9rem);
+  color: var(--color-texto-secundario);
+}
+
+.header-acciones {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.kbd-shortcut {
+  background: rgba(0,0,0,0.2);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Modo Claro: Ajuste de kbd */
+.tema-claro .kbd-shortcut {
+  background: rgba(0,0,0,0.1);
+  border-color: rgba(0,0,0,0.2);
+  color: var(--color-texto);
+}
+
+/* Mobile First Adjustments */
+@media (max-width: 768px) {
+  .mita-header-container {
+    padding: 1rem;
+  }
+  
+  .hide-mobile {
+    display: none !important;
+  }
+  
+  .header-acciones {
+    gap: 0.5rem;
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

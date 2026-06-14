@@ -1,54 +1,54 @@
 <div class="demo-wrapper">
   <!-- Editor de Código -->
-  <div class="code-editor-mock">
-    <div class="editor-header">
-      <div class="mac-dots">
-        <span class="dot red"></span>
-        <span class="dot yellow"></span>
-        <span class="dot green"></span>
-      </div>
-      <span class="filename">perfil.js</span>
-    </div>
-    <div class="editor-content">
-<pre><code class="language-javascript"><span class="token keyword">import</span> { crearRecurso } <span class="token keyword">from</span> <span class="token string">'mita-dom'</span>;
+  <mita-code-editor archivo="perfil.js (Nested Routing)" lenguaje="javascript">
+  <pre><code>import { rutaActual } from 'mita-dom';
 
-<span class="token keyword">export class</span> <span class="token class-name">MitaPerfil</span> <span class="token keyword">extends</span> <span class="token class-name">MitaElement</span> {
-  <span class="token function">constructor</span>() {
-    <span class="token keyword">super</span>();
-    <span class="token keyword">this</span>.recursoPerfil = <span class="token function">crearRecurso</span>(<span class="token keyword">async</span> () => {
-      <span class="token keyword">const</span> res = <span class="token keyword">await</span> <span class="token function">fetch</span>(<span class="token string">'https://jsonplaceholder.typicode.com/users/1'</span>);
-      <span class="token keyword">return</span> <span class="token keyword">await</span> res.<span class="token function">json</span>();
+export class MitaPerfil extends MitaElement {
+  iniciarLogica() {
+    this.$tabInfo = this.querySelector('#tab-info');
+    this.$tabSeguridad = this.querySelector('#tab-seguridad');
+
+    // Sub-Router Local (Nested Routes)
+    rutaActual.suscribir(ruta => {
+      if (!ruta.startsWith('/perfil')) return;
+      
+      // Esto emula el <Outlet> de React Router
+      this.$tabInfo.style.display = ruta === '/perfil/info' ? 'block' : 'none';
+      this.$tabSeguridad.style.display = ruta === '/perfil/seguridad' ? 'block' : 'none';
     });
   }
-
-  <span class="token function">iniciarLogica</span>() {
-    <span class="token keyword">this</span>.recursoPerfil.<span class="token function">suscribir</span>(estado => {
-      <span class="token keyword">if</span> (estado.loading) <span class="token keyword">this</span>.<span class="token function">mostrarLoader</span>();
-      <span class="token keyword">else if</span> (estado.error) <span class="token keyword">this</span>.<span class="token function">mostrarError</span>();
-      <span class="token keyword">else</span> <span class="token keyword">this</span>.<span class="token function">renderData</span>(estado.data);
-    });
-  }
-}</code></pre>
-    </div>
+}
+  </code></pre>
+</mita-code-editor>
+  
+  <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 0 0 8px 8px; font-size: 0.95rem; border: 1px solid var(--border-color); border-top: none;">
+    <p style="margin: 0;"><strong>Buenas Prácticas Frontend:</strong> Para hacer <em>Nested Routes</em> no necesitas un framework inmenso. Solo suscríbete al <code>Signal</code> del router global dentro del componente y decide qué sub-bloque de HTML mostrar (tu propio <code>Outlet</code>). Esto respeta el encapsulamiento.</p>
   </div>
 
-  <!-- Resultado Visual -->
-  <div style="background: var(--color-superficie); padding: 1.5rem; border-top: 1px solid var(--color-borde);">
-    <div class="perfil-optimizado">
-        <h2>Perfil de Usuario Remoto</h2>
-        <div id="perfil-estado">
-            <!-- Skeleton o loader -->
-            <p class="loader">Cargando datos desde la API...</p>
-        </div>
-        
-        <div id="perfil-contenido" style="display: none;">
-            <p><strong>Nombre:</strong> <span id="perfil-nombre"></span></p>
-            <p><strong>Email:</strong> <span id="perfil-email"></span></p>
-        </div>
+  <!-- Resultado Visual: Rutas Anidadas -->
+  <div style="background: var(--color-superficie); border-top: 1px solid var(--color-borde); padding: 0;">
+    <div style="display: flex; border-bottom: 1px solid var(--border-color);">
+      <a href="/perfil/info" data-mita-link style="padding: 1rem; text-decoration: none; color: var(--text-color); font-weight: 500;">👤 Información</a>
+      <a href="/perfil/seguridad" data-mita-link style="padding: 1rem; text-decoration: none; color: var(--text-color); font-weight: 500;">🔒 Seguridad</a>
+    </div>
 
-        <div id="perfil-error" style="display: none; color: #ff5252;">
-            <p>Error al cargar el perfil.</p>
-        </div>
+    <!-- OUTLET -->
+    <div style="padding: 1.5rem;">
+      <div id="tab-info" style="display: none;">
+        <h3>Información del Usuario</h3>
+        <p><strong>Nombre:</strong> Jane Doe</p>
+        <p><strong>Email:</strong> jane.doe@mita-dom.dev</p>
+      </div>
+      
+      <div id="tab-seguridad" style="display: none;">
+        <h3>Configuración de Seguridad</h3>
+        <p>Último inicio de sesión: <i>Hoy</i></p>
+        <button style="padding: 0.5rem 1rem; background: var(--danger-color); color: white; border: none; border-radius: 4px;">Cambiar Contraseña</button>
+      </div>
+
+      <div id="tab-index" style="display: none;">
+        <p style="color: gray;">Selecciona una pestaña arriba para ver el sub-router en acción.</p>
+      </div>
     </div>
   </div>
 </div>

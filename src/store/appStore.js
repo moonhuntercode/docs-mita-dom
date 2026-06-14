@@ -1,6 +1,7 @@
 // @ts-check
 import { Signal } from 'mita-dom';
 import { Logger } from '../utils/logger.js';
+import { IndexedDBAdapter } from '../utils/db.js';
 
 /**
  * 🌐 Estado Global de la Aplicación (App Store)
@@ -9,6 +10,7 @@ import { Logger } from '../utils/logger.js';
 export const estadoAppGlobal = new Signal({ visitas: 0 }, {
     immutable: true, 
     persistKey: 'mita_estado_global', 
+    storageAdapter: IndexedDBAdapter, // Persistencia asíncrona avanzada con IndexedDB
     onMutate: (newVal, oldVal) => {
         Logger.info(`[Telemetría] AppStore mutado de ${JSON.stringify(oldVal)} a ${JSON.stringify(newVal)}`);
     },

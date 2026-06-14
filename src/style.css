@@ -57,6 +57,11 @@ body {
 }
 
 /* --- ÁREAS DEL GRID --- */
+mita-header,
+mita-sidebar {
+  display: contents; /* Permite que los elementos internos participen en el Grid de body */
+}
+
 header {
   grid-area: header;
   display: flex;

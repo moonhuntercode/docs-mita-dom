@@ -12,17 +12,7 @@
   <!-- Layout estructurado para grid-template-areas -->
 
   <!-- Layout estructurado para grid-template-areas -->
-  <header id="main-header">
-    <div class="header-contenido">
-      <h1>🌿 mita-dom SPA</h1>
-      <p>Demostración CSS Grid, Routing Avanzado y Signals</p>
-    </div>
-    <div style="display: flex; gap: 1rem; align-items: center;">
-      <button id="btn-tema">🌙 Modo Oscuro</button>
-      <!-- Botón de Menú (Mobile Only) -->
-      <button id="btn-menu-mobile" class="menu-btn-mobile">☰ Menú</button>
-    </div>
-  </header>
+  <mita-header></mita-header>
 
   <!-- SIDEBAR GLOBAL (Componente con Teleport y Conditional Render) -->
   <mita-sidebar></mita-sidebar>
@@ -45,25 +35,6 @@
         <demo-shopping-list></demo-shopping-list>
       </section>
     </div>
-
-    <!-- VISTA: Perfil (Oculto por defecto) -->
-      <demo-perfil style="display: none;"></demo-perfil>
-      <!-- Vista Documentación Avanzada -->
-      <mita-docs style="display: none;"></mita-docs>
-      <!-- Vista Blog / Novedades -->
-      <mita-blog style="display: none;"></mita-blog>
-      <!-- Vista Acerca de Nosotros -->
-      <demo-acerca style="display: none;"></demo-acerca>
-      <!-- Vista Configuración -->
-      <demo-config style="display: none;"></demo-config>
-      <!-- Vista Demo Estados y Feedback UI -->
-      <demo-estados style="display: none;"></demo-estados>
-    
-    <!-- VISTA: Admin Logs (Oculto por defecto) -->
-    <demo-admin-logs style="display: none;"></demo-admin-logs>
-
-    <!-- VISTA: Error 404 (Oculto por defecto) -->
-    <demo-404></demo-404>
   </main>
 
   <footer>
@@ -72,6 +43,8 @@
 
   <!-- WIDGET DE RENDIMIENTO (Profiler) -->
   <mita-profiler></mita-profiler>
+
+  <!-- MODAL DE BÚSQUEDA GLOBAL -->
 
   <script type="module" src="/src/main.js"></script>
 </body>

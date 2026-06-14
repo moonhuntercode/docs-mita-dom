@@ -1,30 +1,27 @@
 <div class="demo-wrapper">
   <!-- Editor de Código -->
-  <div class="code-editor-mock">
-    <div class="editor-header">
-      <div class="mac-dots">
-        <span class="dot red"></span>
-        <span class="dot yellow"></span>
-        <span class="dot green"></span>
-      </div>
-      <span class="filename">admin-logs.js</span>
-    </div>
-    <div class="editor-content">
-<pre><code class="language-javascript"><span class="token keyword">import</span> { StorageAdapter } <span class="token keyword">from</span> <span class="token string">'mita-dom'</span>;
+  <mita-code-editor archivo="admin-logs.js" lenguaje="javascript">
+  <pre><code>// router.js
+import { rutaActual } from 'mita-dom';
 
-<span class="token keyword">export class</span> <span class="token class-name">DemoAdminLogs</span> <span class="token keyword">extends</span> <span class="token class-name">MitaElement</span> {
-  <span class="token function">iniciarLogica</span>() {
-    <span class="token keyword">const</span> db = <span class="token keyword">new</span> <span class="token class-name">StorageAdapter</span>(<span class="token string">'mita_logs'</span>);
-    
-    <span class="token keyword">this</span>.$btnLimpiar.<span class="token function">addEventListener</span>(<span class="token string">'click'</span>, <span class="token keyword">async</span> () => {
-      <span class="token keyword">await</span> db.<span class="token function">clear</span>();
-      <span class="token keyword">this</span>.<span class="token function">cargarLogs</span>();
-    });
+const registroRutas = [
+  { path: '/admin/logs', tag: 'demo-admin-logs', meta: { requiresAuth: true } }
+];
 
-    <span class="token keyword">this</span>.<span class="token function">cargarLogs</span>();
+// 🛡️ Navigation Guard Interceptor
+rutaActual.suscribir(ruta => {
+  const config = registroRutas.find(r => r.path === ruta);
+  
+  if (config?.meta?.requiresAuth && !localStorage.getItem('mita_token')) {
+    alert("Acceso Denegado. Interceptado por MitaDOM Guard.");
+    navegarA('/perfil');
+    return; // ⛔ Bloquea carga del Chunk
   }
-}</code></pre>
-    </div>
+});
+  </code></pre>
+</mita-code-editor>
+  <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 0 0 8px 8px; font-size: 0.95rem; border: 1px solid var(--border-color); border-top: none;">
+    <p style="margin: 0;"><strong>Buenas Prácticas Frontend:</strong> Para llegar a esta vista, el Router de MitaDOM evaluó que tuvieras un token local. Este es el patrón estándar de <strong>Navigation Guards</strong> que encuentras en Vue Router, implementado con 0 dependencias.</p>
   </div>
 
   <!-- Resultado Visual -->

@@ -1,0 +1,19 @@
+<!-- mita-search.html -->
+<div class="search-wrapper" id="search-wrapper">
+  <div class="search-input-container">
+    <span class="search-icon">🔍</span>
+    <input type="search" id="search-input" placeholder="Buscar... (Ctrl+K)" autocomplete="off" />
+  </div>
+  
+  <div id="search-dropdown" class="search-dropdown" style="display: none;">
+    <div class="search-filters">
+      <span class="filter-tag active" data-filter="all">Todos</span>
+      <span class="filter-tag" data-filter="aprende">Aprende</span>
+      <span class="filter-tag" data-filter="referencia">Referencia</span>
+    </div>
+    <div id="search-results" class="search-results">
+      <!-- Los resultados se inyectarán aquí -->
+      <div class="search-empty">Empieza a escribir para buscar...</div>
+    </div>
+  </div>
+</div>

@@ -4,93 +4,173 @@ import { Logger } from '../utils/logger.js';
 import { estadoDocActivo } from '../store/docsStore.js';
 
 /**
- * 🧭 Router Inteligente SPA
- * Escucha los cambios de ruta del framework oficial y gestiona la visibilidad
- * de las "Páginas" principales del Light DOM.
+ * 🧭 Advanced Router SPA (Lazy Loading, Guards, Scroll Behavior)
+ * Controla la inyección dinámica de componentes para soportar Code Splitting.
  */
 
 export function iniciarRouter() {
-  Logger.info('Iniciando enrutador visual de MitaDOM...');
+  Logger.info('Iniciando enrutador avanzado MitaDOM (Lazy Loading Activado)...');
 
-  // Catálogo de rutas permitidas mapeadas a sus componentes
-  const componentesPorRuta = {
-    '/': document.getElementById('vista-inicio'),
-    '/perfil': document.querySelector('demo-perfil'),
-    '/admin/logs': document.querySelector('demo-admin-logs'),
-    '/blog': document.querySelector('mita-blog'),
-    '/acerca': document.querySelector('demo-acerca'),
-    '/configuracion': document.querySelector('demo-config'),
-    '/estados': document.querySelector('demo-estados')
+  const $appContainer = document.getElementById('app-container');
+
+  // Registro de Rutas (inspirado en Vue Router)
+  const registroRutas = [
+    { path: '/', tag: 'vista-inicio', isEager: true }, // Ya está en index.html
+    { path: '/perfil', tag: 'demo-perfil', lazy: () => import('../componentes/perfil/perfil.js'), layout: 'mita-layout-dashboard' },
+    { path: '/admin/logs', tag: 'demo-admin-logs', lazy: () => import('../componentes/admin-logs/admin-logs.js'), meta: { requiresAuth: true }, layout: 'mita-layout-dashboard' },
+    { path: '/blog', tag: 'mita-blog', lazy: () => import('../componentes/mita-blog/mita-blog.js') },
+    { path: '/acerca', tag: 'demo-acerca', lazy: () => import('../componentes/acerca/demo-acerca.js') },
+    { path: '/configuracion', tag: 'demo-config', lazy: () => import('../componentes/configuracion/demo-config.js') },
+    { path: '/estados', tag: 'demo-estados', lazy: () => import('../componentes/demo-estados/demo-estados.js') },
+    { path: '/docs', tag: 'mita-docs', lazy: () => import('../componentes/mita-docs/mita-docs.js') },
+    { path: '/performance', tag: 'demo-performance', lazy: () => import('../componentes/demo-performance/demo-performance.js') }
+  ];
+
+  // Caché de elementos instanciados para no recrearlos
+  const vistasInstanciadas = {
+    '/': document.getElementById('vista-inicio')
   };
 
-  const $mitaDocs = document.querySelector('mita-docs');
-  const $error404 = document.querySelector('demo-404');
-  
-  // Configuración para URLPattern
+  // Configuración para rutas dinámicas (Ej: /docs/:id)
   const patternDocs = new URLPattern({ pathname: '/docs/:id' });
 
-  // 🛡️ Error Boundary: Verifica que el componente exista en el Light DOM
-  function verificarComponente(ruta, $elemento) {
-      if (!$elemento) {
-          const errMsg = `[Error Boundary] Componente no encontrado en el Light DOM para la ruta: ${ruta}`;
-          Logger.error(errMsg);
-          
-          // Mostrar Toast de Error UI para ayudar al DX (Developer Experience)
-          const $toast = document.createElement('div');
-          $toast.className = 'mita-error-toast';
-          $toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#f44336;color:white;padding:1rem 1.5rem;border-radius:8px;z-index:9999;font-weight:bold;box-shadow:0 10px 30px rgba(0,0,0,0.3);animation:fade-in 0.3s;transition:opacity 0.3s;';
-          $toast.innerHTML = `🚨 <b>Error Boundary (Router):</b><br>La ruta <code>${ruta}</code> no tiene un componente válido renderizado en <code>index.html</code>.`;
-          document.body.appendChild($toast);
-          
-          setTimeout(() => {
-              $toast.style.opacity = '0';
-              setTimeout(() => $toast.remove(), 300);
-          }, 6000);
+  // Función para obtener/inyectar vista
+  async function montarVista(rutaBase, config) {
+    if (vistasInstanciadas[rutaBase]) {
+      return vistasInstanciadas[rutaBase];
+    }
+    
+    // Lazy Loading: Resolvemos la promesa de importación (Code Splitting)
+    if (config.lazy) {
+      Logger.info(`[Router] Lazy Loading Chunk: ${config.tag}`);
+      try {
+        await config.lazy(); 
+      } catch (err) {
+        Logger.error(`[Router] Fallo de red al cargar el chunk ${config.tag}:`, err);
+        return null; // El componente no pudo ser descargado
       }
+    }
+
+    // El import ejecuta customElements.define, ahora podemos crear el Tag
+    const $el = document.createElement(config.tag);
+    
+    // Si la ruta define un Layout, lo inyectamos dentro del Layout (Slot)
+    if (config.layout) {
+      let $layout = document.querySelector(config.layout);
+      if (!$layout) {
+        // Importamos el layout dinámicamente si no existe (Code Splitting para Layouts)
+        await import(`../componentes/layout/${config.layout}.js`);
+        $layout = document.createElement(config.layout);
+        $layout.style.display = 'none'; // Se mostrará más abajo
+        $appContainer.appendChild($layout);
+      }
+      $layout.appendChild($el);
+    } else {
+      $appContainer.appendChild($el);
+    }
+
+    vistasInstanciadas[rutaBase] = $el;
+    
+    return $el;
   }
 
-  rutaActual.suscribir(ruta => {
+  rutaActual.suscribir(async (ruta) => {
     Logger.info(`Navegando a ruta: ${ruta}`);
     
-    const matchDocs = patternDocs.exec({ pathname: ruta });
-    const esSeccionDocs = !!matchDocs || ruta === '/docs' || ruta === '/docs/';
+    // --- 1. MATCH DE RUTAS Y PARÁMETROS ---
+    let matchDocs = patternDocs.exec({ pathname: ruta });
+    let rutaFisica = matchDocs ? '/docs' : ruta; // Normalizar
+    if (ruta === '/docs/') rutaFisica = '/docs'; // Normalización estricta
+    
+    // Normalización de Nested Routes (Outlets)
+    if (ruta.startsWith('/perfil')) rutaFisica = '/perfil';
+    
+    const configRuta = registroRutas.find(r => r.path === rutaFisica);
 
-    // 1. Ocultar todos los componentes del Light DOM primero
-    Object.values(componentesPorRuta).forEach($el => {
-        if ($el) $el.style.display = 'none';
-    });
-    if ($mitaDocs) $mitaDocs.style.display = 'none';
-    if ($error404) $error404.style.display = 'none';
+    // --- 2. NAVIGATION GUARDS ---
+    if (configRuta && configRuta.meta && configRuta.meta.requiresAuth) {
+      // Simulación de token/guard
+      const isAuthenticated = localStorage.getItem('mita_token') === 'true'; // false por defecto
+      if (!isAuthenticated) {
+        Logger.warn(`[Router Guard] Acceso denegado a ${ruta}. Redirigiendo a /perfil`);
+        alert("🛡️ MitaDOM Guard: Necesitas estar autenticado para ver Logs. Visita perfil.");
+        import('mita-dom').then(m => m.navegarA('/perfil'));
+        return; // Interceptamos y cortamos la carga
+      }
+    }
 
-    // 2. Mostrar el componente que corresponde a la ruta actual
-    let rutaReconocida = false;
-
-    if (esSeccionDocs) {
-        rutaReconocida = true;
-        verificarComponente('/docs', $mitaDocs);
-        if ($mitaDocs) {
-            $mitaDocs.style.display = 'block';
-            if (matchDocs && matchDocs.pathname.groups.id) {
-                estadoDocActivo.set(matchDocs.pathname.groups.id);
-            } else {
-                estadoDocActivo.set('readme');
+    // --- RENDERIZADO CONDICIONAL Y CATCH-ALL ---
+    if (!configRuta) {
+      Logger.warn(`Ruta 404 interceptada: ${ruta}`);
+      const fallbackConfig = { tag: 'demo-404', lazy: () => import('../componentes/404/404.js') };
+      const $error404 = await montarVista('/404', fallbackConfig);
+      
+      const mostrar404 = () => {
+        Object.values(vistasInstanciadas).forEach($el => {
+          if ($el) {
+            $el.style.display = 'none';
+            if ($el.parentElement && $el.parentElement.id !== 'app-container') {
+              $el.parentElement.style.display = 'none';
             }
-        }
-    } else if (componentesPorRuta[ruta] !== undefined) {
-        rutaReconocida = true;
-        const $el = componentesPorRuta[ruta];
-        verificarComponente(ruta, $el);
-        if ($el) $el.style.display = 'block';
+          }
+        });
+        if ($error404) $error404.style.display = 'block';
+      };
+
+      if (document.startViewTransition) document.startViewTransition(() => mostrar404());
+      else mostrar404();
+      
+      return;
     }
 
-    // 3. Catch-All: Detectar rutas no registradas (404)
-    if (!rutaReconocida) {
-        Logger.warn(`Ruta 404 interceptada: ${ruta}`);
-        if ($error404) {
-            $error404.style.display = 'block';
-        } else {
-            verificarComponente('404', $error404);
-        }
+    // Montamos la vista solicitada (Eager o Lazy)
+    const $vistaActiva = await montarVista(rutaFisica, configRuta);
+    
+    // Si hubo un error de red cargando el chunk, abortamos
+    if (!$vistaActiva) {
+      alert("Error de conexión: No se pudo cargar esta sección. Verifica tu internet.");
+      return;
     }
+    
+    // --- 3. ACTUALIZACIÓN DEL DOM (Con View Transitions API) ---
+    const actualizarDOM = () => {
+      // 3.1 Limpiar vistas y layouts activos
+      Object.values(vistasInstanciadas).forEach($el => {
+        if ($el) {
+          $el.style.display = 'none';
+          if ($el.parentElement && $el.parentElement.id !== 'app-container') {
+            $el.parentElement.style.display = 'none';
+          }
+        }
+      });
+
+      // 3.2 Mostrar la nueva vista
+      $vistaActiva.style.display = 'block';
+      
+      // Si la vista está dentro de un Layout, mostramos también el Layout
+      if ($vistaActiva.parentElement && $vistaActiva.parentElement.id !== 'app-container') {
+        $vistaActiva.parentElement.style.display = 'grid'; // Grid para el layout dashboard
+      }
+    };
+
+    // Usar la API nativa de transiciones si está disponible (Navegación Fluida 60fps)
+    if (document.startViewTransition) {
+      document.startViewTransition(() => actualizarDOM());
+    } else {
+      actualizarDOM();
+    }
+
+    // Data Fetching / Loaders: Si es Docs, inyectamos el estado
+    if (rutaFisica === '/docs') {
+      if (matchDocs && matchDocs.pathname.groups.id) {
+          estadoDocActivo.set(matchDocs.pathname.groups.id);
+      } else {
+          estadoDocActivo.set('readme');
+      }
+    }
+
+    // --- 5. SCROLL BEHAVIOR ---
+    // Emula el scroll nativo al inicio de página al cambiar de vista
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 }

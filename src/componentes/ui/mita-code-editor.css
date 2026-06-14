@@ -1,0 +1,148 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.editor-container {
+  background: #1e1e1e;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  margin: 1rem 0;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+  color: #d4d4d4;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.editor-container:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #252526;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mac-dots { display: flex; gap: 8px; }
+.dot { width: 12px; height: 12px; border-radius: 50%; }
+.dot.red { background: #ff5f56; }
+.dot.yellow { background: #ffbd2e; }
+.dot.green { background: #27c93f; }
+
+.filename {
+  font-size: 0.85rem;
+  color: #9cdcfe;
+  font-weight: 500;
+  user-select: none;
+  letter-spacing: 0.5px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #cccccc;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.action-btn.success {
+  background: rgba(39, 201, 63, 0.2);
+  border-color: #27c93f;
+  color: #27c93f;
+}
+
+/* LIVE EDITING STRUCTURE */
+.editor-wrapper {
+  position: relative;
+  min-height: 100px;
+}
+
+.editor-textarea, 
+.editor-display {
+  width: 100%;
+  padding: 1.2rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  tab-size: 2;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.editor-textarea {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  resize: vertical;
+  color: transparent;
+  background: transparent;
+  caret-color: #fff;
+  border: none;
+  outline: none;
+  z-index: 1;
+  white-space: pre;
+  overflow: hidden;
+}
+
+.editor-display {
+  overflow-x: auto;
+  pointer-events: none;
+  z-index: 0;
+  position: relative;
+}
+
+/* Custom Scrollbar for Code Block */
+.editor-display::-webkit-scrollbar { height: 8px; }
+.editor-display::-webkit-scrollbar-track { background: #1e1e1e; }
+.editor-display::-webkit-scrollbar-thumb { background: #424242; border-radius: 4px; }
+.editor-display::-webkit-scrollbar-thumb:hover { background: #4f4f4f; }
+
+pre {
+  margin: 0;
+  tab-size: 2;
+  font-family: inherit;
+}
+
+code {
+  font-family: inherit;
+}
+
+/* Syntax Highlighting Tokens (VSCode Dark+ Theme Colors) */
+.token.comment { color: #6A9955; font-style: italic; }
+.token.string { color: #CE9178; }
+.token.keyword { color: #569CD6; }
+.token.control-keyword { color: #C586C0; }
+.token.function { color: #DCDCAA; }
+.token.builtin { color: #4EC9B0; } /* Class/Type/Global */
+.token.property { color: #9CDCFE; }
+.token.number { color: #B5CEA8; }
+.token.boolean { color: #569CD6; }
+.token.operator { color: #D4D4D4; }
+.token.punctuation { color: #D4D4D4; }
+.token.tag { color: #569CD6; }
+.token.attr-name { color: #9CDCFE; }
+.token.attr-value { color: #CE9178; }

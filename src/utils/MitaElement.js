@@ -1,6 +1,6 @@
 // @ts-check
 import { Logger } from './logger.js';
-import { registrarMetrica } from '../store/profilerStore.js';
+import { registrarMetrica, registrarInteraccion } from '../store/profilerStore.js';
 
 /**
  * 🛡️ MitaElement (Patrón Error Boundary Local)
@@ -38,8 +38,25 @@ export class MitaElement extends HTMLElement {
       const t1 = performance.now();
       const duracion = t1 - t0;
       
-      // Registrar la métrica globalmente
+      // Registrar la métrica globalmente de renderizado
       registrarMetrica(this.tagName.toLowerCase(), duracion);
+
+      // 🖱️ INTERACTION PROFILER (INP Básico)
+      // Escuchamos clics para medir si los botones tardan mucho en reaccionar
+      this.addEventListener('click', (e) => {
+        const target = e.target;
+        // Solo medimos si es un botón o tiene rol de botón
+        if (target && (target.tagName === 'BUTTON' || target.getAttribute('role') === 'button')) {
+          const start = performance.now();
+          // Usamos requestAnimationFrame para saber cuándo el hilo principal se liberó después del clic
+          requestAnimationFrame(() => {
+            const end = performance.now();
+            const latency = end - start;
+            const objetivo = target.id ? `#${target.id}` : target.textContent?.trim().substring(0, 15) || 'Botón';
+            registrarInteraccion(this.tagName.toLowerCase(), objetivo, latency);
+          });
+        }
+      });
 
     } catch (error) {
       Logger.error(`Error en componente local [${this.tagName}]`, error);

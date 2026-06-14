@@ -19,10 +19,13 @@ export const dbAdapter = {
  * ⏱️ Estado del Mita Profiler (Métricas de Rendimiento)
  * Guarda las mediciones de performance en tiempo real y las persiste en la DB elegida.
  */
-export const estadoProfiler = new Signal([], {
-    persistKey: 'mita_profiler_metrics',
+export const estadoProfiler = new Signal({
+    renderizados: [],
+    interacciones: []
+}, {
+    persistKey: 'mita_profiler_metrics_v2', // Nueva key para evitar conflictos con array viejo
     storageAdapter: dbAdapter,
-    immutable: false // Mantenemos false para parchear rápido el array
+    immutable: false // Mantenemos false para parchear rápido
 });
 
 /**
@@ -31,11 +34,25 @@ export const estadoProfiler = new Signal([], {
  * @param {number} ms Tiempo en milisegundos
  */
 export function registrarMetrica(componente, ms) {
-    estadoProfiler.update(historial => {
-        const nuevoHistorial = [...historial, { componente, ms, timestamp: Date.now() }];
-        // Mantenemos solo las últimas 50 métricas para no llenar la DB
+    estadoProfiler.update(estado => {
+        const nuevoHistorial = [...estado.renderizados, { componente, ms, timestamp: Date.now() }];
+        // Mantenemos solo las últimas 50 métricas
         if (nuevoHistorial.length > 50) nuevoHistorial.shift();
-        return nuevoHistorial;
+        return { ...estado, renderizados: nuevoHistorial };
+    });
+}
+
+/**
+ * Registra una medición de latencia de interacción (INP).
+ * @param {string} componente Componente padre
+ * @param {string} objetivo Descripción del elemento interactuado (ej. Botón ID)
+ * @param {number} ms Tiempo de procesamiento
+ */
+export function registrarInteraccion(componente, objetivo, ms) {
+    estadoProfiler.update(estado => {
+        const nuevoHistorial = [...estado.interacciones, { componente, objetivo, ms, timestamp: Date.now() }];
+        if (nuevoHistorial.length > 50) nuevoHistorial.shift();
+        return { ...estado, interacciones: nuevoHistorial };
     });
 }
 
