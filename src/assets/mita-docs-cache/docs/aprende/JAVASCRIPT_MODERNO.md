@@ -1,78 +1,76 @@
-# 🚀 JavaScript Moderno (ES6+)
+# 🚀 JavaScript Moderno (Vanilla ES6+)
 
-MitaDOM está construido sobre las bases más sólidas de JavaScript moderno. Entender estas características te ayudará a sacar el máximo provecho de la librería y escribir código más limpio y mantenible.
+En MitaDOM no usamos Babel, Webpack, ni transpiladores por defecto. Aprovechamos que los motores V8 (Chrome) y SpiderMonkey (Firefox) ya implementan el 99% de las características modernas.
 
-## 1. ES Modules (ESM)
+Aquí te explicamos las herramientas clave que usa la librería internamente.
 
-En MitaDOM, todo funciona a través de módulos nativos. Atrás quedaron los días de importar variables globales.
+## 1. ES Modules Nativos (`import` / `export`)
+
+Ya no necesitamos requerir scripts globales. Cada archivo en MitaDOM es un módulo independiente con su propio alcance (scope).
 
 ```javascript
-// Exportar desde un archivo (store.js)
-export const estadoAppGlobal = new SignalDerivado({ contador: 0 });
-
-// Importar donde lo necesites (componente.js)
-import { estadoAppGlobal } from './store.js';
+// store.js (Exportamos una instancia de Signal)
+import { Signal } from 'mita-dom';
+export const contador = new Signal(0);
 ```
 
-## 2. Clases y Herencia (Web Components)
+```javascript
+// componente.js (Importamos lo que necesitamos)
+import { contador } from './store.js';
 
-Los Web Components nativos se benefician enormemente de la sintaxis de clases de ES6.
+contador.suscribir(valor => console.log('Nuevo valor:', valor));
+```
+**Ventaja:** Permite *Tree Shaking*. Si no importas la clase `<mita-dialog>`, el compilador de Vite no la incluirá en el archivo final.
+
+## 2. Proxies (La Magia de la Reactividad)
+
+Frameworks viejos como Vue 2 usaban `Object.defineProperty`. MitaDOM (y Vue 3) utiliza la API moderna `Proxy` para interceptar operaciones sobre objetos.
+Así es como sabemos cuándo mutas el Estado Global.
 
 ```javascript
-import { MitaElement } from 'mita-dom';
+const estadoReal = { activo: false };
 
-class MiComponente extends MitaElement {
-  constructor() {
-    super(); // Llama al constructor padre
-    this.attachShadow({ mode: 'open' }); // Encapsulamiento
+// El Proxy es como un guardaespaldas del objeto
+const estadoReactivo = new Proxy(estadoReal, {
+  set(target, propiedad, valorNuevo) {
+    console.log(`¡Alguien cambió ${propiedad} a ${valorNuevo}!`);
+    target[propiedad] = valorNuevo;
+    // Aquí es donde MitaDOM repinta la UI 🎨
+    return true;
   }
+});
 
-  // Método asíncrono moderno
-  async render() {
-    this.shadowRoot.innerHTML = `<h1>¡Hola Mundo!</h1>`;
+estadoReactivo.activo = true; // Consola: ¡Alguien cambió activo a true!
+```
+
+## 3. Map y Set (Estructuras de Datos Óptimas)
+
+En MitaDOM usamos `Map` y `Set` en lugar de Objetos (`{}`) y Arrays (`[]`) para el caché y el registro de eventos, porque son exponencialmente más rápidos para búsquedas directas.
+
+```javascript
+// DOCS_MAP en MitaDocs es un objeto nativo, 
+// pero internamente el router guarda los componentes en Map.
+const cacheComponentes = new Map();
+
+cacheComponentes.set('/ruta', MitaElement);
+if (cacheComponentes.has('/ruta')) {
+  // Búsqueda en O(1) constante, ultrarrápida
+  const Elemento = cacheComponentes.get('/ruta');
+}
+```
+
+## 4. Clases y "this" contextual
+
+Las clases en JS son azúcar sintáctico sobre prototipos, pero son perfectas para Web Components.
+
+```javascript
+class MitaBase {
+  constructor() {
+    // Al hacer 'bind', aseguramos que `this` siempre sea la clase,
+    // incluso si pasamos esta función a un evento (click).
+    this.manejarClick = this.manejarClick.bind(this);
   }
 }
-customElements.define('mi-componente', MiComponente);
 ```
 
-## 3. Arrow Functions y Contexto (`this`)
-
-Las funciones flecha no solo son más cortas, sino que **no crean su propio contexto `this`**, heredándolo de la función padre. Esto es crucial al usar `suscribir` en MitaDOM.
-
-```javascript
-// ❌ Función tradicional: pierde el 'this' de la clase
-estadoAppGlobal.suscribir(function(estado) {
-  this.actualizarUI(estado); // ERROR: this es undefined
-});
-
-// ✅ Arrow function: mantiene el 'this' de la clase
-estadoAppGlobal.suscribir((estado) => {
-  this.actualizarUI(estado); // Funciona perfectamente
-});
-```
-
-## 4. Destructuración y Spread Operator
-
-Manipular estados inmutables en MitaDOM requiere crear nuevas copias de objetos. Aquí brilla el _Spread Operator_ (`...`).
-
-```javascript
-// Actualizando un objeto complejo reactivo
-estadoAppGlobal.set({
-  ...estadoAppGlobal.value, // Copiamos lo anterior
-  contador: estadoAppGlobal.value.contador + 1 // Sobrescribimos el contador
-});
-```
-
-## 5. Optional Chaining (`?.`) y Nullish Coalescing (`??`)
-
-Protege tus renders de variables indefinidas de forma elegante.
-
-```javascript
-// En lugar de hacer validaciones largas:
-const nombre = (usuario && usuario.perfil) ? usuario.perfil.nombre : 'Invitado';
-
-// Usamos JS Moderno:
-const nombre = usuario?.perfil?.nombre ?? 'Invitado';
-```
-
-Al dominar estos conceptos, el uso de MitaDOM (y de cualquier librería moderna) se sentirá fluido y natural.
+Con estas bases, puedes leer y modificar cualquier archivo del núcleo (core) de `mita-dom` sin sentirte abrumado. ¡Es puro JavaScript!

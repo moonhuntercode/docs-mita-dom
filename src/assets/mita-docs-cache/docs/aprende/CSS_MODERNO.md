@@ -1,102 +1,82 @@
-# 🎨 CSS3 Moderno: La Base del Diseño
+# 🎨 CSS Moderno (Nativo)
 
-MitaDOM favorece el uso de **CSS Vanilla Moderno** por encima de librerías pesadas o frameworks como Tailwind. Entender las características actuales de CSS te permitirá construir interfaces fluidas y "Mobile First" nativamente.
+En MitaDOM no encontrarás TailwindCSS, SASS, ni Styled Components. Hemos optado por Vanilla CSS porque el estándar ha evolucionado espectacularmente.
 
-## 1. Variables Nativas (Custom Properties)
+## 1. Variables CSS (Custom Properties)
 
-Las variables CSS permiten tener un "Tema Global" y componentes súper consistentes. Además, pueden cambiar en tiempo de ejecución para lograr modos Claro/Oscuro sin JS complejo.
+Las variables CSS permiten tener un Sistema de Diseño dinámico. Si cambias el valor de una variable en JS, toda la aplicación se redibuja en 60fps sin necesidad de un Virtual DOM.
 
 ```css
 :root {
+  /* Tokens de Color */
   --color-primario: #10b981;
-  --color-fondo: #121212;
-  --espaciado-base: 1rem;
+  --bg-principal: #ffffff;
 }
 
-body.tema-claro {
-  --color-primario: #059669;
-  --color-fondo: #f9fafb;
-}
-
-.tarjeta {
-  background-color: var(--color-fondo);
-  padding: var(--espaciado-base);
+/* Modo Oscuro Nativo */
+[data-theme="dark"] {
+  --bg-principal: #121212;
+  --color-texto: #e5e7eb;
 }
 ```
 
-## 2. Flexbox y CSS Grid: Layouts Bidimensionales
+```javascript
+// En JS, cambiar a modo oscuro es solo mutar el DOM:
+document.documentElement.setAttribute('data-theme', 'dark');
+```
 
-Dejamos atrás los \`float\` y \`inline-block\`.
-*   **Flexbox** es perfecto para alinear elementos en 1 sola dirección (filas o columnas). Ideal para un Header (Logo + Menú de navegación).
-*   **Grid** es la solución definitiva para estructurar toda una página (Sidebar + Header + Contenido).
+## 2. CSS Nesting (Anidamiento Nativo)
+
+SASS ya no es necesario para el anidamiento. Los navegadores modernos soportan CSS Nesting nativamente.
 
 ```css
-/* Ejemplo Grid: App Layout Completo */
-.app-container {
-  display: grid;
-  grid-template-areas: 
-    "header header"
-    "sidebar contenido";
-  grid-template-columns: 250px 1fr;
-  grid-template-rows: 60px 1fr;
-  min-height: 100vh;
-}
+/* Esto es CSS puro, sin pre-procesadores */
+.tarjeta-mita {
+  background: var(--bg-secundario);
+  border-radius: 8px;
 
-header { grid-area: header; }
-aside { grid-area: sidebar; }
-main { grid-area: contenido; }
+  & .titulo {
+    color: var(--color-primario);
+    font-size: 1.5rem;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
 ```
 
-## 3. Unidades Relativas (Rem, Vh, Clamp)
+## 3. `@scope` (El futuro del encapsulamiento)
 
-Para asegurar que tu web se vea perfecta en un reloj, un celular o un televisor 4k, no uses \`px\`.
-La función \`clamp(min, preferido, max)\` es mágica para las tipografías responsivas.
+Para no contaminar el DOM global, los componentes de MitaDOM (cuando no usan Shadow DOM cerrado) utilizan la directiva `@scope`. 
 
 ```css
-h1 {
-  /* Mínimo 1.5rem, escala dinámicamente al 5% del ancho, máximo 3rem */
-  font-size: clamp(1.5rem, 5vw, 3rem);
-}
-
-.contenedor {
-  /* Ancho dinámico pero sin romperse */
-  width: 100%;
-  max-width: 1200px;
-  padding: 2rem;
+@scope (.mita-search-container) {
+  /* Estas reglas SÓLO afectarán a los elementos dentro de .mita-search-container */
+  input {
+    border: 1px solid var(--color-primario);
+  }
+  
+  /* Incluso si hay un <ul> global en la web, este <ul> solo se aplica localmente */
+  ul {
+    list-style: none;
+  }
 }
 ```
 
-## 4. Web Components y el Shadow DOM (\`:host\`)
+## 4. `color-mix()` y Unidades Lógicas
 
-Cuando estilas un componente nativo (`<mita-code-editor>`), usas el Shadow DOM. Para estilizar al "contenedor mismo" de tu componente, usas `:host`.
+Podemos crear variaciones de color sobre la marcha mezclando el primario con blanco o transparente.
 
 ```css
-:host {
-  display: block; /* Los custom elements son inline por defecto! */
-  contain: content; /* Optimización brutal de renderizado */
+.btn-hover {
+  /* Mezcla un 80% de color primario con un 20% de blanco */
+  background: color-mix(in srgb, var(--color-primario) 80%, white);
 }
-
-/* Aplicar estilos solo si el Body tiene una clase (Temas) */
-:host-context(.tema-claro) .btn {
-  background: white;
-}
-```
-
-## 5. Micro-animaciones (Transiciones)
-
-Un diseño Premium ("WOW Effect") requiere micro-interacciones sutiles pero fluidas. Nunca animes \`width\`, \`height\`, o \`margin\` (causan "reflow" en la CPU). **Anima solo \`transform\` y \`opacity\` (Usan la GPU).**
-
-```css
-.boton {
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
-}
-
-.boton:hover {
-  transform: translateY(-2px); /* Se eleva */
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); /* Crea sombra abajo */
-}
-
-.boton:active {
-  transform: translateY(0); /* Se hunde al clickear */
+.btn-foco {
+  /* Un anillo semitransparente perfecto para accesibilidad */
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primario) 30%, transparent);
 }
 ```
+
+MitaDOM utiliza estas tecnologías subyacentes para entregar una UI espectacular que pesa 0kb en librerías CSS externas.

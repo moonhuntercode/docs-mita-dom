@@ -8,9 +8,12 @@ A continuación, una guía profunda de Patrones Avanzados.
 
 ---
 
-## 1. Code Splitting y Lazy Loading (Importaciones Dinámicas)
+## 1. Routing Tradicional (Eager) vs Lazy Loading
 
-Para que tu aplicación inicie en microsegundos, no debes cargar todo el JS en `index.html`. Debemos usar `import()` asíncrono para que empaquetadores como **Vite** creen "Chunks" separados.
+En el enrutamiento **tradicional (sin lazy)**, todos los componentes se importan al inicio del archivo (`import { Vista } from './vista.js'`). 
+**Caso de uso:** Perfecto para los componentes de la vista inicial (`/`) o "Layouts" que el usuario siempre va a ver, garantizando el renderizado más rápido posible.
+
+Sin embargo, para que tu aplicación escale y mantenga un *Time-To-Interactive* en milisegundos, no debes cargar *toda* la aplicación en `index.html`. Aquí entra el **Lazy Loading (Importaciones Dinámicas)**: usamos `import()` asíncrono para que herramientas como Vite separen las vistas en "Chunks" o archivos independientes que solo se descargan si el usuario entra a esa ruta.
 
 <div class="demo-wrapper">
   <div class="code-editor-mock">

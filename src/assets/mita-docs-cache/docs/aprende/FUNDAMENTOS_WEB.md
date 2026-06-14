@@ -1,52 +1,71 @@
-# 🧠 Fundamentos del Desarrollo Web Moderno
+# 🌐 Fundamentos Web Modernos (HTML5 & DOM)
 
-Para dominar MitaDOM, no necesitas aprender "magia" ni un nuevo lenguaje de plantillas. Necesitas dominar el **Desarrollo Web Nativo**. MitaDOM no es más que una capa de reactividad quirúrgica (Signals) sobre los estándares de la W3C.
+**MitaDOM** no inventa una rueda nueva, te enseña a usar la que ya viene instalada en tu navegador: La Web Plataforma.
 
-Esta guía recopila los fundamentos indispensables que todo desarrollador debería conocer.
+Para dominar MitaDOM, debes dominar tres conceptos fundamentales del DOM moderno:
 
-## 1. El DOM y la Reconciliación
+## 1. Custom Elements (Elementos Personalizados)
 
-En la era dorada de React, nos convencieron de que el DOM era "lento". Esto dio origen al Virtual DOM (VDOM), una copia en memoria del árbol HTML que se compara en cada render.
+Antes, para crear componentes usábamos funciones de React o clases de Angular. Hoy, el estándar HTML5 nos permite registrar nuestras propias etiquetas HTML en el navegador.
 
-**La Realidad Actual**: El DOM moderno es rapidísimo si sabes cómo tocarlo. 
-- Cambiar `nodo.textContent = "Hola"` toma menos de un milisegundo.
-- El cuello de botella no es el DOM, sino el "Reflow" (cuando el navegador debe recalcular posiciones y tamaños de la página) provocado por escrituras masivas.
-- **Cómo lo soluciona MitaDOM**: En vez de recrear un VDOM completo, un `Signal` guarda una referencia exacta a un nodo de texto o a un atributo CSS, y lo actualiza directamente en el DOM real.
+```javascript
+// La forma nativa (Vainilla)
+class MiBoton extends HTMLElement {
+  connectedCallback() {
+    this.innerHTML = `<button>Haz clic</button>`;
+  }
+}
+// Registramos la etiqueta
+customElements.define('mi-boton', MiBoton);
+```
 
-## 2. Consumo de APIs (REST y Fetch)
+**¿Cómo lo hace MitaDOM?**
+MitaDOM provee la clase base `MitaElement`, que extiende de `HTMLElement`, añadiéndole soporte para Signals (Reactividad) y prevención de errores (Error Boundaries).
 
-El desarrollo frontend moderno gira en torno a consumir datos asíncronos desde una nube, un microservicio o un backend (Node.js, Python, Go).
+## 2. Shadow DOM (Encapsulamiento)
 
-### El Flujo Estándar de Peticiones:
-1. **Petición**: Usamos `fetch()` para llamar a una URL.
-2. **Promesas y Async/Await**: Las peticiones demoran, así que el código debe "esperar" (`await`) la respuesta.
-3. **Parseo**: La respuesta suele venir en formato JSON (`await res.json()`).
-4. **Manejo de Errores**: Siempre envuelve tus llamadas en `try / catch` para controlar servidores caídos o errores 404/500.
+El Shadow DOM es un "DOM dentro del DOM". Sirve para que el CSS y los IDs de tu componente no afecten al resto de la página, y viceversa. Es la solución definitiva al CSS global.
 
-MitaDOM facilita esto combinando `fetch` con un `Signal` que controle la interfaz (Mostrando "Cargando..." o el mensaje de "Error"). Consulta la guía [Datos y APIs](./DATOS_Y_APIS.md) para ejemplos de código real.
+```javascript
+class MitaBoton extends HTMLElement {
+  constructor() {
+    super();
+    // Creamos un Shadow DOM "abierto"
+    this.attachShadow({ mode: 'open' }); 
+  }
 
-## 3. Git y Despliegue en la Nube
+  connectedCallback() {
+    // El estilo solo aplicará a este botón
+    this.shadowRoot.innerHTML = `
+      <style>
+        button { background: red; color: white; }
+      </style>
+      <button>Soy rojo y no rompo tu CSS global</button>
+    `;
+  }
+}
+```
 
-Tu código no sirve si solo vive en `localhost`.
+En la librería usamos el Shadow DOM específicamente en el `<mita-code-editor>`, para que las reglas CSS del resaltado de sintaxis no interfieran con tu proyecto principal.
 
-### Git: El Sistema de Control de Versiones
-MitaDOM está diseñado para el trabajo en equipo. Usa Git para guardar tu código.
-- `git add .` (Añade tus cambios)
-- `git commit -m "feat: nuevo componente"` (Guarda la foto de tus cambios)
-- `git push` (Sube tus cambios a GitHub, GitLab, etc.)
+## 3. Atributos Data (`data-*`) vs Propiedades JS
 
-### Build y Despliegue (Vite)
-Cuando desarrollas, Vite crea un servidor local. Pero para producción, debes "compilar" (minificar y ofuscar) tu código.
+El HTML es estático, el JS es dinámico. ¿Cómo se comunican?
+En MitaDOM usamos intensivamente los `data-attributes` para el estado inicial, y la API nativa de observables para la reactividad.
 
-1. Ejecutas `npm run build`.
-2. Vite lee tu `vite.config.js` y genera una carpeta `/dist`. Esta carpeta contiene tu `index.html` optimizado y archivos JS/CSS ultra-comprimidos.
-3. Subes esa carpeta `/dist` a servicios de nube gratuitos como **Vercel**, **Netlify**, o **Cloudflare Pages**.
-4. ¡Listo! Tu SPA (Single Page Application) estará viva en internet.
+```html
+<!-- HTML Estático -->
+<demo-perfil data-user-id="123" data-theme="dark"></demo-perfil>
+```
 
-> [!WARNING]
-> Recuerda siempre configurar las reglas de reescritura en tu proveedor de nube para que todas las peticiones apunten a `/index.html` (El famoso *Catch-All* para SPAs).
+```javascript
+// Dentro del Web Component (JS)
+const userId = this.dataset.userId; // "123"
+```
 
-## 4. Patrones de Arquitectura SPA
-En una *Single Page Application*, el usuario descarga el HTML, CSS y JS una sola vez. Cuando el usuario hace clic en "Ir al Perfil", la página *no se recarga*. En su lugar, JavaScript intercepta el clic, cambia la URL en la barra superior (usando la Navigation API) y destruye u oculta secciones del DOM para mostrar la vista del Perfil.
+## Resumen Arquitectónico
 
-Esto otorga a las SPAs la misma sensación de fluidez y velocidad que una aplicación móvil instalada.
+Al usar estos fundamentos web (Custom Elements + Shadow DOM + Data Attributes), obtenemos:
+1. **0 Dependencias:** Funciona en cualquier navegador sin necesidad de npm install react.
+2. **Framework Agnostic:** Un `<mita-dialog>` funcionará perfecto dentro de Vue, Svelte, React o jQuery.
+3. **Alto Rendimiento:** El navegador optimiza nativamente estas APIs, están escritas en C++, mucho más rápidas que un Virtual DOM en JavaScript.
