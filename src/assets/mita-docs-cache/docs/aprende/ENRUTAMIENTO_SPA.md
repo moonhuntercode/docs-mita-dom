@@ -8,7 +8,50 @@ A continuación, una guía profunda de Patrones Avanzados.
 
 ---
 
-## 1. Routing Tradicional (Eager) vs Lazy Loading
+## 1. Navegación Dinámica y Extracción de Parámetros
+
+A veces necesitas redirigir al usuario vía JavaScript (por ejemplo, después de un inicio de sesión o al fallar una petición), o enviar Query Parameters en la URL (`?id=123`).
+
+**Navegación Programática:**
+MitaDOM ofrece un helper simple sobre `window.navigation`.
+
+```javascript
+import { navegarA } from 'mita-dom';
+
+async function hacerLogin() {
+  const exito = await apiLogin();
+  if (exito) {
+    // Te mueve de vista y dispara el evento en el Router sin recargar
+    navegarA('/dashboard?bienvenido=true');
+  }
+}
+```
+
+**Extraer Parámetros (Query Strings):**
+Gracias a que `rutaActual` de MitaDOM te entrega un simple `string` o puedes leer `window.location`, extraer parámetros dinámicos no requiere de hooks complejos como `useSearchParams()`. Solo usamos `URLSearchParams` nativo de HTML5.
+
+```javascript
+class MiVista extends MitaElement {
+  connectedCallback() {
+    const parametros = new URLSearchParams(window.location.search);
+    const mensaje = parametros.get('bienvenido'); // "true"
+    
+    if (mensaje) alert("¡Bienvenido al sistema!");
+  }
+}
+```
+
+## 2. Auditoría, Telemetría y Fallbacks (Protegiendo tu SPA)
+
+Un sistema de Routing Enterprise debe ser a prueba de fallos. El usuario solicitó: *"Cualquier vista debe avisar si pudo ser renderizada o no"*.
+
+1. **Catálogo Estricto:** El Router tiene un objeto de configuración (`registroRutas`). Si intentas acceder a algo no registrado, en lugar de crashear, carga un Fallback `404.js` asíncronamente y avisa.
+2. **Telemetría de Consola:** Inyectamos medidores de rendimiento (`performance.now()`) en el Router. Al navegar, verás logs exactos: `[Router] ✅ Vista 'demo-perfil' renderizada exitosamente en 12.5ms`. Si un componente falla o no compila, verás `[Router] ❌ Error Crítico: No se pudo instanciar la vista`.
+3. **Validación Exhaustiva:** En la capa del generador de Markdown (`<mita-docs>`), el componente valida si el archivo estático existe físicamente en el `DOCS_MAP`. Si falta (Ej: `FILOSOFIA.md`), en lugar de colgar el Hilo Principal, emite un error detallado en la consola (`[MitaDocs] ❌ Error 404...`) y renderiza un elegante Fallback 404 in-situ informando qué archivo `.md` específico falló, dándole visibilidad absoluta al desarrollador para debugear.
+
+---
+
+## 3. Routing Tradicional (Eager) vs Lazy Loading
 
 En el enrutamiento **tradicional (sin lazy)**, todos los componentes se importan al inicio del archivo (`import { Vista } from './vista.js'`). 
 **Caso de uso:** Perfecto para los componentes de la vista inicial (`/`) o "Layouts" que el usuario siempre va a ver, garantizando el renderizado más rápido posible.
@@ -33,10 +76,10 @@ Sin embargo, para que tu aplicación escale y mantenga un *Time-To-Interactive* 
 rutaActual.<span class="token function">suscribir</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span>ruta<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
   <span class="token keyword">const</span> config <span class="token operator">=</span> registroRutas.<span class="token function">find</span><span class="token punctuation">(</span>r <span class="token operator">=&gt;</span> r.path <span class="token operator">===</span> ruta<span class="token punctuation">)</span><span class="token punctuation">;</span>
   
-  <span class="token keyword">if</span> <span class="token punctuation">(</span>config<span class="token operator">?.</span>lazy <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>document.<span class="token function">querySelector</span><span class="token punctuation">(</span>config.tag<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>config<span class="token punctuation">?.</span>lazy <span class="token punctuation">&amp;&amp;</span> <span class="token operator">!</span>document.<span class="token function">querySelector</span><span class="token punctuation">(</span>config.tag<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token keyword">try</span> <span class="token punctuation">{</span>
       <span class="token keyword">await</span> config.<span class="token function">lazy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Fallback de Red (Error Boundary)</span>
-    <span class="token punctuation">}</span> <span class="token keyword">catch</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token function">alert</span><span class="token punctuation">(</span><span class="token string">"Error de conexión."</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token keyword">return</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span> <span class="token catch">catch</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token function">alert</span><span class="token punctuation">(</span><span class="token string">"Error de conexión."</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token keyword">return</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
     
     <span class="token keyword">const</span> el <span class="token operator">=</span> document.<span class="token function">createElement</span><span class="token punctuation">(</span>config.tag<span class="token punctuation">)</span><span class="token punctuation">;</span>
     document.<span class="token function">getElementById</span><span class="token punctuation">(</span><span class="token string">'app'</span><span class="token punctuation">)</span>.<span class="token function">appendChild</span><span class="token punctuation">(</span>el<span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -48,7 +91,7 @@ rutaActual.<span class="token function">suscribir</span><span class="token punct
 
 ---
 
-## 2. Advanced Layouts (`+layout.svelte` vs `<slot>`)
+## 4. Advanced Layouts (`+layout.svelte` vs `<slot>`)
 
 En SvelteKit, creas un archivo `+layout.svelte` y usas `{@render children()}` para envolver rutas. En MitaDOM, usamos la API nativa de **Slots** dentro de un Custom Element.
 
@@ -78,7 +121,7 @@ En SvelteKit, creas un archivo `+layout.svelte` y usas `{@render children()}` pa
 
 ---
 
-## 3. Nested Routes (Sub-rutas / Outlets)
+## 5. Nested Routes (Sub-rutas / Outlets)
 
 React Router usa `<Outlet>`. Vue Router usa `<router-view>`. 
 En MitaDOM, como cada Signal es reactivo independientemente, puedes crear un "Sub-Router" local suscribiéndote a la URL desde dentro del componente, logrando **Rutas Anidadas puras**.
@@ -116,7 +159,7 @@ En MitaDOM, como cada Signal es reactivo independientemente, puedes crear un "Su
 
 ---
 
-## 4. Dynamic Params y Rest Parameters (`[...rest]`)
+## 6. Rutas Dinámicas y Catch-All (`[...rest]`)
 
 SvelteKit usa un sistema de archivos para compilar expresiones regulares para cosas como `/[org]/[repo]/tree/[...rest]`.
 La **Web Plataforma** moderna incluye `URLPattern`, que soporta parámetros exactos, dinámicos, y Wildcards/CatchAlls de forma nativa en tu navegador.

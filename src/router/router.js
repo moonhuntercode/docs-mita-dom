@@ -77,6 +77,10 @@ export function iniciarRouter() {
   rutaActual.suscribir(async (ruta) => {
     Logger.info(`Navegando a ruta: ${ruta}`);
     
+    // --- 0. TELEMETRÍA INICIAL ---
+    const inicioRenderizado = performance.now();
+    Logger.info(`[Router] Intentando renderizar ruta solicitada: ${ruta}...`);
+
     // --- 1. MATCH DE RUTAS Y PARÁMETROS ---
     let matchDocs = patternDocs.exec({ pathname: ruta });
     let rutaFisica = matchDocs ? '/docs' : ruta; // Normalizar
@@ -101,7 +105,8 @@ export function iniciarRouter() {
 
     // --- RENDERIZADO CONDICIONAL Y CATCH-ALL ---
     if (!configRuta) {
-      Logger.warn(`Ruta 404 interceptada: ${ruta}`);
+      const tiempoTomado = (performance.now() - inicioRenderizado).toFixed(1);
+      Logger.warn(`[Router] ❌ Ruta 404 (No existe en el catálogo): ${ruta}. Mostrando Fallback. (Tomó ${tiempoTomado}ms)`);
       const fallbackConfig = { tag: 'demo-404', lazy: () => import('../componentes/404/404.js') };
       const $error404 = await montarVista('/404', fallbackConfig);
       
@@ -128,6 +133,7 @@ export function iniciarRouter() {
     
     // Si hubo un error de red cargando el chunk, abortamos
     if (!$vistaActiva) {
+      Logger.error(`[Router] ❌ Error Crítico: No se pudo instanciar la vista '${configRuta.tag}'. Verifique la red o el código del componente.`);
       alert("Error de conexión: No se pudo cargar esta sección. Verifica tu internet.");
       return;
     }
@@ -172,5 +178,9 @@ export function iniciarRouter() {
     // --- 5. SCROLL BEHAVIOR ---
     // Emula el scroll nativo al inicio de página al cambiar de vista
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // --- 6. TELEMETRÍA DE ÉXITO ---
+    const tiempoFinal = (performance.now() - inicioRenderizado).toFixed(1);
+    console.log(`%c[Router] ✅ Vista '${configRuta.tag}' renderizada exitosamente en ${tiempoFinal}ms`, 'color: #10b981; font-weight: bold;');
   });
 }

@@ -51,6 +51,7 @@ export class MitaDocs extends MitaElement {
       const contenidoRaw = DOCS_MAP[idDoc];
 
       if (!contenidoRaw) {
+        console.error(`[MitaDocs] ❌ Error 404: El archivo Markdown '${idDoc}.md' no existe o no pudo ser renderizado.`);
         this.$container.innerHTML = `
           <div style="text-align: center; padding: 3rem 1rem;">
             <h1 style="font-size: 4rem; margin: 0; color: var(--color-primario);">404</h1>
@@ -77,8 +78,9 @@ export class MitaDocs extends MitaElement {
         });
 
         this.$container.innerHTML = html;
+        console.log(`%c[MitaDocs] ✅ Documento Markdown '${idDoc}.md' renderizado con éxito.`, 'color: #3b82f6; font-weight: bold;');
       } catch (err) {
-        console.error(err);
+        console.error(`[MitaDocs] ❌ Error Crítico de Renderizado (Markdown Parser) en '${idDoc}.md'`, err);
         this.renderErrorUI(err, `Error al parsear el documento "${idDoc}"`);
       }
     });
