@@ -1,38 +1,60 @@
-/* Estilos de Mita Code Editor (Global Light DOM) */
+/* Estilos Modernos de Mita Code Editor (CSS Variables + Grid Stack) */
+:root {
+  --mita-editor-bg: #1e1e1e;
+  --mita-editor-header-bg: #252526;
+  --mita-editor-border: rgba(255, 255, 255, 0.1);
+  --mita-editor-border-hover: rgba(255, 255, 255, 0.2);
+  --mita-editor-text: #d4d4d4;
+  --mita-editor-font: 'Fira Code', 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+  --mita-editor-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  --mita-editor-shadow-hover: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
 mita-code-editor {
   display: block;
   width: 100%;
 }
 
 .mita-editor-container {
-  background: #1e1e1e;
+  background: var(--mita-editor-bg);
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--mita-editor-border);
   overflow: hidden;
   margin: 1rem 0;
-  font-family: 'Fira Code', 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
-  color: #d4d4d4;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
-  position: relative;
+  font-family: var(--mita-editor-font);
+  color: var(--mita-editor-text);
+  box-shadow: var(--mita-editor-shadow);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .mita-editor-container:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+  border-color: var(--mita-editor-border-hover);
+  box-shadow: var(--mita-editor-shadow-hover);
 }
 
+/* Header */
 .mita-editor-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #252526;
+  background: var(--mita-editor-header-bg);
   padding: 0.6rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--mita-editor-border);
 }
 
-.mita-mac-dots { display: flex; gap: 8px; }
-.mita-dot { width: 12px; height: 12px; border-radius: 50%; }
+.mita-mac-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.mita-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
 .mita-dot.red { background: #ff5f56; }
 .mita-dot.yellow { background: #ffbd2e; }
 .mita-dot.green { background: #27c93f; }
@@ -51,8 +73,8 @@ mita-code-editor {
 }
 
 .mita-action-btn {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--mita-editor-border);
   color: #cccccc;
   padding: 0.3rem 0.8rem;
   border-radius: 6px;
@@ -65,7 +87,7 @@ mita-code-editor {
 }
 
 .mita-action-btn:hover {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   color: white;
 }
 
@@ -75,15 +97,23 @@ mita-code-editor {
   color: #27c93f;
 }
 
-/* LIVE EDITING STRUCTURE */
+/* 
+  LIVE EDITING STRUCTURE (CSS Grid Stack)
+  Ambos elementos ocupan la misma celda de grid para superponerse perfectamente.
+*/
 .mita-editor-wrapper {
-  position: relative;
+  display: grid;
+  grid-template-areas: "editor";
   min-height: 100px;
+  max-height: 500px; /* Evitar que crezca infinitamente en mobile */
+  position: relative;
 }
 
-.mita-editor-textarea, 
+.mita-editor-textarea,
 .mita-editor-display {
+  grid-area: editor;
   width: 100%;
+  height: 100%;
   padding: 1.2rem;
   font-family: inherit;
   font-size: 0.95rem;
@@ -93,40 +123,25 @@ mita-code-editor {
   box-sizing: border-box;
 }
 
+/* MODO LECTURA (Por Defecto) */
 .mita-editor-textarea {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  resize: vertical;
   color: transparent;
   background: transparent;
   caret-color: #fff;
   border: none;
   outline: none;
-  z-index: 1;
+  resize: none;
   white-space: pre;
-  overflow: hidden;
-  pointer-events: none; /* Bloqueado por defecto */
-}
-
-.mita-editor-textarea.editable {
-  pointer-events: auto;
-  background: rgba(0,0,0,0.05);
+  pointer-events: none; /* Ignora toques en modo lectura */
+  overflow: hidden; /* Ocultamos el scroll del textarea en modo lectura */
+  z-index: 1;
 }
 
 .mita-editor-display {
-  overflow-x: auto;
-  pointer-events: none;
-  z-index: 0;
-  position: relative;
+  pointer-events: auto; /* Permite scroll táctil nativo */
+  overflow: auto; /* Scroll principal manejado por el display */
+  z-index: 2; /* Arriba para recibir interacciones de lectura/selección */
 }
-
-/* Custom Scrollbar for Code Block */
-.mita-editor-display::-webkit-scrollbar { height: 8px; }
-.mita-editor-display::-webkit-scrollbar-track { background: #1e1e1e; }
-.mita-editor-display::-webkit-scrollbar-thumb { background: #424242; border-radius: 4px; }
-.mita-editor-display::-webkit-scrollbar-thumb:hover { background: #4f4f4f; }
 
 .mita-editor-display pre {
   margin: 0;
@@ -138,13 +153,46 @@ mita-code-editor {
   font-family: inherit;
 }
 
+/* MODO EDICIÓN */
+.mita-editor-textarea.editable {
+  pointer-events: auto; /* Ahora el textarea intercepta la escritura y scroll */
+  overflow: auto; /* El scroll pasa al textarea */
+  z-index: 3; /* Se pone por encima del display */
+  background: rgba(0, 0, 0, 0.05); /* Feedback visual ligero */
+}
+
+/* En modo edición, el display se vuelve fondo inactivo */
+.mita-editor-wrapper:has(.mita-editor-textarea.editable) .mita-editor-display {
+  pointer-events: none;
+  overflow: hidden; /* Evita doble scrollbar */
+}
+
+/* Custom Scrollbars para todos */
+::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--mita-editor-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #424242;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4f4f4f;
+}
+
 /* Syntax Highlighting Tokens (VSCode Dark+ Theme Colors) */
 .mita-editor-display .token.comment { color: #6A9955; font-style: italic; }
 .mita-editor-display .token.string { color: #CE9178; }
 .mita-editor-display .token.keyword { color: #569CD6; }
 .mita-editor-display .token.control-keyword { color: #C586C0; }
 .mita-editor-display .token.function { color: #DCDCAA; }
-.mita-editor-display .token.builtin { color: #4EC9B0; } /* Class/Type/Global */
+.mita-editor-display .token.builtin { color: #4EC9B0; }
 .mita-editor-display .token.property { color: #9CDCFE; }
 .mita-editor-display .token.number { color: #B5CEA8; }
 .mita-editor-display .token.boolean { color: #569CD6; }
