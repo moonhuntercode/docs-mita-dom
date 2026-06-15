@@ -1,11 +1,20 @@
 <div class="blog-layout">
   <header class="blog-header">
-    <h2>📰 MitaDOM Novedades</h2>
-    <p>Entérate de las últimas versiones, fixes y filosofías de la web reactiva.</p>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h2 id="blog-title">📰 MitaDOM Novedades</h2>
+        <p id="blog-subtitle">Entérate de las últimas versiones, fixes y filosofías de la web reactiva.</p>
+      </div>
+      <button id="btn-back" class="btn-primario" style="display: none; height: fit-content;">⬅ Volver al Blog</button>
+    </div>
   </header>
   
   <main class="docs-content">
-    <div id="blog-container" class="markdown-body">
+    <div id="blog-index" class="blog-grid">
+      <!-- Tarjetas se inyectan aquí -->
+    </div>
+
+    <div id="blog-container" class="markdown-body" style="display: none;">
       <!-- El Blog parseado se inyectará aquí -->
     </div>
   </main>

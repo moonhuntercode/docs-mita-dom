@@ -98,6 +98,40 @@ class IndexedDBAdapter {
       return false;
     }
   }
+
+  async deleteByLocalId(idLocal) {
+    try {
+      const db = await this._getDB();
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction([this.storeName], 'readwrite');
+        const store = transaction.objectStore(this.storeName);
+        
+        // IndexedDB usa una clave autoincremental internamente (id).
+        // Tenemos que iterar un cursor para borrar por 'idLocal'
+        const request = store.openCursor();
+        
+        request.onsuccess = (event) => {
+          // @ts-ignore
+          const cursor = event.target.result;
+          if (cursor) {
+            if (cursor.value.idLocal === idLocal) {
+              const deleteRequest = cursor.delete();
+              deleteRequest.onsuccess = () => resolve(true);
+              deleteRequest.onerror = () => reject(false);
+            } else {
+              cursor.continue();
+            }
+          } else {
+            resolve(false); // No encontrado
+          }
+        };
+        request.onerror = () => reject(false);
+      });
+    } catch (e) {
+      console.error('Fallo al borrar registro en IndexedDB', e);
+      return false;
+    }
+  }
 }
 
 // 🌐 Instancia Global del Servicio Activo

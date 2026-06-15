@@ -8,23 +8,24 @@ import { estadoDocActivo } from '../store/docsStore.js';
  * Controla la inyección dinámica de componentes para soportar Code Splitting.
  */
 
+// Registro de Rutas Globales (exportado para Health Checker)
+export const registroRutas = [
+  { path: '/', tag: 'vista-inicio', isEager: true },
+  { path: '/perfil', tag: 'demo-perfil', lazy: () => import('../componentes/perfil/perfil.js'), layout: 'mita-layout-dashboard' },
+  { path: '/admin/logs', tag: 'demo-admin-logs', lazy: () => import('../componentes/admin-logs/admin-logs.js'), meta: { requiresAuth: true }, layout: 'mita-layout-dashboard' },
+  { path: '/dashboard', tag: 'mita-dashboard', lazy: () => import('../componentes/mita-dashboard/mita-dashboard.js'), layout: 'mita-layout-dashboard' },
+  { path: '/blog', tag: 'mita-blog', lazy: () => import('../componentes/mita-blog/mita-blog.js') },
+  { path: '/acerca', tag: 'demo-acerca', lazy: () => import('../componentes/acerca/demo-acerca.js') },
+  { path: '/configuracion', tag: 'demo-config', lazy: () => import('../componentes/configuracion/demo-config.js') },
+  { path: '/estados', tag: 'demo-estados', lazy: () => import('../componentes/demo-estados/demo-estados.js') },
+  { path: '/docs', tag: 'mita-docs', lazy: () => import('../componentes/mita-docs/mita-docs.js') },
+  { path: '/performance', tag: 'demo-performance', lazy: () => import('../componentes/demo-performance/demo-performance.js') }
+];
+
 export function iniciarRouter() {
   Logger.info('Iniciando enrutador avanzado MitaDOM (Lazy Loading Activado)...');
 
   const $appContainer = document.getElementById('app-container');
-
-  // Registro de Rutas (inspirado en Vue Router)
-  const registroRutas = [
-    { path: '/', tag: 'vista-inicio', isEager: true }, // Ya está en index.html
-    { path: '/perfil', tag: 'demo-perfil', lazy: () => import('../componentes/perfil/perfil.js'), layout: 'mita-layout-dashboard' },
-    { path: '/admin/logs', tag: 'demo-admin-logs', lazy: () => import('../componentes/admin-logs/admin-logs.js'), meta: { requiresAuth: true }, layout: 'mita-layout-dashboard' },
-    { path: '/blog', tag: 'mita-blog', lazy: () => import('../componentes/mita-blog/mita-blog.js') },
-    { path: '/acerca', tag: 'demo-acerca', lazy: () => import('../componentes/acerca/demo-acerca.js') },
-    { path: '/configuracion', tag: 'demo-config', lazy: () => import('../componentes/configuracion/demo-config.js') },
-    { path: '/estados', tag: 'demo-estados', lazy: () => import('../componentes/demo-estados/demo-estados.js') },
-    { path: '/docs', tag: 'mita-docs', lazy: () => import('../componentes/mita-docs/mita-docs.js') },
-    { path: '/performance', tag: 'demo-performance', lazy: () => import('../componentes/demo-performance/demo-performance.js') }
-  ];
 
   // Caché de elementos instanciados para no recrearlos
   const vistasInstanciadas = {
@@ -33,6 +34,7 @@ export function iniciarRouter() {
 
   // Configuración para rutas dinámicas (Ej: /docs/:id)
   const patternDocs = new URLPattern({ pathname: '/docs/:id' });
+  const patternBlog = new URLPattern({ pathname: '/blog/:slug' });
 
   // Función para obtener/inyectar vista
   async function montarVista(rutaBase, config) {
@@ -83,8 +85,13 @@ export function iniciarRouter() {
 
     // --- 1. MATCH DE RUTAS Y PARÁMETROS ---
     let matchDocs = patternDocs.exec({ pathname: ruta });
-    let rutaFisica = matchDocs ? '/docs' : ruta; // Normalizar
+    let matchBlog = patternBlog.exec({ pathname: ruta });
+    
+    let rutaFisica = ruta;
+    if (matchDocs) rutaFisica = '/docs';
+    if (matchBlog) rutaFisica = '/blog';
     if (ruta === '/docs/') rutaFisica = '/docs'; // Normalización estricta
+    if (ruta === '/blog/') rutaFisica = '/blog'; // Normalización estricta
     
     // Normalización de Nested Routes (Outlets)
     if (ruta.startsWith('/perfil')) rutaFisica = '/perfil';
@@ -166,13 +173,23 @@ export function iniciarRouter() {
       actualizarDOM();
     }
 
-    // Data Fetching / Loaders: Si es Docs, inyectamos el estado
+    // Data Fetching / Loaders: Inyectamos el estado según la ruta dinámica
     if (rutaFisica === '/docs') {
       if (matchDocs && matchDocs.pathname.groups.id) {
           estadoDocActivo.set(matchDocs.pathname.groups.id);
       } else {
           estadoDocActivo.set('readme');
       }
+    }
+
+    if (rutaFisica === '/blog') {
+      import('../store/blogStore.js').then(({ estadoPostActivo }) => {
+        if (matchBlog && matchBlog.pathname.groups.slug) {
+            estadoPostActivo.set({ slug: matchBlog.pathname.groups.slug });
+        } else {
+            estadoPostActivo.set({ slug: 'index' });
+        }
+      });
     }
 
     // --- 5. SCROLL BEHAVIOR ---

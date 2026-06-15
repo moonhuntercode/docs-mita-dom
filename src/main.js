@@ -12,17 +12,20 @@ import './style.css';
 import './markdown-styles.css';
 
 // 2. Utilidades, Configuración y Error Boundary Global
+import { inicializarTelemetria } from './store/telemetryStore.js';
 import { Logger } from './utils/logger.js';
+import { checkMitaDomVersion } from './utils/versionChecker.js';
+import { runHealthCheck } from './utils/healthCheck.js';
+import { iniciarViteErrorCatcher } from './utils/viteErrorCatcher.js';
+
+inicializarTelemetria();
+checkMitaDomVersion();
+iniciarViteErrorCatcher();
 Logger.info('Arrancando SPA MitaDOM...');
 
-window.addEventListener('error', (event) => {
-  Logger.error(`Fallo crítico no controlado: ${event.message}`, event.error?.stack);
-  // Aquí podríamos despachar una vista de caída global (Fallback UI)
-});
+// Ejecutar Auditoría Silenciosa después del arranque
+setTimeout(() => runHealthCheck(), 3000);
 
-window.addEventListener('unhandledrejection', (event) => {
-  Logger.error(`Promesa rechazada no controlada: ${event.reason}`);
-});
 
 // 3. Inicialización del Router
 import { iniciarRouter } from './router/router.js';

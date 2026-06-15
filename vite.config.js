@@ -5,9 +5,11 @@ import fs from 'fs';
 
 import { mitaHmrPlugin } from 'mita-dom';
 import legacy from '@vitejs/plugin-legacy';
+import mitaTelemetryPlugin from './vite-plugin-mita-telemetry.js';
 
 export default defineConfig({
   plugins: [
+    mitaTelemetryPlugin(),
     mitaHmrPlugin(),
     // Fallback inteligente para navegadores que no soportan ES Modules o Web Components
     legacy({

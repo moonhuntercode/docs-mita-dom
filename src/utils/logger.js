@@ -7,7 +7,7 @@
  * "por debajo de la mesa" al servidor de telemetría para auditoría.
  */
 
-import { logService } from '../services/logService.js';
+import { registrarTelemetria } from '../store/telemetryStore.js';
 
 const isDev = import.meta.env.DEV;
 
@@ -16,17 +16,7 @@ function persistirLog(nivel, mensaje, datosExtra) {
   // En producción podríamos ignorar los INFO si queremos ahorrar memoria
   if (nivel === 'INFO' && !isDev) return; 
 
-  const payload = {
-    timestamp: new Date().toISOString(),
-    nivel,
-    mensaje,
-    datosExtra: datosExtra && datosExtra.length ? datosExtra : null,
-    userAgent: navigator.userAgent,
-    url: window.location.href
-  };
-
-  // Delegamos a la Base de Datos activa (actualmente IndexedDB)
-  logService.save(payload).catch(() => {});
+  registrarTelemetria(nivel, mensaje, datosExtra && datosExtra.length ? datosExtra : null).catch(() => {});
 }
 
 export const Logger = {
@@ -58,6 +48,18 @@ export const Logger = {
       console.groupEnd();
     }
     // No enviamos mutaciones de estado a telemetría por privacidad y volumen,
-    // a menos que sea estrictamente necesario auditar algo.
   }
 };
+
+// ==========================================
+// CAPTURA GLOBAL DE ERRORES EN EL NAVEGADOR
+// ==========================================
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (event) => {
+    Logger.error(`Fallo crítico no controlado: ${event.message}`, { stackTrace: event.error?.stack });
+  });
+
+  window.addEventListener('unhandledrejection', (event) => {
+    Logger.error(`Promesa rechazada no controlada: ${event.reason}`, { stackTrace: event.reason?.stack || String(event.reason) });
+  });
+}
