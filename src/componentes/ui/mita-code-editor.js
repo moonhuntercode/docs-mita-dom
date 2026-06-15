@@ -1,28 +1,32 @@
 // @ts-check
 import { MitaElement } from '../../utils/MitaElement.js';
-import styles from './mita-code-editor.css?inline';
+import htmlTemplate from './mita-code-editor.html?raw';
+import './mita-code-editor.css';
 
 /**
  * 💻 <mita-code-editor>
- * Un editor de código interactivo y auto-resaltado sin dependencias.
+ * Un editor de código interactivo y auto-resaltado estilo VS Code.
+ * Ahora en Light DOM para mejor compatibilidad global.
  */
 export class MitaCodeEditor extends MitaElement {
   constructor() {
     super();
     this.codigoLimpio = '';
     this.lenguaje = 'javascript';
+    this.modoEdicion = false;
+    this.esEditableGlobal = false;
   }
 
   async render() {
-    this.attachShadow({ mode: 'open' });
-
+    // 1. Extraer atributos
     const archivo = this.getAttribute('archivo') || 'codigo.js';
     this.lenguaje = this.getAttribute('lenguaje') || 'javascript';
-    const esEditableInicial = this.hasAttribute('editable') && this.getAttribute('editable') !== 'false';
-    this.modoEdicion = esEditableInicial;
+    // Por defecto bloqueado, salvo que tenga editable="true"
+    this.esEditableGlobal = this.getAttribute('editable') === 'true';
+    this.modoEdicion = this.esEditableGlobal;
     
+    // 2. Extraer código antes de reemplazar el innerHTML
     let codigoRaw = '';
-
     const codeNode = this.querySelector('code');
     const templateNode = this.querySelector('template');
     
@@ -35,119 +39,138 @@ export class MitaCodeEditor extends MitaElement {
     }
 
     this.codigoLimpio = this._limpiarIndentacion(codigoRaw);
-    const codigoResaltado = this._resaltarSintaxis(this.codigoLimpio, this.lenguaje);
 
-    this.shadowRoot.innerHTML = `
-      <style>${styles}
-        .editor-textarea { pointer-events: none; }
-        .editor-textarea.editable { pointer-events: auto; background: rgba(0,0,0,0.1); }
-      </style>
+    // 3. Renderizar Light DOM usando el template externo
+    this.innerHTML = htmlTemplate;
 
-      <div class="editor-container">
-        <div class="editor-header">
-          <div class="mac-dots">
-            <span class="dot red"></span>
-            <span class="dot yellow"></span>
-            <span class="dot green"></span>
-          </div>
-          <span class="filename">${archivo}</span>
-          <div class="header-actions">
-            <button class="action-btn toggle-edit-btn" aria-label="Alternar edición">
-              ${this.modoEdicion ? '🔒 Bloquear' : '✏️ Editar'}
-            </button>
-            <button class="action-btn format-btn" aria-label="Formatear código" style="display: ${this.modoEdicion ? 'flex' : 'none'}">✨ Formatear</button>
-            <button class="action-btn copy-btn" aria-label="Copiar código">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-              <span class="copy-text">Copiar</span>
-            </button>
-          </div>
-        </div>
-        <div class="editor-wrapper">
-          <textarea class="editor-textarea ${this.modoEdicion ? 'editable' : ''}" spellcheck="false" aria-label="Editor de código" ${this.modoEdicion ? '' : 'readonly'}>${this.codigoLimpio}</textarea>
-          <div class="editor-display">
-            <pre><code id="codigo-renderizado">${codigoResaltado}</code></pre>
-          </div>
-        </div>
-      </div>
-    `;
+    // 4. Inicializar UI
+    const elFilename = this.querySelector('#ui-filename');
+    const btnToggleEdit = this.querySelector('.toggle-edit-btn');
+    const textarea = this.querySelector('.mita-editor-textarea');
+    const renderizado = this.querySelector('#codigo-renderizado');
+    const btnFormat = this.querySelector('.format-btn');
 
+    if (elFilename) elFilename.textContent = archivo;
+    
+    // Solo mostrar el botón de edición si el componente permite ser editable
+    if (!this.esEditableGlobal && btnToggleEdit) {
+      // @ts-ignore
+      btnToggleEdit.style.display = 'none';
+    }
+
+    if (textarea) {
+      // @ts-ignore
+      textarea.value = this.codigoLimpio;
+      if (this.modoEdicion) {
+        textarea.classList.add('editable');
+        textarea.removeAttribute('readonly');
+        if (btnToggleEdit) btnToggleEdit.textContent = '🔒 Bloquear';
+        if (btnFormat) {
+          // @ts-ignore
+          btnFormat.style.display = 'flex';
+        }
+      }
+    }
+
+    if (renderizado) {
+      renderizado.innerHTML = this._resaltarSintaxis(this.codigoLimpio, this.lenguaje);
+    }
+
+    // 5. Asignar Eventos
     this._iniciarEventos();
   }
 
   _iniciarEventos() {
-    const btnCopiar = this.shadowRoot.querySelector('.copy-btn');
-    const spanTexto = this.shadowRoot.querySelector('.copy-text');
-    const btnFormat = this.shadowRoot.querySelector('.format-btn');
-    const btnToggleEdit = this.shadowRoot.querySelector('.toggle-edit-btn');
-    const textarea = this.shadowRoot.querySelector('.editor-textarea');
-    const renderizado = this.shadowRoot.querySelector('#codigo-renderizado');
-    const display = this.shadowRoot.querySelector('.editor-display');
+    const btnCopiar = this.querySelector('.copy-btn');
+    const spanTexto = this.querySelector('.copy-text');
+    const btnFormat = this.querySelector('.format-btn');
+    const btnToggleEdit = this.querySelector('.toggle-edit-btn');
+    const textarea = this.querySelector('.mita-editor-textarea');
+    const renderizado = this.querySelector('#codigo-renderizado');
+    const display = this.querySelector('.mita-editor-display');
 
-    btnToggleEdit.addEventListener('click', () => {
-      this.modoEdicion = !this.modoEdicion;
-      if (this.modoEdicion) {
-        textarea.classList.add('editable');
-        textarea.removeAttribute('readonly');
-        btnToggleEdit.textContent = '🔒 Bloquear';
-        btnFormat.style.display = 'flex';
-      } else {
-        textarea.classList.remove('editable');
-        textarea.setAttribute('readonly', 'true');
-        btnToggleEdit.textContent = '✏️ Editar';
-        btnFormat.style.display = 'none';
-      }
-    });
+    if (btnToggleEdit && textarea && btnFormat) {
+      btnToggleEdit.addEventListener('click', () => {
+        this.modoEdicion = !this.modoEdicion;
+        if (this.modoEdicion) {
+          textarea.classList.add('editable');
+          textarea.removeAttribute('readonly');
+          btnToggleEdit.textContent = '🔒 Bloquear';
+          // @ts-ignore
+          btnFormat.style.display = 'flex';
+        } else {
+          textarea.classList.remove('editable');
+          textarea.setAttribute('readonly', 'true');
+          btnToggleEdit.textContent = '✏️ Editar';
+          // @ts-ignore
+          btnFormat.style.display = 'none';
+        }
+      });
+    }
 
-    textarea.addEventListener('scroll', () => {
-      display.scrollLeft = textarea.scrollLeft;
-      display.scrollTop = textarea.scrollTop;
-    });
+    if (textarea && display) {
+      textarea.addEventListener('scroll', () => {
+        display.scrollLeft = textarea.scrollLeft;
+        display.scrollTop = textarea.scrollTop;
+      });
 
-    textarea.addEventListener('input', (e) => {
-      if (!this.modoEdicion) return;
-      this.codigoLimpio = e.target.value;
-      renderizado.innerHTML = this._resaltarSintaxis(this.codigoLimpio, this.lenguaje);
-    });
+      textarea.addEventListener('input', (e) => {
+        if (!this.modoEdicion) return;
+        // @ts-ignore
+        this.codigoLimpio = e.target.value;
+        if (renderizado) {
+          renderizado.innerHTML = this._resaltarSintaxis(this.codigoLimpio, this.lenguaje);
+        }
+      });
 
-    textarea.addEventListener('keydown', (e) => {
-      if (!this.modoEdicion) return;
-      if (e.key === 'Tab') {
-        e.preventDefault();
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        textarea.value = textarea.value.substring(0, start) + '  ' + textarea.value.substring(end);
-        textarea.selectionStart = textarea.selectionEnd = start + 2;
+      textarea.addEventListener('keydown', (e) => {
+        if (!this.modoEdicion) return;
+        // @ts-ignore
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          // @ts-ignore
+          const start = textarea.selectionStart;
+          // @ts-ignore
+          const end = textarea.selectionEnd;
+          // @ts-ignore
+          textarea.value = textarea.value.substring(0, start) + '  ' + textarea.value.substring(end);
+          // @ts-ignore
+          textarea.selectionStart = textarea.selectionEnd = start + 2;
+          textarea.dispatchEvent(new Event('input'));
+        }
+      });
+    }
+
+    if (btnCopiar && spanTexto) {
+      btnCopiar.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(this.codigoLimpio);
+          spanTexto.textContent = '¡Copiado!';
+          btnCopiar.classList.add('success');
+          
+          setTimeout(() => {
+            spanTexto.textContent = 'Copiar';
+            btnCopiar.classList.remove('success');
+          }, 2000);
+        } catch (err) {
+          console.error('Error al copiar:', err);
+          spanTexto.textContent = 'Error';
+        }
+      });
+    }
+
+    if (btnFormat && textarea) {
+      btnFormat.addEventListener('click', () => {
+        if (!this.modoEdicion) return;
+        const codigoFormateado = this._formatearCodigo(this.codigoLimpio);
+        // @ts-ignore
+        textarea.value = codigoFormateado;
         textarea.dispatchEvent(new Event('input'));
-      }
-    });
-
-    btnCopiar.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(this.codigoLimpio);
-        spanTexto.textContent = '¡Copiado!';
-        btnCopiar.classList.add('success');
-        
-        setTimeout(() => {
-          spanTexto.textContent = 'Copiar';
-          btnCopiar.classList.remove('success');
-        }, 2000);
-      } catch (err) {
-        console.error('Error al copiar:', err);
-        spanTexto.textContent = 'Error';
-      }
-    });
-
-    btnFormat.addEventListener('click', () => {
-      if (!this.modoEdicion) return;
-      const codigoFormateado = this._formatearCodigo(this.codigoLimpio);
-      textarea.value = codigoFormateado;
-      textarea.dispatchEvent(new Event('input'));
-    });
+      });
+    }
   }
 
   _formatearCodigo(codigo) {
-    // Formateador súper básico para JS:
-    // Elimina múltiples saltos de línea y arregla indentaciones de bloques {}
     let lineas = codigo.split('\n').map(l => l.trim());
     let resultado = '';
     let nivel = 0;
@@ -201,16 +224,17 @@ export class MitaCodeEditor extends MitaElement {
   _resaltarSintaxis(codigo, lenguaje) {
     let code = this._escaparHTML(codigo);
 
-    if (lenguaje !== 'javascript' && lenguaje !== 'js' && lenguaje !== 'html' && lenguaje !== 'css') {
+    if (lenguaje !== 'javascript' && lenguaje !== 'js' && lenguaje !== 'html' && lenguaje !== 'css' && lenguaje !== 'typescript' && lenguaje !== 'ts') {
       return code; // Fallback sin resaltado
     }
 
+    // Tokens mejorados
     const tokens = [
       { type: 'string', regex: /^(?:&quot;.*?&quot;|&#039;.*?&#039;|`[\s\S]*?`)/ },
       { type: 'comment', regex: /^(?:\/\/.*|\/\*[\s\S]*?\*\/)/ },
       { type: 'control-keyword', regex: /^(?:if|else|for|while|do|return|try|catch|finally|switch|case|break|continue|await|async|yield|throw)\b/ },
-      { type: 'keyword', regex: /^(?:import|export|class|extends|constructor|super|this|new|const|let|var|function|typeof|default|from|in|of|instanceof|void|delete)\b/ },
-      { type: 'builtin', regex: /^(?:console|document|window|process|require|module|exports|global|setTimeout|setInterval|clearTimeout|clearInterval|Promise|Math|JSON|Object|Array|String|Number|Boolean|Date|Map|Set|Symbol|Error|RegExp)\b/ },
+      { type: 'keyword', regex: /^(?:import|export|class|extends|constructor|super|this|new|const|let|var|function|typeof|default|from|in|of|instanceof|void|delete|interface|type)\b/ },
+      { type: 'builtin', regex: /^(?:console|document|window|process|require|module|exports|global|setTimeout|setInterval|clearTimeout|clearInterval|Promise|Math|JSON|Object|Array|String|Number|Boolean|Date|Map|Set|Symbol|Error|RegExp|HTMLElement|customElements)\b/ },
       { type: 'boolean', regex: /^(?:true|false|null|undefined|NaN|Infinity)\b/ },
       { type: 'function', regex: /^[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()/ },
       { type: 'property', regex: /^\.[a-zA-Z_$][a-zA-Z0-9_$]*/ },
@@ -239,7 +263,6 @@ export class MitaCodeEditor extends MitaElement {
         }
       }
       if (!matched) {
-        // Fallback infinito
         html += current[0];
         current = current.substring(1);
       }

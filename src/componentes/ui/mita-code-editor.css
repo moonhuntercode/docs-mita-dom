@@ -1,9 +1,10 @@
-:host {
+/* Estilos de Mita Code Editor (Global Light DOM) */
+mita-code-editor {
   display: block;
   width: 100%;
 }
 
-.editor-container {
+.mita-editor-container {
   background: #1e1e1e;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -16,12 +17,12 @@
   position: relative;
 }
 
-.editor-container:hover {
+.mita-editor-container:hover {
   border-color: rgba(255, 255, 255, 0.2);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
 }
 
-.editor-header {
+.mita-editor-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -30,13 +31,13 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.mac-dots { display: flex; gap: 8px; }
-.dot { width: 12px; height: 12px; border-radius: 50%; }
-.dot.red { background: #ff5f56; }
-.dot.yellow { background: #ffbd2e; }
-.dot.green { background: #27c93f; }
+.mita-mac-dots { display: flex; gap: 8px; }
+.mita-dot { width: 12px; height: 12px; border-radius: 50%; }
+.mita-dot.red { background: #ff5f56; }
+.mita-dot.yellow { background: #ffbd2e; }
+.mita-dot.green { background: #27c93f; }
 
-.filename {
+.mita-filename {
   font-size: 0.85rem;
   color: #9cdcfe;
   font-weight: 500;
@@ -44,12 +45,12 @@
   letter-spacing: 0.5px;
 }
 
-.header-actions {
+.mita-header-actions {
   display: flex;
   gap: 0.5rem;
 }
 
-.action-btn {
+.mita-action-btn {
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.1);
   color: #cccccc;
@@ -63,25 +64,25 @@
   gap: 6px;
 }
 
-.action-btn:hover {
+.mita-action-btn:hover {
   background: rgba(255,255,255,0.1);
   color: white;
 }
 
-.action-btn.success {
+.mita-action-btn.success {
   background: rgba(39, 201, 63, 0.2);
   border-color: #27c93f;
   color: #27c93f;
 }
 
 /* LIVE EDITING STRUCTURE */
-.editor-wrapper {
+.mita-editor-wrapper {
   position: relative;
   min-height: 100px;
 }
 
-.editor-textarea, 
-.editor-display {
+.mita-editor-textarea, 
+.mita-editor-display {
   width: 100%;
   padding: 1.2rem;
   font-family: inherit;
@@ -92,7 +93,7 @@
   box-sizing: border-box;
 }
 
-.editor-textarea {
+.mita-editor-textarea {
   position: absolute;
   top: 0;
   left: 0;
@@ -106,9 +107,15 @@
   z-index: 1;
   white-space: pre;
   overflow: hidden;
+  pointer-events: none; /* Bloqueado por defecto */
 }
 
-.editor-display {
+.mita-editor-textarea.editable {
+  pointer-events: auto;
+  background: rgba(0,0,0,0.05);
+}
+
+.mita-editor-display {
   overflow-x: auto;
   pointer-events: none;
   z-index: 0;
@@ -116,33 +123,33 @@
 }
 
 /* Custom Scrollbar for Code Block */
-.editor-display::-webkit-scrollbar { height: 8px; }
-.editor-display::-webkit-scrollbar-track { background: #1e1e1e; }
-.editor-display::-webkit-scrollbar-thumb { background: #424242; border-radius: 4px; }
-.editor-display::-webkit-scrollbar-thumb:hover { background: #4f4f4f; }
+.mita-editor-display::-webkit-scrollbar { height: 8px; }
+.mita-editor-display::-webkit-scrollbar-track { background: #1e1e1e; }
+.mita-editor-display::-webkit-scrollbar-thumb { background: #424242; border-radius: 4px; }
+.mita-editor-display::-webkit-scrollbar-thumb:hover { background: #4f4f4f; }
 
-pre {
+.mita-editor-display pre {
   margin: 0;
   tab-size: 2;
   font-family: inherit;
 }
 
-code {
+.mita-editor-display code {
   font-family: inherit;
 }
 
 /* Syntax Highlighting Tokens (VSCode Dark+ Theme Colors) */
-.token.comment { color: #6A9955; font-style: italic; }
-.token.string { color: #CE9178; }
-.token.keyword { color: #569CD6; }
-.token.control-keyword { color: #C586C0; }
-.token.function { color: #DCDCAA; }
-.token.builtin { color: #4EC9B0; } /* Class/Type/Global */
-.token.property { color: #9CDCFE; }
-.token.number { color: #B5CEA8; }
-.token.boolean { color: #569CD6; }
-.token.operator { color: #D4D4D4; }
-.token.punctuation { color: #D4D4D4; }
-.token.tag { color: #569CD6; }
-.token.attr-name { color: #9CDCFE; }
-.token.attr-value { color: #CE9178; }
+.mita-editor-display .token.comment { color: #6A9955; font-style: italic; }
+.mita-editor-display .token.string { color: #CE9178; }
+.mita-editor-display .token.keyword { color: #569CD6; }
+.mita-editor-display .token.control-keyword { color: #C586C0; }
+.mita-editor-display .token.function { color: #DCDCAA; }
+.mita-editor-display .token.builtin { color: #4EC9B0; } /* Class/Type/Global */
+.mita-editor-display .token.property { color: #9CDCFE; }
+.mita-editor-display .token.number { color: #B5CEA8; }
+.mita-editor-display .token.boolean { color: #569CD6; }
+.mita-editor-display .token.operator { color: #D4D4D4; }
+.mita-editor-display .token.punctuation { color: #D4D4D4; }
+.mita-editor-display .token.tag { color: #569CD6; }
+.mita-editor-display .token.attr-name { color: #9CDCFE; }
+.mita-editor-display .token.attr-value { color: #CE9178; }

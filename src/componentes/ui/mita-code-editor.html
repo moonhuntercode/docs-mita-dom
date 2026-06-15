@@ -1,0 +1,28 @@
+<div class="mita-editor-container">
+  <div class="mita-editor-header">
+    <div class="mita-mac-dots">
+      <span class="mita-dot red"></span>
+      <span class="mita-dot yellow"></span>
+      <span class="mita-dot green"></span>
+    </div>
+    <span class="mita-filename" id="ui-filename">codigo.js</span>
+    <div class="mita-header-actions">
+      <button class="mita-action-btn toggle-edit-btn" aria-label="Alternar edición">
+        ✏️ Editar
+      </button>
+      <button class="mita-action-btn format-btn" aria-label="Formatear código" style="display: none;">
+        ✨ Formatear
+      </button>
+      <button class="mita-action-btn copy-btn" aria-label="Copiar código">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        <span class="copy-text">Copiar</span>
+      </button>
+    </div>
+  </div>
+  <div class="mita-editor-wrapper">
+    <textarea class="mita-editor-textarea" spellcheck="false" aria-label="Editor de código" readonly></textarea>
+    <div class="mita-editor-display">
+      <pre><code id="codigo-renderizado"></code></pre>
+    </div>
+  </div>
+</div>
