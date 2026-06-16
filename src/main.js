@@ -41,5 +41,7 @@ import './componentes/mita-profiler/mita-profiler.js';
 import './componentes/mita-docs-nav/mita-docs-nav.js';
 import './componentes/ui/mita-search.js';
 import './componentes/ui/mita-code-editor.js';
+import './componentes/ui/mita-teleport.js';
+import './componentes/ui/mita-suspense.js';
 import './componentes/layout/mita-header/mita-header.js';
 
