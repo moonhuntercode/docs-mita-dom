@@ -6,10 +6,13 @@
   </div>
   
   <div id="search-dropdown" class="search-dropdown" style="display: none;">
-    <div class="search-filters">
-      <span class="filter-tag active" data-filter="all">Todos</span>
-      <span class="filter-tag" data-filter="aprende">Aprende</span>
-      <span class="filter-tag" data-filter="referencia">Referencia</span>
+    <div class="search-filters" style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <span class="filter-tag active" data-filter="all">Todos</span>
+        <span class="filter-tag" data-filter="aprende">Aprende</span>
+        <span class="filter-tag" data-filter="referencia">Referencia</span>
+      </div>
+      <button id="search-close-btn" style="background: none; border: none; color: var(--color-texto); opacity: 0.6; cursor: pointer; font-size: 0.8rem;" title="Cerrar Búsqueda">Cerrar ✕</button>
     </div>
     <div id="search-results" class="search-results">
       <!-- Los resultados se inyectarán aquí -->

@@ -8,8 +8,9 @@ export class SearchEngine {
   }
 
   iniciarIndice(docsMap) {
-    // docsMap es un objeto { idDoc: stringMarkdown }
-    for (const [id, contenido] of Object.entries(docsMap)) {
+    // docsMap es un objeto { idDoc: { idDoc, categoria, contenido } }
+    for (const [id, item] of Object.entries(docsMap)) {
+      const contenido = item.contenido;
       // Extraemos el título principal (H1 o H2) para mostrarlo en los resultados
       const matchTitulo = contenido.match(/^#+\s+(.*)$/m);
       const titulo = matchTitulo ? matchTitulo[1] : id.replace(/_/g, ' ').toUpperCase();
@@ -17,6 +18,7 @@ export class SearchEngine {
       this.docs.push({
         id,
         titulo,
+        categoria: item.categoria,
         contenido: contenido.toLowerCase(),
         contenidoOriginal: contenido // Para extraer el snippet original con mayúsculas/minúsculas
       });
@@ -49,6 +51,7 @@ export class SearchEngine {
 
         resultados.push({
           idDoc: doc.id,
+          categoria: doc.categoria,
           titulo: doc.titulo,
           extracto: extractoResaltado
         });

@@ -15,6 +15,7 @@ export class MitaDocs extends MitaElement {
   async render() {
     this.innerHTML = htmlTemplate;
     this.iniciarLogica();
+    this.iniciarLogicaUX();
   }
 
   iniciarLogica() {
@@ -48,7 +49,7 @@ export class MitaDocs extends MitaElement {
         return;
       }
 
-      const contenidoRaw = DOCS_MAP[idDoc];
+      const contenidoRaw = DOCS_MAP[idDoc]?.contenido;
 
       if (!contenidoRaw) {
         console.error(`[MitaDocs] ❌ Error 404: El archivo Markdown '${idDoc}.md' no existe o no pudo ser renderizado.`);
@@ -118,6 +119,94 @@ export class MitaDocs extends MitaElement {
         }
       }
     });
+  }
+
+  iniciarLogicaUX() {
+    this.$btnCopyIA = this.querySelector('#btn-copy-ia');
+    this.$btnPrintPDF = this.querySelector('#btn-print-pdf');
+
+    if (this.$btnCopyIA) {
+      this.$btnCopyIA.addEventListener('click', () => {
+        // Obtenemos el texto limpio de todo el contenedor de markdown actual
+        const texto = this.$container.innerText;
+        navigator.clipboard.writeText(texto).then(() => {
+          const originalText = this.$btnCopyIA.innerHTML;
+          this.$btnCopyIA.innerHTML = '✅ ¡Copiado para IA!';
+          setTimeout(() => { this.$btnCopyIA.innerHTML = originalText; }, 2000);
+        }).catch(err => console.error('Error al copiar:', err));
+      });
+    }
+
+    if (this.$btnPrintPDF) {
+      this.$btnPrintPDF.addEventListener('click', () => {
+        this.exportarPDFLibro();
+      });
+    }
+  }
+
+  exportarPDFLibro() {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Por favor permite los popups en tu navegador para exportar el PDF.');
+      return;
+    }
+
+    let htmlConsolidado = `
+      <html>
+        <head>
+          <title>Libro Completo - MitaDOM SPA</title>
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; padding: 2rem; max-width: 900px; margin: 0 auto; }
+            h1, h2, h3 { color: #111; border-bottom: 1px solid #ccc; padding-bottom: 0.5rem; page-break-after: avoid; }
+            pre { background: #f4f4f4; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.9em; page-break-inside: avoid; }
+            code { font-family: monospace; background: #eee; padding: 0.1rem 0.3rem; border-radius: 3px; }
+            img { max-width: 100%; height: auto; }
+            blockquote { border-left: 4px solid #007bff; margin-left: 0; padding-left: 1rem; color: #555; }
+            table { border-collapse: collapse; width: 100%; margin-bottom: 1rem; page-break-inside: avoid; }
+            th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; }
+            th { background: #f8f9fa; }
+            .page-break { page-break-after: always; }
+            @media print {
+              body { font-size: 11pt; max-width: 100%; padding: 0; margin: 0; }
+              a { text-decoration: none; color: #000; }
+            }
+          </style>
+        </head>
+        <body>
+          <div style="text-align: center; padding: 4rem 0;" class="page-break">
+            <h1 style="font-size: 3rem; border: none;">Libro de Documentación: MitaDOM</h1>
+            <p style="font-size: 1.2rem; color: #666;">Generado automáticamente (Production Ready)</p>
+          </div>
+    `;
+
+    const docs = Object.values(DOCS_MAP).sort((a, b) => a.categoria.localeCompare(b.categoria) || a.idDoc.localeCompare(b.idDoc));
+    
+    docs.forEach(doc => {
+      // Ignorar changelogs para no engordar el PDF
+      if (doc.categoria === 'changelogs') return;
+
+      const parsedHtml = marked.parse(doc.contenido);
+      htmlConsolidado += `
+        <div class="doc-section page-break">
+          <div style="font-size: 0.8rem; color: #666; text-transform: uppercase; margin-bottom: 1rem; border-bottom: 1px dashed #ccc; padding-bottom: 0.5rem;">Categoría: ${doc.categoria} | ID: ${doc.idDoc}</div>
+          ${parsedHtml}
+        </div>
+      `;
+    });
+
+    htmlConsolidado += `
+        </body>
+      </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(htmlConsolidado);
+    printWindow.document.close();
+
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+    };
   }
 
   /**

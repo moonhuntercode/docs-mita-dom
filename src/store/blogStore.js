@@ -15,6 +15,14 @@ export const estadoPostActivo = crearEstadoLocal({
  */
 export const BLOG_REGISTRY = [
     {
+        slug: 'informe-tecnico-junio-15',
+        titulo: 'Informe Técnico: Estabilidad y UX',
+        subtitulo: 'Mejoras en MitaDOM, Editor de Código estabilizado, y UI de búsqueda.',
+        categoria: 'Novedades',
+        fecha: '15 de Junio, 2026',
+        archivo: () => import('../assets/informe-tecnico-junio-15.md?raw')
+    },
+    {
         slug: 'por-que-no-usar-frameworks',
         titulo: 'Filosofía: ¿Por qué NO usar un Framework?',
         subtitulo: 'Entendiendo el control real sobre el DOM y el ecosistema web nativo.',

@@ -11,6 +11,19 @@ for (const path in mdFiles) {
   const archivo = partes[partes.length - 1];
   const idDoc = archivo.replace(/\.md$/i, '').toLowerCase();
   
-  // Almacenar el contenido RAW en el mapa
-  DOCS_MAP[idDoc] = mdFiles[path];
+  // Extraer categoría de la ruta
+  let categoria = 'todos';
+  if (partes.length >= 3) {
+      const parentDir = partes[partes.length - 2].toLowerCase();
+      if (parentDir !== 'mita-docs-cache' && parentDir !== 'docs') {
+          categoria = parentDir;
+      }
+  }
+
+  // Almacenar el objeto completo en el mapa
+  DOCS_MAP[idDoc] = {
+      idDoc: idDoc,
+      categoria: categoria,
+      contenido: mdFiles[path]
+  };
 }

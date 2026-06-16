@@ -19,7 +19,7 @@ mita-code-editor {
   background: var(--mita-editor-bg);
   border-radius: 8px;
   border: 1px solid var(--mita-editor-border);
-  overflow: hidden;
+  overflow: auto;
   margin: 1rem 0;
   font-family: var(--mita-editor-font);
   color: var(--mita-editor-text);
@@ -27,6 +27,8 @@ mita-code-editor {
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
   display: flex;
   flex-direction: column;
+  /* padding-bottom: 15px; */
+  /* margin-bottom: 10px; */
 }
 
 .mita-editor-container:hover {
@@ -55,9 +57,17 @@ mita-code-editor {
   border-radius: 50%;
 }
 
-.mita-dot.red { background: #ff5f56; }
-.mita-dot.yellow { background: #ffbd2e; }
-.mita-dot.green { background: #27c93f; }
+.mita-dot.red {
+  background: #ff5f56;
+}
+
+.mita-dot.yellow {
+  background: #ffbd2e;
+}
+
+.mita-dot.green {
+  background: #27c93f;
+}
 
 .mita-filename {
   font-size: 0.85rem;
@@ -105,7 +115,8 @@ mita-code-editor {
   display: grid;
   grid-template-areas: "editor";
   min-height: 100px;
-  max-height: 500px; /* Evitar que crezca infinitamente en mobile */
+  max-height: 500px;
+  /* Evitar que crezca infinitamente en mobile */
   position: relative;
 }
 
@@ -132,15 +143,21 @@ mita-code-editor {
   outline: none;
   resize: none;
   white-space: pre;
-  pointer-events: none; /* Ignora toques en modo lectura */
-  overflow: hidden; /* Ocultamos el scroll del textarea en modo lectura */
+  pointer-events: none;
+  /* Ignora toques en modo lectura */
+  overflow: hidden;
+  /* Ocultamos el scroll del textarea en modo lectura */
   z-index: 1;
 }
 
 .mita-editor-display {
-  pointer-events: auto; /* Permite scroll táctil nativo */
-  overflow: auto; /* Scroll principal manejado por el display */
-  z-index: 2; /* Arriba para recibir interacciones de lectura/selección */
+  pointer-events: auto;
+  /* Permite scroll táctil nativo */
+  overflow: auto;
+  /* Scroll principal manejado por el display */
+  z-index: 2;
+  /* Arriba para recibir interacciones de lectura/selección */
+  padding-bottom: 10px;
 }
 
 .mita-editor-display pre {
@@ -155,16 +172,21 @@ mita-code-editor {
 
 /* MODO EDICIÓN */
 .mita-editor-textarea.editable {
-  pointer-events: auto; /* Ahora el textarea intercepta la escritura y scroll */
-  overflow: auto; /* El scroll pasa al textarea */
-  z-index: 3; /* Se pone por encima del display */
-  background: rgba(0, 0, 0, 0.05); /* Feedback visual ligero */
+  pointer-events: auto;
+  /* Ahora el textarea intercepta la escritura y scroll */
+  overflow: auto;
+  /* El scroll pasa al textarea */
+  z-index: 3;
+  /* Se pone por encima del display */
+  background: rgba(0, 0, 0, 0.05);
+  /* Feedback visual ligero */
 }
 
 /* En modo edición, el display se vuelve fondo inactivo */
 .mita-editor-wrapper:has(.mita-editor-textarea.editable) .mita-editor-display {
   pointer-events: none;
-  overflow: hidden; /* Evita doble scrollbar */
+  overflow: hidden;
+
 }
 
 /* Custom Scrollbars para todos */
@@ -187,17 +209,59 @@ mita-code-editor {
 }
 
 /* Syntax Highlighting Tokens (VSCode Dark+ Theme Colors) */
-.mita-editor-display .token.comment { color: #6A9955; font-style: italic; }
-.mita-editor-display .token.string { color: #CE9178; }
-.mita-editor-display .token.keyword { color: #569CD6; }
-.mita-editor-display .token.control-keyword { color: #C586C0; }
-.mita-editor-display .token.function { color: #DCDCAA; }
-.mita-editor-display .token.builtin { color: #4EC9B0; }
-.mita-editor-display .token.property { color: #9CDCFE; }
-.mita-editor-display .token.number { color: #B5CEA8; }
-.mita-editor-display .token.boolean { color: #569CD6; }
-.mita-editor-display .token.operator { color: #D4D4D4; }
-.mita-editor-display .token.punctuation { color: #D4D4D4; }
-.mita-editor-display .token.tag { color: #569CD6; }
-.mita-editor-display .token.attr-name { color: #9CDCFE; }
-.mita-editor-display .token.attr-value { color: #CE9178; }
+.mita-editor-display .token.comment {
+  color: #6A9955;
+  font-style: italic;
+}
+
+.mita-editor-display .token.string {
+  color: #CE9178;
+}
+
+.mita-editor-display .token.keyword {
+  color: #569CD6;
+}
+
+.mita-editor-display .token.control-keyword {
+  color: #C586C0;
+}
+
+.mita-editor-display .token.function {
+  color: #DCDCAA;
+}
+
+.mita-editor-display .token.builtin {
+  color: #4EC9B0;
+}
+
+.mita-editor-display .token.property {
+  color: #9CDCFE;
+}
+
+.mita-editor-display .token.number {
+  color: #B5CEA8;
+}
+
+.mita-editor-display .token.boolean {
+  color: #569CD6;
+}
+
+.mita-editor-display .token.operator {
+  color: #D4D4D4;
+}
+
+.mita-editor-display .token.punctuation {
+  color: #D4D4D4;
+}
+
+.mita-editor-display .token.tag {
+  color: #569CD6;
+}
+
+.mita-editor-display .token.attr-name {
+  color: #9CDCFE;
+}
+
+.mita-editor-display .token.attr-value {
+  color: #CE9178;
+}

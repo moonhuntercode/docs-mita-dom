@@ -24,6 +24,19 @@ export class MitaSearch extends MitaElement {
     this.$dropdown = this.querySelector('#search-dropdown');
     this.$results = this.querySelector('#search-results');
     this.$filters = this.querySelectorAll('.filter-tag');
+    this.$btnClose = this.querySelector('#search-close-btn');
+
+    // Manejar Cierre Explicito
+    if (this.$btnClose) {
+      this.$btnClose.addEventListener('click', () => {
+        this.$btnClose.textContent = "Cerrando...";
+        setTimeout(() => {
+          this.cerrarDropdown();
+          this.$btnClose.textContent = "Cerrar ✕";
+          this.$input.blur();
+        }, 150);
+      });
+    }
 
     // Manejar Focus / Blur
     this.$input.addEventListener('focus', () => {
@@ -104,9 +117,7 @@ export class MitaSearch extends MitaElement {
     // Aplicar filtro si no es 'all'
     const resultados = todosLosResultados.filter(res => {
       if (this.filtroActivo === 'all') return true;
-      // Inferencia simple de categoría basada en la ruta del archivo
-      // docs/referencia -> referencia | docs/aprende -> aprende
-      return res.idDoc.includes(this.filtroActivo);
+      return res.categoria === this.filtroActivo;
     });
 
     if (resultados.length === 0) {

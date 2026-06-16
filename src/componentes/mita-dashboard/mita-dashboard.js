@@ -6,23 +6,29 @@ import { telemetryStore, limpiarTelemetria, eliminarLog } from '../../store/tele
 
 class MitaDashboard extends MitaElement {
     constructor() {
-        super(html, css);
+        super();
         this.filtroActual = 'ALL';
     }
 
-    connectedCallback() {
-        super.connectedCallback();
+    async render() {
+        if (!this.shadowRoot) {
+            this.attachShadow({ mode: 'open' });
+        }
+        this.shadowRoot.innerHTML = `<style>${css}</style>${html}`;
+        
         this.renderizarLogs();
         this.configurarEventos();
 
         // Suscribir a los cambios en vivo del Store de Telemetría
-        this.suscripcion = telemetryStore.suscribir(() => {
-            this.renderizarLogs();
-        });
+        if (!this.suscripcion) {
+            this.suscripcion = telemetryStore.suscribir(() => {
+                this.renderizarLogs();
+            });
+        }
     }
 
     disconnectedCallback() {
-        super.disconnectedCallback();
+        super.disconnectedCallback?.();
         if (this.suscripcion) this.suscripcion();
     }
 
