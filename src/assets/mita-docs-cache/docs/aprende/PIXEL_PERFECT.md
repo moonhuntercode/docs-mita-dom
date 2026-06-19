@@ -1,79 +1,167 @@
-# Guía Senior: Pixel Perfect, CSS Moderno y UX/UI (2026)
+# 🎨 Guía Definitiva: Pixel Perfect, UI/UX y Temas Modernos (2026)
 
-Llegar al nivel *Frontend Senior* no solo se trata de saber JavaScript. Se trata de entender las bases de la interfaz, la accesibilidad, y cómo las medidas relativas funcionan en el navegador moderno. Esta guía destila las mejores prácticas del 2026.
+Bienvenido a la guía de **Accesibilidad, Fundamentos UX/UI y Diseño Pixel Perfect** para la Web en 2026, utilizando estándares nativos (CSS3, HTML5 Semántico y JS Moderno) sin dependencias pesadas.
 
-## 1. Pixel Perfect Moderno: Olvídate del `px`
+---
 
-El concepto tradicional de *Pixel Perfect* asume que una página web se ve idéntica a un diseño de Figma en "píxeles absolutos". Sin embargo, **el píxel absoluto (`px`) está obsoleto** para maquetar la estructura principal de la web moderna porque destruye la accesibilidad y no escala con las configuraciones del usuario.
+## 💎 1. Fundamentos de "Pixel Perfect" Moderno
 
-El "Pixel Perfect Moderno" significa: **El diseño debe mantener su jerarquía, proporciones y estética independientemente del dispositivo, tamaño de fuente o zoom del usuario.**
+El concepto de *Pixel Perfect* ha evolucionado. Ya no significa "que se vea idéntico en todos los monitores", sino **que escale armónicamente en cualquier dispositivo manteniendo las proporciones ideales del diseño**.
 
-### La Calculadora Definitiva: `rem` vs `em` vs `px`
-
-- **`px` (Píxel Absoluto):** Úsalo **ÚNICAMENTE** para bordes sutiles (`border: 1px solid`), sombras (`box-shadow`), o elementos donde la escala visual rompería el renderizado sub-píxel. ¡No lo uses para tipografías!
-- **`rem` (Root EM):** La medida reina en 2026. Equivale al tamaño de fuente del `<html root>`. 
-  - *Cálculo:* Si el usuario tiene su navegador por defecto en `16px`, entonces `1rem = 16px`. Si en tu diseño de Figma un título dice `32px`, en CSS debe ser `2rem` (`32 / 16`).
-  - *Ventaja UX:* Si una persona con discapacidad visual configura su navegador a `24px` de fuente base, tu título de `2rem` automáticamente crecerá a `48px`, manteniendo la accesibilidad intacta. Si usaras píxeles fijos, el texto se quedaría pequeño.
-- **`em` (Element EM):** Relativo al tamaño de fuente del *elemento padre directo*.
-  - *Cálculo:* Si un `<button>` tiene `font-size: 1.5rem` (ej. 24px), y le das un `padding: 1em 2em`, el padding será proporcional a su propia fuente (24px de padding vertical y 48px horizontal).
-  - *Ventaja UI:* Te permite crear componentes "modulares" que se escalan proporcionalmente solo cambiando su `font-size`.
-
-## 2. Variables CSS (Custom Properties) y Themes
-
-En la era del MitaDOM, no necesitas procesadores de CSS externos como SASS para manejar variables.
-
-### Definiendo Temas Modernos
-La mejor forma de estructurar un "Dark Mode" dinámico y libre de "flashes" es centralizando los *tokens de diseño* en `:root`.
+### Unidades Relativas (rem vs em)
+Olvídate de los píxeles (`px`) para la tipografía.
+- **`rem`**: Usa `rem` para *font-size*, márgenes y paddings globales. Esto respeta la configuración de accesibilidad visual del usuario en su sistema operativo.
+- **`em`**: Usa `em` para paddings internos de botones o componentes que deben crecer proporcionalmente si el texto interno crece.
 
 ```css
-/* style.css - Tema Claro por Defecto */
 :root {
-  --color-fondo: #ffffff;
-  --color-texto: #1e293b;
-  --color-primario: #2563eb;
-  --borde-suave: 1px solid rgba(0,0,0,0.1);
-  --sombra-card: 0 4px 6px rgba(0,0,0,0.05);
+  /* Escala tipográfica fluida moderna (Clamp) */
+  --font-size-base: clamp(1rem, 0.95rem + 0.25vw, 1.25rem);
+  --font-size-h1: clamp(2rem, 1.8rem + 1vw, 3rem);
 }
-
-/* Tema Oscuro: Se activa inyectando el atributo data-theme="dark" al <html> */
-html[data-theme="dark"] {
-  --color-fondo: #0f172a;
-  --color-texto: #f8fafc;
-  --color-primario: #3b82f6;
-  --borde-suave: 1px solid rgba(255,255,255,0.1);
-  --sombra-card: 0 4px 6px rgba(0,0,0,0.3);
-}
-
-/* Uso Semántico */
 body {
-  background-color: var(--color-fondo);
-  color: var(--color-texto);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  font-size: var(--font-size-base);
 }
 ```
 
-Para alternar el tema en JavaScript (MitaDOM):
-```javascript
-const modoActual = document.documentElement.getAttribute('data-theme');
-document.documentElement.setAttribute('data-theme', modoActual === 'dark' ? 'light' : 'dark');
+---
+
+## 🌗 2. Temas Modernos (Dark Mode Dinámico)
+
+En 2026, los temas claros y oscuros se manejan mejor con `CSS Variables` (Custom Properties) y el espacio de color `oklch()`, el cual proporciona colores vibrantes perceptualmente uniformes y es soportado universalmente.
+
+### Ejemplo de Configuración Nativa
+
+```css
+/* Variables base y Modo Claro por defecto */
+:root {
+  --hue-primary: 250; /* Azul Púrpura */
+  
+  --bg-color: oklch(98% 0.01 var(--hue-primary));
+  --text-main: oklch(20% 0.05 var(--hue-primary));
+  --brand-color: oklch(60% 0.2 var(--hue-primary));
+  
+  --shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  color-scheme: light dark; /* Informa al navegador */
+}
+
+/* Modo Oscuro Detectado por Sistema */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: oklch(15% 0.02 var(--hue-primary));
+    --text-main: oklch(90% 0.02 var(--hue-primary));
+    --shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 0.8);
+  }
+}
+
+/* Tema Forzado por Atributo (Para botón de cambiar tema) */
+[data-theme="dark"] {
+  --bg-color: oklch(15% 0.02 var(--hue-primary));
+  --text-main: oklch(90% 0.02 var(--hue-primary));
+}
 ```
 
-## 3. Accesibilidad y HTML5 Semántico (a11y)
+Implementación JS de un botón:
+```javascript
+const themeToggle = document.querySelector('#btn-theme');
+themeToggle.addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme');
+    const newTheme = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+});
+```
 
-Escribir `<div>` para todo (*div-soup*) no es de Seniors. Los lectores de pantalla (Screen Readers) y los motores de búsqueda (SEO) dependen de la semántica.
+---
 
-### Reglas Clave:
-1. **Puntos de Referencia (Landmarks):** Usa `<header>`, `<nav>`, `<main>`, `<article>`, y `<footer>`. Evita tener múltiples etiquetas `<main>`.
-2. **Botones vs Enlaces:**
-   - Un botón `<button>`: **Ejecuta una acción** (ej. "Enviar Formulario", "Abrir Modal").
-   - Un enlace `<a>`: **Navega a otra página** o sección. ¡Nunca uses un `<a>` para disparar eventos JavaScript si no cambia la URL!
-3. **Roles ARIA (Solo cuando sea necesario):** HTML nativo es mejor que ARIA. Si tienes un SVG que es puramente decorativo, usa `aria-hidden="true"`.
-4. **Focus Management:** Al abrir un `<dialog>` o un menú desplegable, asegúrate de que el foco del teclado se quede atrapado adentro. (Afortunadamente, `<dialog>` hace esto automáticamente en 2026).
+## ♿ 3. Accesibilidad Web (a11y) y Semántica HTML5
 
-## 4. Fundamentos UX/UI (User Experience / User Interface)
+La accesibilidad ya no es opcional, es obligatoria. HTML5 proporciona el 90% de la accesibilidad gratis si se usa correctamente.
 
-El Pixel Perfect no sirve si la experiencia es mala.
+### Reglas de Oro Semánticas:
+1. **Nunca uses un `<div>` o `<span>` para botones.** Usa `<button>`. Los botones obtienen foco con `Tab`, se activan con `Enter` y `Espacio`, y son detectados por lectores de pantalla.
+2. **Jerarquía de Encabezados:** Nunca saltes del `<h1>` al `<h3>`. Los lectores de pantalla usan los encabezados como índice de navegación.
+3. **Imágenes siempre con `alt`:** `<img src="logo.png" alt="Logo de MitaDOM">`. Si es puramente decorativa: `alt=""`.
 
-- **Feedback Inmediato:** Siempre muestra una respuesta visual antes de 100ms. Si haces un `fetch()`, deshabilita el botón temporalmente o muestra un spinner. La API `Signal` de MitaDOM es perfecta para este estado de `loading`.
-- **Zonas de Clic (Touch Targets):** En dispositivos móviles, un botón nunca debe tener menos de `44px x 44px` (recomendación de Apple/Google). Un padding de `0.8rem 1.5rem` suele ser el estándar seguro.
-- **Micro-interacciones:** Agrega `transition: transform 0.2s ease` a tus botones y un leve `transform: scale(0.97)` en el evento `:active`. Dará una sensación táctil robusta.
+### Atributos ARIA (Accessible Rich Internet Applications)
+Úsalos solo cuando HTML no es suficiente (por ejemplo, en modales y menús desplegables complejos).
+```html
+<button aria-expanded="false" aria-controls="menu-principal">Menú</button>
+<nav id="menu-principal" aria-hidden="true">...</nav>
+```
+
+---
+
+## 🎨 4. Fundamentos UX/UI y Microinteracciones
+
+Una interfaz "intuitiva" es aquella que no requiere instrucciones. 
+
+### Principios UX Claves:
+- **Ley de Fitts:** Los botones de acciones principales deben ser grandes y estar cerca de la zona de interacción natural (especialmente en móviles, cerca del pulgar).
+- **Feedback Visual Inmediato:** Cada interacción debe tener una respuesta. Hover, Focus, y Active.
+  
+```css
+/* Microinteracciones modernas */
+.btn-moderno {
+  background: var(--brand-color);
+  color: #fff;
+  padding: 0.75em 1.5em;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.2s ease;
+}
+
+.btn-moderno:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+}
+
+.btn-moderno:active {
+  transform: translateY(1px); /* Efecto de "presionar" */
+}
+
+/* Accesibilidad de foco ESENCIAL */
+.btn-moderno:focus-visible {
+  outline: 3px solid oklch(80% 0.1 var(--hue-primary));
+  outline-offset: 4px;
+}
+```
+
+---
+
+## 🚀 5. Ejemplo en Vivo: UI Nativa con `<mita-dialog>`
+
+A continuación, un componente moderno visual con su código, usando el concepto de *Dialog Nativo* de HTML5.
+
+### Vista Previa
+
+<div style="padding: 1.5rem; border: 1px solid var(--border-color, #444); border-radius: 8px; margin-bottom: 1rem; background: var(--bg-surface, #1e1e2e);">
+  <h2 style="margin: 0; font-size: 1.25rem;">🪟 Demo: UI Nativa con &lt;mita-dialog&gt;</h2>
+  <p>Haz clic abajo para abrir un modal accesible.</p>
+  <button class="mita-button" onclick="document.getElementById('demo-modal').abrir()">Abrir Modal</button>
+  
+  <mita-dialog id="demo-modal" titulo="Términos Modernos">
+    <div slot="body">
+      <p>Este modal utiliza la API nativa de HTML5. Escala perfectamente, bloquea el scroll de fondo (backdrop) y puede ser cerrado presionando <kbd>ESC</kbd>.</p>
+    </div>
+  </mita-dialog>
+</div>
+
+### Código de Implementación
+<mita-code-editor language="html" readonly>
+<button onclick="document.getElementById('demo-modal').abrir()">
+  Abrir Modal
+</button>
+
+<mita-dialog id="demo-modal" titulo="Términos Modernos">
+  <div slot="body">
+    <p>Este modal utiliza la API nativa de HTML5. Escala perfectamente...</p>
+  </div>
+</mita-dialog>
+</mita-code-editor>
+
+---
+
+*Esta guía está diseñada para mantenerse a la vanguardia de los estándares Web, priorizando velocidad, accesibilidad y la eliminación de dependencias innecesarias.*

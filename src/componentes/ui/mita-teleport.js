@@ -15,6 +15,15 @@ export class MitaTeleport extends MitaElement {
   }
 
   async render() {
+    // 🐛 FIX PRODUCCIÓN: En entornos de producción, connectedCallback() puede ejecutarse
+    // ANTES de que el navegador haya parseado los nodos hijos del Custom Element.
+    // Usamos setTimeout para colocar la ejecución al final del event loop actual.
+    setTimeout(() => {
+      this.ejecutarTeleport();
+    }, 0);
+  }
+
+  ejecutarTeleport() {
     const toSelector = this.getAttribute('to');
     if (!toSelector) {
       console.warn('<mita-teleport> requiere un atributo "to".');

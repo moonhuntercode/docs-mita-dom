@@ -15,6 +15,14 @@ export const estadoPostActivo = crearEstadoLocal({
  */
 export const BLOG_REGISTRY = [
     {
+        slug: 'informe-tecnico-junio-16',
+        titulo: 'Informe Técnico y Actualización',
+        subtitulo: 'Teleport, Suspense Prod Bugs, y Auditoría GolangCI-Lint',
+        categoria: 'Novedades',
+        fecha: '16 de Junio, 2026',
+        archivo: () => import('../assets/informe-tecnico-junio-16.md?raw')
+    },
+    {
         slug: 'informe-tecnico-junio-15',
         titulo: 'Informe Técnico: Estabilidad y UX',
         subtitulo: 'Mejoras en MitaDOM, Editor de Código estabilizado, y UI de búsqueda.',

@@ -15,7 +15,11 @@ export class MitaSuspense extends MitaElement {
 
   async render() {
     this.style.display = 'block';
-    this.actualizarUI();
+    // 🐛 FIX PRODUCCIÓN: Retrasamos un ciclo para permitir que el parser de HTML
+    // inserte los templates y nodos hijos antes de intentar buscarlos con querySelector.
+    setTimeout(() => {
+      this.actualizarUI();
+    }, 0);
   }
 
   /**
