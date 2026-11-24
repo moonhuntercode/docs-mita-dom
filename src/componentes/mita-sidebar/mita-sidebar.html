@@ -1,9 +1,9 @@
 <aside id="sidebar" class="sidebar-cerrado">
-  <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--color-borde);">
+  <header class="sidebar-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--color-borde);">
     <h3 style="margin: 0; color: var(--color-primario);">Navegación</h3>
     <!-- Renderizado Condicional: Este botón se mostrará/ocultará vía JS -->
     <button id="btn-cerrar-sidebar" style="display: none; background: transparent; border: none; font-size: 1.2rem; cursor: pointer; color: var(--color-texto);">✕</button>
-  </div>
+  </header>
   <nav aria-label="Navegación principal">
     <a href="/">🏠 Inicio</a>
     <a href="/perfil">👤 Perfil</a>
@@ -13,10 +13,14 @@
     <a href="/configuracion">⚙️ Configuración</a>
     <a href="/admin/logs">🛡️ Dashboard Logs</a>
     <a href="/estados">🌍 Demo Estados</a>
+    <a href="/laboratorio">🧪 Laboratorio Signals v2.7</a>
     <a href="/performance">⏱️ Analíticas</a>
     <a href="/ruta-falsa">🛑 Probar 404</a>
-    
+
     <!-- PORTAL: Navegación Específica de Docs (Se muestra solo en /docs) -->
     <mita-docs-nav></mita-docs-nav>
+
+    <!-- PORTAL: Acordeones + Buscador del Laboratorio (Se muestra solo en /laboratorio) -->
+    <mita-lab-nav></mita-lab-nav>
   </nav>
 </aside>

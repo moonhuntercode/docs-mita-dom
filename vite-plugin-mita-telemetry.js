@@ -11,7 +11,33 @@ import path from 'path';
 export default function mitaTelemetryPlugin() {
   return {
     name: 'vite-plugin-mita-telemetry',
-    
+
+    configureServer(server) {
+      server.middlewares.use('/__mita_fs_sync', (req, res) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 405;
+          res.end(JSON.stringify({ ok: false, error: 'Method Not Allowed' }));
+          return;
+        }
+        let body = '';
+        req.on('data', (chunk) => {
+          body += chunk;
+        });
+        req.on('end', () => {
+          try {
+            const payload = JSON.parse(body || '{}');
+            const dbFile = path.resolve(process.cwd(), 'src/assets/mita-docs-db.json');
+            fs.writeFileSync(dbFile, JSON.stringify(payload, null, 2), 'utf-8');
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ ok: true, archivo: 'src/assets/mita-docs-db.json' }));
+          } catch (err) {
+            res.statusCode = 500;
+            res.end(JSON.stringify({ ok: false, error: String(err) }));
+          }
+        });
+      });
+    },
+
     // Capturamos cualquier error en la resolución o transformación
     buildEnd(error) {
       if (error) {

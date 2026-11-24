@@ -1,0 +1,32 @@
+name: CI — Docs MitaDOM SPA QA & Bundle Gate
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint JS & Unused CSS
+        run: npm run lint && npm run test:css
+
+      - name: Run Vitest Suite
+        run: npm run test
+
+      - name: Build & Enforce <500 kB Bundle Budget
+        run: npm run build && npm run test:bundle

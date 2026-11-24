@@ -1,14 +1,173 @@
-<!-- inicio file: src/componentes/mita-docs/mita-docs.html -->
-<!-- Componente Mita Docs (Solo el contenido) -->
-<div class="docs-layout">
-  <main class="docs-content">
-    <div class="docs-toolbar" style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--color-borde); padding-bottom: 0.5rem;">
-      <button id="btn-copy-ia" class="btn-secundario" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;" title="Copia el texto limpio de este documento para dárselo a una IA">🤖 Copiar Vista (IA)</button>
-      <button id="btn-print-pdf" class="btn-primario" style="font-size: 0.85rem; padding: 0.4rem 0.8rem; background-color: #3b82f6;" title="Generar un PDF combinando todos los documentos">🖨️ Exportar Libro PDF</button>
-    </div>
-    <div id="markdown-container" class="markdown-body">
-      <!-- El HTML parseado se inyectará aquí -->
+<!-- Componente Mita Docs: Lectura Visual Amigable (A-/A+) + Auto-Administrable con DB Local + File System + Dashboard Admin -->
+<section class="docs-layout">
+  <article class="docs-content">
+    <!-- 1. Barra Visual de Accesibilidad Lectora + Switch Admin -->
+    <header class="docs-reader-bar" aria-label="Controles visuales de lectura y administración">
+      <menu class="docs-reader-controls">
+        <li>
+          <span class="docs-reader-label">👁️ Tamaño de letra:</span>
+        </li>
+        <li>
+          <button type="button" id="btn-font-decrease" class="btn-secundario docs-font-btn" title="Disminuir tamaño de letra">
+            A-
+          </button>
+        </li>
+        <li>
+          <button type="button" id="btn-font-reset" class="btn-secundario docs-font-btn" title="Tamaño de letra normal (16px)">
+            <output id="out-font-size">16px</output>
+          </button>
+        </li>
+        <li>
+          <button type="button" id="btn-font-increase" class="btn-secundario docs-font-btn" title="Aumentar tamaño de letra">
+            A+
+          </button>
+        </li>
+        <li>
+          <button type="button" id="btn-reading-comfort" class="btn-secundario docs-action-btn" title="Alternar interlineado y ancho de lectura cómoda">
+            📖 Lectura Cómoda
+          </button>
+        </li>
+      </menu>
+
+      <menu class="docs-actions-menu">
+        <li>
+          <button type="button" id="btn-toggle-admin-docs" class="btn-secundario docs-action-btn" title="Activar o desactivar el Dashboard exclusivo para Admin">
+            🛡️ Modo Admin: OFF
+          </button>
+        </li>
+        <li>
+          <button type="button" id="btn-copy-ia" class="btn-secundario docs-action-btn" title="Copia el texto limpio para IA">
+            🤖 Copiar Vista (IA)
+          </button>
+        </li>
+        <li>
+          <button type="button" id="btn-print-pdf" class="btn-primario docs-action-btn" title="Exportar libro PDF">
+            🖨️ Exportar PDF
+          </button>
+        </li>
+      </menu>
+    </header>
+
+    <!-- 1.5 Barra de Gamificación de Lectura, Resaltador de Texto y Analíticas de Precisión -->
+    <section class="docs-gamification-bar" aria-label="Seguimiento gamificado de lectura y resaltador">
+      <p class="docs-gamif-stats">
+        <strong id="gamif-badge-level" class="docs-gamif-pill">🌱 Explorador Mita-DOM • 50 XP</strong>
+        <output id="gamif-progress-text" class="docs-gamif-progress">Progreso: 1 guía leída</output>
+        <output id="gamif-precision-out" class="docs-gamif-precision">📊 Precisión: 15s activos</output>
+      </p>
+
+      <menu class="docs-actions-menu">
+        <li>
+          <input
+            type="search"
+            id="input-highlight-term"
+            class="docs-highlight-input"
+            placeholder="🖍️ Palabra a resaltar..."
+            aria-label="Palabra o frase a resaltar en el documento"
+          />
+        </li>
+        <li>
+          <button type="button" id="btn-add-highlight" class="btn-secundario docs-action-btn" title="Resaltar texto en esta guía (+15 XP)">
+            🖍️ Resaltar (+15 XP)
+          </button>
+        </li>
+        <li>
+          <button type="button" id="btn-mark-doc-read" class="btn-primario docs-action-btn" title="Marcar esta guía como completada (+50 XP)">
+            ✅ Marcar Leída (+50 XP)
+          </button>
+        </li>
+        <li>
+          <button type="button" id="btn-docs-run-advisor" class="btn-secundario docs-action-btn" title="Ejecutar Mita Doc Advisor sobre la vista actual">
+            🩺 Mita Doc Advisor
+          </button>
+        </li>
+      </menu>
+    </section>
+
+    <!-- 1.8 Banner Interactivo de Cookies, Términos y Guía en la Nube aplicado en Documentación -->
+    <aside id="docs-cookies-banner" class="docs-gamification-bar" aria-label="Control de Cookies y Términos en Documentación">
+      <p class="docs-gamif-stats">
+        <strong id="docs-cookies-pill" class="docs-gamif-pill">🍪 Cookies: Esenciales</strong>
+        <span id="docs-cookies-text">Acepta cookies analíticas para habilitar telemetría de precisión en tu lectura.</span>
+      </p>
+      <menu class="docs-actions-menu">
+        <li>
+          <button type="button" id="btn-docs-cookies-accept" class="btn-primario docs-action-btn">
+            ✅ Aceptar Cookies y Términos
+          </button>
+        </li>
+        <li>
+          <button type="button" id="btn-docs-cookies-essential" class="btn-secundario docs-action-btn">
+            🛡️ Solo Esenciales
+          </button>
+        </li>
+      </menu>
+    </aside>
+
+    <!-- 2. Buscador y Filtro por Categoría -->
+    <header class="docs-toolbar">
+      <search class="docs-inline-search-group">
+        <label for="docs-inline-search" class="docs-sr-only">Buscar y filtrar dentro de documentación</label>
+        <input
+          type="search"
+          id="docs-inline-search"
+          class="docs-inline-input"
+          placeholder="🔍 Filtrar todos los documentos por título, contenido o categoría..."
+          autocomplete="off"
+        />
+        <select id="docs-category-filter" class="docs-inline-select" aria-label="Filtrar por categoría">
+          <option value="todos">Todas las categorías</option>
+          <option value="aprende">🎓 Aprende</option>
+          <option value="referencia">📖 Referencia</option>
+          <option value="changelogs">📝 Changelogs</option>
+          <option value="local">🗄️ DB Local + File System</option>
+        </select>
+      </search>
+    </header>
+
+    <!-- 3. Slot Condicional: Dashboard Exclusivo para Admin (0 display: none, montado con renderCondicional) -->
+    <section id="docs-admin-dashboard-slot"></section>
+
+    <!-- 4. Resultados del Buscador/Filtro Interno de Documentación -->
+    <section id="docs-filter-results" class="docs-filter-results" hidden aria-live="polite"></section>
+
+    <!-- 5. Indicador de estado cuando el documento proviene de DB Local / File System -->
+    <output id="docs-local-badge" class="docs-local-badge" hidden></output>
+
+    <!-- 6. Cuerpo del Documento con Tamaño de Fuente Reactivo -->
+    <article id="markdown-container" class="markdown-body">
       <p>Cargando documentación...</p>
-    </div>
-  </main>
-</div>
+    </article>
+  </article>
+
+  <!-- Modal Nativo Re-utilizable (<mita-dialog>) para Auto-Administrar Documentación en DB Local + File System -->
+  <mita-dialog id="modal-admin-doc">
+    <span slot="titulo">🗄️ Auto-Administrar Documentación (DB Local + File System Repo)</span>
+    <form id="form-admin-doc" class="docs-admin-form">
+      <label class="docs-admin-label">
+        ID del documento (slug URL, ej: <code>mi_guia_chat</code>):
+        <input type="text" id="admin-doc-id" class="docs-inline-input" required />
+      </label>
+      <label class="docs-admin-label">
+        Título visible:
+        <input type="text" id="admin-doc-title" class="docs-inline-input" required />
+      </label>
+      <label class="docs-admin-label">
+        Categoría:
+        <select id="admin-doc-category" class="docs-inline-select">
+          <option value="local">🗄️ DB Local + File System</option>
+          <option value="aprende">🎓 Aprende</option>
+          <option value="referencia">📖 Referencia</option>
+        </select>
+      </label>
+      <label class="docs-admin-label">
+        Contenido Markdown (soporta bloques <code>```js</code> para <code>&lt;mita-code-editor&gt;</code>):
+        <textarea id="admin-doc-content" class="docs-admin-textarea" rows="10" required></textarea>
+      </label>
+      <menu class="docs-admin-actions">
+        <li><button type="button" id="btn-cancel-admin-doc" class="btn-secundario docs-action-btn">Cancelar</button></li>
+        <li><button type="submit" class="btn-primario docs-action-btn">💾 Guardar en DB Local + File System</button></li>
+      </menu>
+    </form>
+  </mita-dialog>
+</section>

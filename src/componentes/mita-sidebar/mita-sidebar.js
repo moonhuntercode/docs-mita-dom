@@ -34,8 +34,11 @@ export class MitaSidebar extends MitaElement {
             });
         }
 
-        // Delegación de eventos para auto-cerrar en mobile
+        // Delegación de eventos para auto-cerrar en mobile (sin cerrar al escribir en buscador o abrir acordeones)
         $sidebar.addEventListener('click', (e) => {
+            if (e.target.closest('input') || e.target.closest('summary')) {
+                return;
+            }
             if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('a') || e.target.closest('button')) {
                 if (window.innerWidth < 715) {
                     estadoSidebar.patch({ abierto: false });

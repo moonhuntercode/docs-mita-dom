@@ -1,51 +1,107 @@
-# 📚 Arquitectura y Comunicación en MitaDOM SPA
+# 📚 Arquitectura y Guía Oficial — MitaDOM SPA (`example-mita-spa-01-js`)
 
-Este proyecto demuestra cómo estructurar una aplicación completa, escalable y modular utilizando `mita-dom` sin la necesidad de pesados *frameworks* de terceros.
-
-## 🧱 Estructura Modular y Light DOM
-
-A diferencia de *frameworks* que inyectan toda la aplicación en un solo `<div id="app">` usando JavaScript masivo (*innerHTML*), aquí respetamos la semántica de la web:
-
-- El archivo `index.html` contiene el esqueleto real (`<header>`, `<nav>`, `<main>`), favoreciendo el SEO y la accesibilidad.
-- Los componentes (`<mita-tarjeta>`, `<mita-formulario>`, `<mita-perfil>`) se insertan en el Light DOM, donde el navegador puede renderizarlos nativamente de la forma más rápida posible.
-- CSS y JS viven en archivos separados (`style.css`, `main.js`), logrando un verdadero **Separation of Concerns**.
+- **Actualizado:** `2026-11-22`
+- **Motor:** `mita-dom v2.7.0` (Light DOM + Granular Signals + Auto-Documentación)
+- **Autor:** Victor Code (Bolivia)
 
 ---
 
-## ⚡ Comunicación sin "Props" (El Patrón de Signals)
+## 🧱 1. Estructura Modular, HTML5 Semántico y Light DOM
 
-En frameworks como React o Vue, para pasar datos de un componente a otro, generalmente usamos `props` (de padre a hijo) o Contextos complejos. En MitaDOM, utilizamos el **Patrón de Signals Globales** como un Bus de Eventos Reactivo.
+A diferencia de frameworks que generan *div-soup* dentro de un único `<div id="app">`, esta SPA utiliza Web Components nativos en **Light DOM** con **HTML5 semántico** (`<main>`, `<header>`, `<nav>`, `<aside>`, `<section>`, `<article>`, `<search>`, `<details>`, `<summary>`, `<output>`) y **CSS3 `@scope` Mobile-First**:
 
-### ¿Cómo funciona en esta SPA?
-
-1. **El Origen de los Datos (El Formulario):**
-   El componente `<mita-formulario>` captura el nombre del usuario. En lugar de disparar eventos personalizados o usar `props`, simplemente muta el objeto central:
-   ```javascript
-   import { estadoAppGlobal } from 'mita-dom';
-   
-   // Actualizamos globalmente
-   estadoAppGlobal.value = { ...estadoAppGlobal.value, usuario: "Nuevo Nombre" };
-   ```
-
-2. **La Reacción (El Perfil):**
-   El componente `<mita-perfil>` está suscrito al mismo `estadoAppGlobal`. Al instante en que el formulario modifica el valor, el Perfil reacciona sin necesidad de recargar ni saber quién hizo el cambio:
-   ```javascript
-   estadoAppGlobal.suscribir((estado) => {
-       if (estado && estado.usuario) {
-           this.$nombre.textContent = estado.usuario; // UI Actualizada al instante
-       }
-   });
-   ```
-
-### 🏆 Beneficios de esta alternativa a Props:
-- **Desacoplamiento Total:** El formulario y el perfil no necesitan conocerse, ni estar en la misma jerarquía del DOM. Uno puede estar en el `<header>` y otro en el `<footer>`.
-- **Rendimiento Quirúrgico:** No hay un ciclo masivo de re-renderización del DOM (Virtual DOM). Solo se ejecuta la función de actualización específica, mutando el `textContent` exacto.
+- **Portal lateral contextual (`<aside id="sidebar">`):**
+  - En `/docs`, activa automáticamente `<mita-docs-nav>` con **buscador en vivo** y **acordeones `<details>`**.
+  - En `/laboratorio`, activa automáticamente `<mita-lab-nav>` con **buscador en vivo** y **acordeones `<details>`** sincronizados mediante `estadoLeccionActiva`.
+- **Sandbox Split Interactivo (`/laboratorio`):** Editor `<mita-code-editor editable="true">` a la izquierda + Vista Previa viva a la derecha (`>= 1024px`) y apilado en móvil, con descarga `.js`, recarga, reinicio y expansión (`Mostrar más`).
 
 ---
 
-## 📈 Siguientes Pasos y Escalabilidad
+## ⚡ 2. Estándar Reactivo `mita-dom v2.7.0` (Sin Props Drilling)
 
-Tu SPA ya cuenta con **Navegación Nativamente Optimizada** (Navigation API) y **Formularios Dinámicos Reactivos**. Para seguir escalando podrías:
+### A) Estado Local + `vincularTexto` Granular
 
-1. **Separar los Signals Globales:** Si tu app crece, en lugar de usar un solo `estadoAppGlobal` genérico de MitaDOM, puedes instanciar múltiples Signals independientes en tu proyecto (ej: `estadoCarrito = new Signal([])`, `estadoAutenticacion = new Signal(false)`) e importarlos donde se necesiten.
-2. **Conectar con Backend:** El componente `mita-perfil` ya usa la utilidad `crearRecurso()`. Podrías reemplazar el `setTimeout` por un `fetch()` real a una base de datos para combinar reactividad con persistencia en tiempo real.
+```js
+import { crearEstadoLocal, vincularTexto } from 'mita-dom';
+
+const contador = crearEstadoLocal({ clicks: 0 });
+const stop = vincularTexto(
+  contador,
+  document.querySelector('#contador-out'),
+  (estado) => `Clicks: ${estado.clicks}`
+);
+
+contador.patch({ clicks: contador.get().clicks + 1 });
+stop(); // Limpieza explícita
+```
+
+### B) Compartir Datos entre 2 o más Componentes (`crearEstadoCompartido` / `obtenerEstadoCompartido`)
+
+```js
+import { crearEstadoCompartido, obtenerEstadoCompartido, listarEstadosCompartidos } from 'mita-dom';
+
+// Definir una sola vez (con persistencia local y reglas auditables)
+export const configModulo = crearEstadoCompartido(
+  'empleos:config',
+  { habilitado: true, requiereLogin: false },
+  {
+    persistirLocal: true,
+    descripcion: 'Visibilidad del módulo de anuncios de empleo',
+    reglas: 'Solo el administrador puede desactivar el módulo'
+  }
+);
+
+// En cualquier componente hermano o hijo:
+const cfg = obtenerEstadoCompartido('empleos:config');
+cfg.patch({ habilitado: false });
+
+// En Panel Admin: auditar todos los estados locales registrados
+console.table(listarEstadosCompartidos());
+```
+
+### C) Render Condicional Declarativo + Auto-Limpieza en `MitaElement`
+
+```js
+import { MitaElement } from './utils/MitaElement.js';
+import { obtenerEstadoCompartido } from 'mita-dom';
+
+export class PanelAnuncios extends MitaElement {
+  async render() {
+    const cfg = obtenerEstadoCompartido('empleos:config');
+    this.innerHTML = `<section id="zona"></section>`;
+
+    // Auto-limpia la suscripción en disconnectedCallback()
+    this.mostrarSi({
+      estado: cfg,
+      contenedor: this.querySelector('#zona'),
+      cuando: (estado) => estado.habilitado === true,
+      mostrar: () => `<form>Formulario Activo</form>`,
+      sino: () => `<p>Módulo pausado por Administración.</p>`
+    });
+  }
+}
+```
+
+### D) Efectos Automáticos y Derivados (`crearEfecto` + `.derivar()`)
+
+```js
+import { crearEstadoLocal, crearEfecto } from 'mita-dom';
+
+const items = crearEstadoLocal([10, 20, 30]);
+const total = items.derivar((lista) => lista.reduce((a, b) => a + b, 0));
+
+const detener = crearEfecto(() => {
+  console.log('Total calculado:', total.get());
+});
+
+detener();
+total.destroy();
+```
+
+---
+
+## 🤖 3. Pipeline de Auto-Documentación y Calidad (QA)
+
+1. En `../mita-dom`: `npm run docs:auto` extrae todos los exports/JSDoc hacia `docs/referencia/AUTO_API_REFERENCIA.md` y consolida `changelogs/*.md` en `CHANGELOG.md`.
+2. En esta SPA (`example-mita-spa-01-js`): `node scripts/sync-docs.js` sincroniza todo en `src/assets/mita-docs-cache/`.
+3. Validación completa: `npm run lint && npm run test && npm run test:css && npm run build`.

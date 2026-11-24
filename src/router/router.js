@@ -1,7 +1,18 @@
 // @ts-check
-import { rutaActual } from 'mita-dom';
+import { rutaActual, navegarA } from 'mita-dom';
 import { Logger } from '../utils/logger.js';
 import { estadoDocActivo } from '../store/docsStore.js';
+
+/** @type {Promise<void>} Promesa de la navegación activa para pruebas deterministas sin EnvironmentTeardownError */
+let navegacionActivaPromesa = Promise.resolve();
+
+/**
+ * ⏳ Espera a que termine la navegación asíncrona en curso (lazy chunks + layout).
+ * Garantiza 0 promesas huérfanas durante pruebas Vitest.
+ */
+export async function esperarNavegacionActual() {
+  await navegacionActivaPromesa;
+}
 
 /**
  * 🧭 Advanced Router SPA (Lazy Loading, Guards, Scroll Behavior)
@@ -18,6 +29,7 @@ export const registroRutas = [
   { path: '/acerca', tag: 'demo-acerca', lazy: () => import('../componentes/acerca/demo-acerca.js') },
   { path: '/configuracion', tag: 'demo-config', lazy: () => import('../componentes/configuracion/demo-config.js') },
   { path: '/estados', tag: 'demo-estados', lazy: () => import('../componentes/demo-estados/demo-estados.js') },
+  { path: '/laboratorio', tag: 'demo-laboratorio-signals', lazy: () => import('../componentes/laboratorio-signals/demo-laboratorio-signals.js') },
   { path: '/docs', tag: 'mita-docs', lazy: () => import('../componentes/mita-docs/mita-docs.js') },
   { path: '/performance', tag: 'demo-performance', lazy: () => import('../componentes/demo-performance/demo-performance.js') }
 ];
@@ -61,13 +73,20 @@ export function iniciarRouter() {
       let $layout = document.querySelector(config.layout);
       if (!$layout) {
         // Importamos el layout dinámicamente si no existe (Code Splitting para Layouts)
-        await import(`../componentes/layout/${config.layout}.js`);
+        try {
+          await import(`../componentes/layout/${config.layout}.js`);
+        } catch (err) {
+          Logger.error(`[Router] Fallo al cargar el layout ${config.layout}:`, err);
+          return null;
+        }
+        if (!$appContainer || !$appContainer.isConnected) return null;
         $layout = document.createElement(config.layout);
         $layout.style.display = 'none'; // Se mostrará más abajo
         $appContainer.appendChild($layout);
       }
       $layout.appendChild($el);
     } else {
+      if (!$appContainer || !$appContainer.isConnected) return null;
       $appContainer.appendChild($el);
     }
 
@@ -76,7 +95,8 @@ export function iniciarRouter() {
     return $el;
   }
 
-  rutaActual.suscribir(async (ruta) => {
+  const desuscribirRouter = rutaActual.suscribir((ruta) => {
+    const ejecutarNavegacion = async () => {
     Logger.info(`Navegando a ruta: ${ruta}`);
     
     // --- 0. TELEMETRÍA INICIAL ---
@@ -105,7 +125,7 @@ export function iniciarRouter() {
       if (!isAuthenticated) {
         Logger.warn(`[Router Guard] Acceso denegado a ${ruta}. Redirigiendo a /perfil`);
         alert("🛡️ MitaDOM Guard: Necesitas estar autenticado para ver Logs. Visita perfil.");
-        import('mita-dom').then(m => m.navegarA('/perfil'));
+        navegarA('/perfil');
         return; // Interceptamos y cortamos la carga
       }
     }
@@ -199,5 +219,10 @@ export function iniciarRouter() {
     // --- 6. TELEMETRÍA DE ÉXITO ---
     const tiempoFinal = (performance.now() - inicioRenderizado).toFixed(1);
     console.log(`%c[Router] ✅ Vista '${configRuta.tag}' renderizada exitosamente en ${tiempoFinal}ms`, 'color: #10b981; font-weight: bold;');
+    };
+
+    navegacionActivaPromesa = navegacionActivaPromesa.then(ejecutarNavegacion, ejecutarNavegacion);
   });
+
+  return desuscribirRouter;
 }

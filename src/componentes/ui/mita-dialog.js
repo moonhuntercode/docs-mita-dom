@@ -2,173 +2,110 @@
 import { MitaElement } from '../../utils/MitaElement.js';
 
 /**
- * 🪟 <mita-dialog>
- * Un modal accesible nativo que envuelve el <dialog> de HTML5.
- * 
- * Atributos soportados:
- * - `abierto`: Abre el modal si está presente.
- * - `estricto`: Si está presente, el modal NO se puede cerrar con ESC ni clic afuera. Obliga a usar un botón explícito.
+ * 🪟 <mita-dialog> (Light DOM Nativo — Sin Shadow DOM)
+ * Envuelve el elemento <dialog> de HTML5 respetando la arquitectura Light DOM de MitaDOM.
+ * Re-utilizable para alertas, confirmaciones estrictas, publicación de novedades y edición en DB Local.
  */
 export class MitaDialog extends MitaElement {
   static get observedAttributes() {
     return ['abierto', 'estricto'];
   }
 
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-  }
-
   async render() {
-    this.shadowRoot.innerHTML = `
-      <style>
-        dialog {
-          border: none;
-          border-radius: 12px;
-          padding: 0;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-          background: var(--bg-primary, #ffffff);
-          color: var(--text-color, #1a1a1a);
-          max-width: 500px;
-          width: 90%;
-          opacity: 0;
-          transform: translateY(20px) scale(0.95);
-          transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        dialog[open] {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-        }
+    if (this._inicializado) return;
+    this._inicializado = true;
 
-        dialog::backdrop {
-          background: rgba(0, 0, 0, 0.5);
-          backdrop-filter: blur(4px);
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
+    const nodoTitulo = this.querySelector('[slot="titulo"]');
+    const nodoFooter = this.querySelector('[slot="footer"]');
 
-        dialog[open]::backdrop {
-          opacity: 1;
-        }
+    const tituloHtml = nodoTitulo ? nodoTitulo.innerHTML : (this.getAttribute('titulo') || 'Ventana Modal');
+    if (nodoTitulo) nodoTitulo.remove();
 
-        .dialog-content {
-          padding: 1.5rem;
-        }
+    let footerHtml = '';
+    if (nodoFooter) {
+      footerHtml = nodoFooter.outerHTML;
+      nodoFooter.remove();
+    }
 
-        .header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1rem;
-        }
+    const cuerpoHtml = this.innerHTML;
+    const esEstricto = this.hasAttribute('estricto');
 
-        .close-btn {
-          background: transparent;
-          border: none;
-          font-size: 1.5rem;
-          cursor: pointer;
-          color: var(--text-color, #1a1a1a);
-          line-height: 1;
-          opacity: 0.6;
-          transition: opacity 0.2s;
-        }
-        
-        .close-btn:hover {
-          opacity: 1;
-        }
-
-        /* Ocultar botón de cierre si es estricto */
-        :host([estricto]) .close-btn {
-          display: none;
-        }
-      </style>
-
-      <dialog id="mita-modal">
-        <div class="dialog-content">
-          <div class="header">
-            <strong><slot name="titulo">Título del Modal</slot></strong>
-            <button class="close-btn" aria-label="Cerrar modal">&times;</button>
-          </div>
-          <div class="body">
-            <slot></slot>
-          </div>
-          <div class="footer" style="margin-top: 1.5rem;">
-            <slot name="footer"></slot>
-          </div>
-        </div>
+    this.innerHTML = `
+      <dialog class="mita-native-dialog" style="border: 1px solid var(--color-borde, rgba(255,255,255,0.18)); border-radius: 12px; padding: 0; background: var(--color-superficie, #1e293b); color: var(--color-texto, #f8fafc); max-width: 560px; width: 92%; margin: auto; box-shadow: 0 18px 40px rgba(0,0,0,0.45);">
+        <article class="mita-dialog-box" style="padding: 1.25rem; display: grid; gap: 0.9rem;">
+          <header class="mita-dialog-head" style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; padding-bottom: 0.65rem; border-bottom: 1px solid var(--color-borde, rgba(255,255,255,0.12));">
+            <strong class="mita-dialog-title" style="font-size: 1.05rem;">${tituloHtml}</strong>
+            <button type="button" class="mita-dialog-close" aria-label="Cerrar modal" style="display: ${esEstricto ? 'none' : 'inline-flex'}; background: transparent; border: 1px solid var(--color-borde, rgba(255,255,255,0.2)); color: inherit; border-radius: 6px; padding: 0.15rem 0.55rem; font-size: 1.1rem; cursor: pointer;">&times;</button>
+          </header>
+          <section class="mita-dialog-body" style="display: grid; gap: 0.75rem;">
+            ${cuerpoHtml}
+          </section>
+          ${footerHtml ? `<footer class="mita-dialog-foot" style="padding-top: 0.5rem; border-top: 1px solid var(--color-borde, rgba(255,255,255,0.12));">${footerHtml}</footer>` : ''}
+        </article>
       </dialog>
     `;
 
-    this.$dialog = this.shadowRoot.getElementById('mita-modal');
-    this.$btnCerrar = this.shadowRoot.querySelector('.close-btn');
+    this.$dialog = /** @type {HTMLDialogElement | null} */ (this.querySelector('dialog.mita-native-dialog'));
+    this.$btnCerrar = this.querySelector('.mita-dialog-close');
 
-    // Manejar cierre por botón interno
-    this.$btnCerrar.addEventListener('click', () => this.cerrar());
+    if (this.$btnCerrar) {
+      this.$btnCerrar.addEventListener('click', () => this.cerrar());
+    }
 
-    // Atrapar cierre por ESC para poder bloquearlo si es estricto
-    this.$dialog.addEventListener('cancel', (e) => {
-      if (this.hasAttribute('estricto')) {
-        e.preventDefault(); // Bloquea el ESC
-        this._animarRebote();
-      } else {
-        this.cerrar();
-      }
-    });
-
-    // Cerrar al hacer clic en el backdrop (afuera del modal)
-    this.$dialog.addEventListener('click', (e) => {
-      if (e.target === this.$dialog) {
+    if (this.$dialog) {
+      this.$dialog.addEventListener('cancel', (e) => {
         if (this.hasAttribute('estricto')) {
-          this._animarRebote();
+          e.preventDefault();
         } else {
           this.cerrar();
         }
-      }
-    });
+      });
 
-    // Sincronizar estado inicial
+      this.$dialog.addEventListener('click', (e) => {
+        if (e.target === this.$dialog && !this.hasAttribute('estricto')) {
+          this.cerrar();
+        }
+      });
+    }
+
     this._sincronizarEstado();
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (name === 'abierto' && oldValue !== newValue) {
-      if (this.$dialog) this._sincronizarEstado();
+    if (name === 'abierto' && oldValue !== newValue && this.$dialog) {
+      this._sincronizarEstado();
     }
   }
 
   _sincronizarEstado() {
-    const debeEstarAbierto = this.hasAttribute('abierto');
-    const estaAbierto = this.$dialog.open;
+    if (!this.$dialog) return;
+    const debeAbrir = this.hasAttribute('abierto');
+    const estaAbierto = Boolean(this.$dialog.open);
 
-    if (debeEstarAbierto && !estaAbierto) {
-      this.$dialog.showModal(); // API nativa de accesibilidad
-    } else if (!debeEstarAbierto && estaAbierto) {
-      // Dejamos que CSS anime antes de cerrar realmente
-      this.$dialog.style.opacity = '0';
-      this.$dialog.style.transform = 'translateY(10px) scale(0.98)';
-      setTimeout(() => {
+    if (debeAbrir && !estaAbierto) {
+      if (typeof this.$dialog.showModal === 'function') {
+        this.$dialog.showModal();
+      } else {
+        this.$dialog.setAttribute('open', '');
+      }
+    } else if (!debeAbrir && estaAbierto) {
+      if (typeof this.$dialog.close === 'function') {
         this.$dialog.close();
-        this.$dialog.style = ''; // Limpiar inline styles
-      }, 300); // 300ms debe coincidir con el transition CSS
+      } else {
+        this.$dialog.removeAttribute('open');
+      }
     }
   }
 
-  _animarRebote() {
-    this.$dialog.style.transform = 'translateY(0) scale(1.02)';
-    setTimeout(() => {
-      this.$dialog.style.transform = 'translateY(0) scale(1)';
-    }, 150);
-  }
-
-  // APIs Públicas
   abrir() {
     this.setAttribute('abierto', '');
+    this._sincronizarEstado();
     this.dispatchEvent(new CustomEvent('modal-abierto', { bubbles: true, composed: true }));
   }
 
   cerrar() {
     this.removeAttribute('abierto');
+    this._sincronizarEstado();
     this.dispatchEvent(new CustomEvent('modal-cerrado', { bubbles: true, composed: true }));
   }
 }

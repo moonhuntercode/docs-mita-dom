@@ -15,7 +15,6 @@ import './markdown-styles.css';
 import { inicializarTelemetria } from './store/telemetryStore.js';
 import { Logger } from './utils/logger.js';
 import { checkMitaDomVersion } from './utils/versionChecker.js';
-import { runHealthCheck } from './utils/healthCheck.js';
 import { iniciarViteErrorCatcher } from './utils/viteErrorCatcher.js';
 
 inicializarTelemetria();
@@ -23,8 +22,12 @@ checkMitaDomVersion();
 iniciarViteErrorCatcher();
 Logger.info('Arrancando SPA MitaDOM...');
 
-// Ejecutar Auditoría Silenciosa después del arranque
-setTimeout(() => runHealthCheck(), 3000);
+// Ejecutar Auditoría Silenciosa diferida después del arranque (Code Splitting)
+setTimeout(() => {
+  import('./utils/healthCheck.js')
+    .then((m) => m.runHealthCheck())
+    .catch(() => {});
+}, 3000);
 
 
 // 3. Inicialización del Router
@@ -39,6 +42,7 @@ import './componentes/demo-shopping-list/demo-shopping-list.js';
 import './componentes/mita-sidebar/mita-sidebar.js';
 import './componentes/mita-profiler/mita-profiler.js';
 import './componentes/mita-docs-nav/mita-docs-nav.js';
+import './componentes/mita-lab-nav/mita-lab-nav.js';
 import './componentes/ui/mita-search.js';
 import './componentes/ui/mita-code-editor.js';
 import './componentes/ui/mita-teleport.js';

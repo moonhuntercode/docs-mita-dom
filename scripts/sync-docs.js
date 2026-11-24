@@ -36,10 +36,14 @@ for (const folder of foldersToCopy) {
   }
 }
 
-// Copiar el README.md a la caché
+// Copiar el README.md y CONTRIBUTING.md a la caché
 const readmePath = path.join(mitaDomDir, 'README.md');
 if (fs.existsSync(readmePath)) {
   fs.copyFileSync(readmePath, path.join(SRC_DOCS_DIR, 'readme.md'));
+}
+const contributingPath = path.join(mitaDomDir, 'CONTRIBUTING.md');
+if (fs.existsSync(contributingPath)) {
+  fs.copyFileSync(contributingPath, path.join(SRC_DOCS_DIR, 'contributing.md'));
 }
 
 console.log(`✅ Documentación sincronizada exitosamente en src/assets/mita-docs-cache/`);
