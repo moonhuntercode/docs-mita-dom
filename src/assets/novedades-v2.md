@@ -1,7 +1,17 @@
-# 🚀 ¡MitaDOM v2.7.0 + Bitácora Combinada por Hora, Versiones y Checklist!
-*Actualizado el 22 de Noviembre de 2026 (Incluye historial consolidado desde v2.2.0)*
+# 🚀 ¡MitaDOM v2.8.0 (2026-11-24) + Bitácora Combinada por Hora, Versiones y Checklist!
+*Actualizado el 24 de Noviembre de 2026 (Incluye historial consolidado desde v2.2.0 hasta v2.8.0)*
 
-Nos enorgullece presentar la evolución completa de **MitaDOM**, combinando todos los hitos históricos (`v2.2.0` → `v2.5.0` → `v2.6.0` → `v2.7.0`) junto con las **copias de estado por hora (*Hourly Snapshots*)** y el **Checklist de Funcionalidades Verificadas**.
+Nos enorgullece presentar **MitaDOM `v2.8.0`**, combinando todos los hitos históricos (`v2.2.0` → `v2.6.0` → `v2.7.0` → **`v2.8.0`**) junto con las **copias de estado por hora (*Hourly Snapshots*)**, la **guía de sintaxis completa**, el **Informe Técnico `2026-11-24`** y los **17 Laboratorios Interactivos**.
+
+---
+
+## 🚀 Lanzamiento Oficial `v2.8.0` (`2026-11-24`)
+
+### ⏱️ Copia `00:15 hrs` (`2026-11-24`) — `v2.8.0` (Changelog + Informe Técnico + Lab 17 `v28syntax` + Stack Vite 8 Oxc)
+- **Documentación & Changelog Oficial `v2.8.0` (`2026-11-24`)**: ejemplos **Antes vs Después** copiables en `/docs/2026-11-24-v2.8.0` e Informe Técnico completo con guía de sintaxis y mapa de los **17 Laboratorios** en `/docs/informe_tecnico_v2.8.0_2026-11-24`.
+- **Laboratorio 17 (`v28syntax`) en `/laboratorio`**: prueba interactiva en vivo de `sinRastrear()` (`untrack`, `0` bucles infinitos), selector de los **8 Subpath Exports** (`mita-dom/signals`, `mita-dom/async`, `mita-dom/element`, `mita-dom/rust`, `mita-dom/ssr`, `mita-dom/props`, `mita-dom/ui`, `mita-dom/devtools`), inspector real `obtenerCicloDeVida()` y consola silenciosa `{ debug: true }`.
+- **Ciclo de Vida Completo `MitaElement` + Solid 2.0 Async Graph**: `alCrear()` → `alAntesDeRenderizar()` → `render()` (Error Boundary) → `alMontar()` → `alCambiarProp()` → `alActualizar()` → `alDesmontar()`, más `crearMemoAsincrono()`, `crearEstadoVinculado()` (`linkedSignal`), `crearEstadoOptimistaConRollback()`, `crearFuncionServidorEnVivo()` (`live()` SSE), `cambiarEstrategiaRender()` en 1 línea y `emitirDiagnosticoAgente()` (`skills/reactivity-diagnostics/SKILL.md`).
+- **Infraestructura Ultra-Rápida (`0` Warnings)**: Vite 8 con minificador Rust **Oxc** (`~448 ms`), Rolldown `codeSplitting` (`index.js < 75 kB`), Vitest 5 `vmThreads`, eliminación de `139` dependencias legacy (`terser`/`@vitejs/plugin-legacy`/`core-js`) y validación de paridad NPM `npm run test:vercel`.
 
 ---
 
@@ -40,6 +50,9 @@ Nos enorgullece presentar la evolución completa de **MitaDOM**, combinando todo
 
 ## ✅ Checklist General de Versiones y Funcionalidades
 
+- [x] **Ciclo de Vida Completo `MitaElement` (`v2.8.0`)** (`alCrear`, `render`, `alMontar`, `alCambiarProp`, `alDesmontar`, `obtenerCicloDeVida`)
+- [x] **Solid 2.0 Async Graph, Angular `linkedSignal`, React 19 Optimistic & Live SSE (`v2.8.0`)** (`crearMemoAsincrono`, `crearEstadoVinculado`, `crearEstadoOptimistaConRollback`, `crearFuncionServidorEnVivo`)
+- [x] **`sinRastrear()` + 8 Subpath Exports + Agent Diagnostics `SKILL.md` + Vite 8 Oxc (`v2.8.0`)**
 - [x] **Signals & Reactividad Granular** (`crearEstadoLocal`, `crearEstadoCompartido`, `crearEfecto`, `.derivar`, `vincularTexto`)
 - [x] **Rust Memory Guard** (Borrow Checker `&T`/`&mut T`, RAII `Drop` 0 Memory Leaks)
 - [x] **Estrategias de Render Universal** (`SSR`, `SSG`, `Hybrid Islands`, `CSR/SPA`, control ON/OFF por vista)

@@ -258,5 +258,28 @@ describe('Laboratorio Signals v2.7 (<mita-lab-nav> en aside + <demo-laboratorio-
 
     vista.querySelector('#btn-solid2-diag').click();
     expect(vista.querySelector('#solid2-agent-out').textContent).toContain('MITA_LECTURA_SIN_RASTREO');
+
+    // 19. Probar Lección 17: Sintaxis v2.8.0 (sinRastrear + 8 Subpath Exports + obtenerCicloDeVida + debug silencioso)
+    labNav.querySelector('button[data-leccion="v28syntax"]').click();
+    await new Promise((r) => setTimeout(r, 25));
+
+    // Efecto se ejecutó 1 vez al montar; mutar el Signal no rastreado NO debe volver a dispararlo
+    expect(vista.querySelector('#v28-effect-badge').textContent).toContain('Efecto: 1');
+    vista.querySelector('#btn-v28-untracked').click();
+    expect(vista.querySelector('#v28-effect-badge').textContent).toContain('Efecto: 1');
+    expect(vista.querySelector('#v28-untrack-out').textContent).toContain('auditoria=1');
+
+    // Mutar el Signal rastreado SÍ dispara el efecto (pasa a 2)
+    vista.querySelector('#btn-v28-tracked').click();
+    expect(vista.querySelector('#v28-effect-badge').textContent).toContain('Efecto: 2');
+
+    // Selector interactivo de Subpath Exports
+    vista.querySelector('button[data-v28-subpath="mita-dom/async"]').click();
+    expect(vista.querySelector('#v28-subpath-code').textContent).toContain("from 'mita-dom/async'");
+    expect(vista.querySelector('#v28-subpath-code').textContent).toContain('crearMemoAsincrono');
+
+    // Inspector de ciclo de vida + modo debug silencioso
+    vista.querySelector('#btn-v28-lifecycle').click();
+    expect(vista.querySelector('#v28-lifecycle-out').textContent).toContain('montado=true');
   });
 });

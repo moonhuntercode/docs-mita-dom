@@ -2,9 +2,10 @@
 
 MitaDOM es una librería hiper-ligera, sin dependencias de runtime, para crear **Web Components Nativos** usando JavaScript puro (Vanilla JS) con reactividad granular por Signals, ciclo de vida completo en español (`MitaElement`), Async Graph estilo Solid 2.0 (`crearMemoAsincrono`, `crearFuncionServidorEnVivo`), `linkedSignal`, `sinRastrear`, protección de memoria estilo Rust (`rustGuard`), estrategias universales en 1 línea (`CSR`/`SSR`/`SSG`/`Hybrid`/`Resumable`), `@defer`, `Signal Forms`, Subpath Exports, Agent Repair Guide (`skills/`) y CLI (`npx mita`).
 
-- 📚 **Documentación Oficial y 16 Laboratorios Interactivos:** [docs-mita-dom.vercel.app](https://docs-mita-dom.vercel.app/)
+- 📚 **Documentación Oficial y 17 Laboratorios Interactivos:** [docs-mita-dom.vercel.app](https://docs-mita-dom.vercel.app/)
 - 🛠️ **Guía de Contribución, SemVer y Release:** [CONTRIBUTING.md](./CONTRIBUTING.md)
-- 📝 **Changelog v2.8.0 (Antes vs Después):** [changelogs/2026-11-23-v2.8.0.md](./changelogs/2026-11-23-v2.8.0.md)
+- 📝 **Changelog v2.8.0 (2026-11-24 — Antes vs Después):** [changelogs/2026-11-24-v2.8.0.md](./changelogs/2026-11-24-v2.8.0.md)
+- 📘 **Informe Técnico Oficial v2.8.0 (Sintaxis + 17 Labs):** [docs/referencia/INFORME_TECNICO_V2.8.0_2026-11-24.md](./docs/referencia/INFORME_TECNICO_V2.8.0_2026-11-24.md)
 
 ```bash
 npm install mita-dom

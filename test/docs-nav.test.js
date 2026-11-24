@@ -24,7 +24,7 @@ describe('MitaDocsNav (<mita-docs-nav>) — Buscador, Acordeones y Limpieza v2.7
     expect(nav.style.display).toBe('block');
     expect(nav.querySelectorAll('details.docs-accordion').length).toBeGreaterThanOrEqual(5);
 
-    // 1. Probar buscador en tiempo real
+    // 1. Probar buscador en tiempo real (v2.7.0 histórico + v2.8.0 actual 2026-11-24)
     const input = nav.querySelector('#docs-nav-search');
     expect(input).not.toBeNull();
     input.value = 'v2.7.0';
@@ -33,6 +33,15 @@ describe('MitaDocsNav (<mita-docs-nav>) — Buscador, Acordeones y Limpieza v2.7
     const visibles = Array.from(nav.querySelectorAll('.docs-accordion-list li')).filter((li) => !li.hidden);
     expect(visibles.length).toBeGreaterThanOrEqual(1);
     expect(visibles[0].textContent).toContain('v2.7.0');
+
+    // 1b. Verificar Changelog v2.8.0 (2026-11-24) e Informe Técnico v2.8.0 en índice y buscador
+    expect(nav.querySelector('a[href="/docs/2026-11-24-v2.8.0"]')).not.toBeNull();
+    expect(nav.querySelector('a[href="/docs/informe_tecnico_v2.8.0_2026-11-24"]')).not.toBeNull();
+    input.value = 'v2.8.0';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    const visiblesV28 = Array.from(nav.querySelectorAll('.docs-accordion-list li')).filter((li) => !li.hidden);
+    expect(visiblesV28.length).toBeGreaterThanOrEqual(2);
+    expect(visiblesV28.some((li) => li.textContent.includes('2026-11-24'))).toBe(true);
 
     // 2. Probar estado sin resultados
     input.value = 'documento-inexistente-xyz';

@@ -2,7 +2,7 @@
   <!-- Barra de contexto ultra-clara de la lección activa -->
   <header class="lab-context-bar" aria-labelledby="lab-active-title">
     <section class="lab-context-copy">
-      <p class="lab-eyebrow" id="lab-active-step">Lección 1 de 4 • Mita-DOM v2.7</p>
+      <p class="lab-eyebrow" id="lab-active-step">Lección 1 de 17 • Mita-DOM v2.8.0 (2026-11-24)</p>
       <h1 id="lab-active-title">Compartir Estado entre 3 Componentes</h1>
       <p id="lab-active-goal" class="lab-context-goal"></p>
       <p id="lab-active-try" class="lab-context-try"></p>
@@ -23,8 +23,8 @@
         <output id="lab-gamif-pill" class="lab-outline-btn">🌱 50 XP</output>
       </li>
       <li>
-        <a href="/docs/guia_framework_opinionado_props_defer_y_signal_forms_2026-11-22" class="lab-outline-btn">
-          🏛️ Guía Framework Opinionado
+        <a href="/docs/informe_tecnico_v2.8.0_2026-11-24" class="lab-outline-btn">
+          📘 Informe Técnico v2.8.0
         </a>
       </li>
     </menu>
@@ -49,6 +49,12 @@
     </button>
     <button type="button" class="lab-outline-btn" data-track-leccion="comunidad">
       🛡️ 6. Moderación "DC" &amp; Chat Gate (3s)
+    </button>
+    <button type="button" class="lab-outline-btn" data-track-leccion="solid2">
+      🧬 7. Solid 2.0 Async + Live SSE
+    </button>
+    <button type="button" class="lab-outline-btn" data-track-leccion="v28syntax">
+      🚀 8. Sintaxis v2.8.0 (sinRastrear + Subpaths)
     </button>
   </nav>
 
@@ -103,7 +109,7 @@
   <!-- Mapa de referencia rápida 100% Responsive con ejemplos y botón "Probar" -->
   <section class="lab-summary-docs" aria-labelledby="lab-cheatsheet-title">
     <header class="lab-summary-head">
-      <h2 id="lab-cheatsheet-title">📚 Referencia Rápida Mita-DOM v2.7</h2>
+      <h2 id="lab-cheatsheet-title">📚 Referencia Rápida Mita-DOM v2.8.0 (2026-11-24)</h2>
       <p>Cada tarjeta incluye su sintaxis real y un acceso directo para probarla en el Sandbox de arriba.</p>
     </header>
 
@@ -305,6 +311,30 @@ crearFormularioReactivoConSignals({ nombre: { requerido: true } });</code></pre>
           <p>Express + ORM Server Actions, Data Fetching bajo demanda vs automático, mapa visual de Estrategias y SemVer Advisor.</p>
           <pre class="cheatsheet-code"><code>crearControladorFetchingPorModo({ modoDisparo: 'al-hacer-click' });
 crearAccionServidorIsomorfica('empleos/crearORM', fn);</code></pre>
+        </article>
+      </li>
+
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>Solid 2.0 Async Graph</code> + <code>Live SSE</code> + <code>linkedSignal</code></h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="solid2">▶ Probar</button>
+          </header>
+          <p>Cascadas asíncronas sin race conditions, streams <code>async function*</code>, rollback optimista y estrategia en 1 línea.</p>
+          <pre class="cheatsheet-code"><code>const ciudades = crearMemoAsincrono(async (sig) =&gt; fetchApi(sig));
+cambiarEstrategiaRender('/empleos', 'RESUMABLE');</code></pre>
+        </article>
+      </li>
+
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>sinRastrear()</code> + 8 <code>Subpath Exports</code> + Ciclo v2.8</h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="v28syntax">▶ Probar</button>
+          </header>
+          <p>Evita bucles infinitos en <code>crearEfecto()</code>, importa solo lo que usas e inspecciona <code>obtenerCicloDeVida()</code>.</p>
+          <pre class="cheatsheet-code"><code>import { sinRastrear } from 'mita-dom/signals';
+sinRastrear(() =&gt; auditoria.set(auditoria.get() + 1));</code></pre>
         </article>
       </li>
     </ul>

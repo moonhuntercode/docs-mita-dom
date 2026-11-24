@@ -4,6 +4,7 @@ import {
   obtenerEstadoCompartido,
   listarEstadosCompartidos,
   crearEfecto,
+  sinRastrear,
   renderCondicional,
   vincularTexto,
   crearControlSpam,
@@ -366,6 +367,7 @@ import {
   crearEstadoCompartido,
   obtenerEstadoCompartido,
   crearEfecto,
+  sinRastrear,
   renderCondicional,
   vincularTexto
 } from 'mita-dom';
@@ -904,7 +906,7 @@ console.log(calcularRecomendacionSemVer({ versionActual: '2.7.0', agregaNuevaFun
     ]
   },
   solid2: {
-    paso: 'Lección 16 de 16',
+    paso: 'Lección 16 de 17',
     titulo: '🧬 Ciclo de Vida MitaElement + Solid 2.0 Async Graph + Live SSE + Diagnósticos IA',
     objetivo:
       'Domina el ciclo de vida oficial (alCrear -> render -> alMontar -> alCambiarProp -> alDesmontar), cascadas asíncronas sin race conditions (Solid 2.0 + Angular linkedSignal), streams live() SSE, rollback optimista y cambio de estrategia de render en 1 línea.',
@@ -978,6 +980,63 @@ const pedidosEnVivo = crearFuncionServidorEnVivo('cocina/pedidos', async functio
 // 3. Optimistic Rollback + Estrategia de Render en 1 línea
 const likes = crearEstadoOptimistaConRollback(12);
 cambiarEstrategiaRender('/empleos', 'RESUMABLE', { cacheSegundos: 60 });`
+      }
+    ]
+  },
+  v28syntax: {
+    paso: 'Lección 17 de 17 • Novedades v2.8.0 (2026-11-24)',
+    titulo: '🚀 Sintaxis v2.8.0: sinRastrear(), 8 Subpath Exports y Ciclo de Vida',
+    objetivo:
+      'Aprende la sintaxis oficial de MitaDOM v2.8.0: evita bucles infinitos con sinRastrear() (untrack), importa módulos granulares vía Subpath Exports, activa logs puntuales con { debug: true } e inspecciona obtenerCicloDeVida() en vivo.',
+    comoProbar:
+      '1) Pulsa "+1 Auditoría (sinRastrear)" y observa que el efecto sigue en 1 ejecución. 2) Pulsa "+1 Filtro (Rastreado)" para dispararlo. 3) Explora los 8 Subpath Exports e inspecciona el ciclo de vida real.',
+    tituloPreview: '🚀 Demo Viva v2.8.0: sinRastrear() + Subpath Exports + Ciclo de Vida',
+    archivos: [
+      {
+        nombre: 'sintaxis-v28-sinrastrear.js',
+        codigo: `import { crearEstadoLocal, crearEfecto, sinRastrear } from 'mita-dom/signals';
+
+// 1. Consola silenciosa por defecto en Vitest/CI/producción (opt-in con { debug: true })
+const filtroActivo = crearEstadoLocal(1);
+const auditoriaInterna = crearEstadoLocal(0, { debug: true });
+
+// 2. sinRastrear() lee y muta auditoriaInterna SIN suscribir el efecto a ella (0 bucles)
+const detener = crearEfecto(() => {
+  const actual = filtroActivo.get();
+  sinRastrear(() => {
+    const prev = auditoriaInterna.get();
+    console.debug('Filtro:', actual, '| Auditoría no rastreada:', prev);
+  });
+});
+
+// Mutar auditoriaInterna NO vuelve a disparar el efecto:
+auditoriaInterna.set(auditoriaInterna.get() + 1);
+// Mutar filtroActivo SÍ dispara el efecto:
+filtroActivo.set(2);
+detener();`
+      },
+      {
+        nombre: 'subpath-exports-y-ciclo.js',
+        codigo: `// 8 Subpath Exports oficiales de mita-dom@2.8.0 (100% tree-shakeables)
+import { crearEstadoLocal, sinRastrear } from 'mita-dom/signals';
+import { crearMemoAsincrono, cambiarEstrategiaRender } from 'mita-dom/async';
+import { MitaElement } from 'mita-dom/element';
+import { crearEstadoReactivoInmutable } from 'mita-dom/rust';
+import { renderizarVistaUniversal } from 'mita-dom/ssr';
+import { pasarPropsAElemento } from 'mita-dom/props';
+import { renderizarVistaDiferida } from 'mita-dom/ui';
+import { ejecutarConsejeroMitaDoc } from 'mita-dom/devtools';
+
+// Inspección real del ciclo de vida de cualquier Web Component MitaElement:
+class MiWidget extends MitaElement {
+  alCrear() { this.conteo = crearEstadoLocal(0); }
+  render() { this.innerHTML = '<output class="val">0</output>'; }
+  alMontar() {
+    this.vincularTexto(this.conteo, '.val');
+    console.log(this.obtenerCicloDeVida());
+    // => { componente: 'mi-widget', faseActual: 'montado', montado: true, renders: 1, limpiezasPendientes: 1 }
+  }
+}`
       }
     ]
   }
@@ -3657,6 +3716,189 @@ export class DemoLaboratorioSignals extends MitaElement {
         () => likesOptimistas.destruir(),
         () => streamCocina.destruir(),
         () => depSignal.destroy()
+      );
+      return;
+    }
+
+    if (this.leccionActiva === 'v28syntax') {
+      const contadorRastreado = crearEstadoLocal(1);
+      const auditoriaNoRastreada = crearEstadoLocal(0);
+      let ejecucionesEfecto = 0;
+
+      const subpathsCatalogo = {
+        'mita-dom/signals': {
+          titulo: 'Signals, Efectos y sinRastrear',
+          snippet:
+            "import { crearEstadoLocal, crearEstadoCompartido, crearEfecto, sinRastrear, vincularTexto, renderCondicional } from 'mita-dom/signals';"
+        },
+        'mita-dom/async': {
+          titulo: 'Solid 2.0 Async Graph, linkedSignal, Live SSE y Agentes IA',
+          snippet:
+            "import { crearMemoAsincrono, crearEstadoVinculado, crearEstadoOptimistaConRollback, crearFuncionServidorEnVivo, cambiarEstrategiaRender, emitirDiagnosticoAgente } from 'mita-dom/async';"
+        },
+        'mita-dom/element': {
+          titulo: 'Clase Base MitaElement con Ciclo de Vida Completo',
+          snippet: "import { MitaElement } from 'mita-dom/element';"
+        },
+        'mita-dom/rust': {
+          titulo: 'Rust Memory Guard (Borrow Checker &T / &mut T + RAII Drop)',
+          snippet:
+            "import { crearEstadoReactivoInmutable, leerEstadoInmutable, mutarEstadoConHistorial, crearAmbitoConLimpiezaAutomatica } from 'mita-dom/rust';"
+        },
+        'mita-dom/ssr': {
+          titulo: 'Render Universal (SSR / SSG / Hybrid Islands / CSR) + SEO',
+          snippet: "import { renderizarVistaUniversal, MitaMeta } from 'mita-dom/ssr';"
+        },
+        'mita-dom/props': {
+          titulo: 'Motor de Props React.dev para Web Components',
+          snippet: "import { pasarPropsAElemento, leerPropsDeElemento } from 'mita-dom/props';"
+        },
+        'mita-dom/ui': {
+          titulo: '@defer, Signal Forms, Paginación, Auth, Chat y Moderación',
+          snippet:
+            "import { renderizarVistaDiferida, crearFormularioReactivoConSignals, crearControladorPaginacion, crearControladorAuth } from 'mita-dom/ui';"
+        },
+        'mita-dom/devtools': {
+          titulo: 'Profiler, Mita Doc Advisor y SemVer Release Advisor',
+          snippet:
+            "import { ejecutarConsejeroMitaDoc, calcularRecomendacionSemVer } from 'mita-dom/devtools';"
+        }
+      };
+
+      stage.innerHTML = `
+        <article class="demo-panel">
+          <header class="demo-panel-head">
+            <h3>🙈 1. <code>sinRastrear()</code> (<code>untrack</code>) — Cero Bucles Infinitos</h3>
+            <span class="demo-tag" id="v28-effect-badge">Efecto: 0</span>
+          </header>
+          <p class="demo-help">
+            El efecto lee <code>contadorRastreado</code> normalmente y lee <code>auditoriaNoRastreada</code> dentro de <code>sinRastrear()</code>.
+          </p>
+          <nav class="demo-btn-group" aria-label="Probar sinRastrear vs rastreado">
+            <button type="button" id="btn-v28-untracked" class="demo-btn">
+              🙈 +1 Auditoría (NO dispara efecto)
+            </button>
+            <button type="button" id="btn-v28-tracked" class="demo-btn demo-btn-ghost">
+              ⚡ +1 Filtro Rastreado (SÍ dispara efecto)
+            </button>
+          </nav>
+          <output id="v28-untrack-out" class="demo-log-output"></output>
+        </article>
+
+        <article class="demo-panel">
+          <header class="demo-panel-head">
+            <h3>📦 2. Explorador de los 8 Subpath Exports (<code>mita-dom@2.8.0</code>)</h3>
+            <span class="demo-tag" id="v28-subpath-badge">mita-dom/signals</span>
+          </header>
+          <nav class="demo-btn-group" aria-label="Selector de Subpath Exports">
+            ${Object.keys(subpathsCatalogo)
+              .map(
+                (ruta, idx) =>
+                  `<button type="button" class="demo-btn ${idx === 0 ? '' : 'demo-btn-ghost'}" data-v28-subpath="${ruta}">${ruta.replace('mita-dom/', '/')}</button>`
+              )
+              .join('')}
+          </nav>
+          <pre id="v28-subpath-code" class="demo-pre"></pre>
+        </article>
+
+        <article class="demo-panel">
+          <header class="demo-panel-head">
+            <h3>🧬 3. Inspector <code>obtenerCicloDeVida()</code> + Consola Silenciosa</h3>
+            <span class="demo-tag">2026-11-24</span>
+          </header>
+          <nav class="demo-btn-group" aria-label="Inspeccionar ciclo de vida">
+            <button type="button" id="btn-v28-lifecycle" class="demo-btn">
+              🔍 Llamar this.obtenerCicloDeVida()
+            </button>
+            <button type="button" id="btn-v28-debug-toggle" class="demo-btn demo-btn-ghost">
+              🔇 Modo Consola: Silenciosa en Tests/Prod
+            </button>
+          </nav>
+          <output id="v28-lifecycle-out" class="demo-log-output">
+            Pulsa el botón para leer el estado real del ciclo de vida de &lt;demo-laboratorio-signals&gt;.
+          </output>
+        </article>
+      `;
+
+      const pintarEstadoUntrack = (origen) => {
+        const badge = stage.querySelector('#v28-effect-badge');
+        const out = stage.querySelector('#v28-untrack-out');
+        if (badge) badge.textContent = `Efecto: ${ejecucionesEfecto}`;
+        if (out) {
+          out.textContent =
+            `[${origen}] filtro=${contadorRastreado.get()} | auditoria=${auditoriaNoRastreada.get()} | ejecucionesEfecto=${ejecucionesEfecto}`;
+        }
+      };
+
+      const stopEfectoV28 = crearEfecto(() => {
+        const valRastreado = contadorRastreado.get();
+        const valAuditoria = sinRastrear(() => auditoriaNoRastreada.get());
+        ejecucionesEfecto += 1;
+        const badge = stage.querySelector('#v28-effect-badge');
+        const out = stage.querySelector('#v28-untrack-out');
+        if (badge) badge.textContent = `Efecto: ${ejecucionesEfecto}`;
+        if (out) {
+          out.textContent =
+            `[crearEfecto] filtro=${valRastreado} | auditoria=${valAuditoria} | ejecucionesEfecto=${ejecucionesEfecto}`;
+        }
+      });
+
+      const pintarSubpath = (clave) => {
+        const info = subpathsCatalogo[clave];
+        if (!info) return;
+        const badge = stage.querySelector('#v28-subpath-badge');
+        const pre = stage.querySelector('#v28-subpath-code');
+        if (badge) badge.textContent = clave;
+        if (pre) pre.textContent = `// ${info.titulo}\n${info.snippet}`;
+      };
+      pintarSubpath('mita-dom/signals');
+
+      let debugActivoLocal = false;
+      const onClickV28 = (e) => {
+        const subpathBtn = e.target.closest('button[data-v28-subpath]');
+        if (subpathBtn) {
+          stage.querySelectorAll('button[data-v28-subpath]').forEach((b) => b.classList.add('demo-btn-ghost'));
+          subpathBtn.classList.remove('demo-btn-ghost');
+          pintarSubpath(subpathBtn.getAttribute('data-v28-subpath'));
+          return;
+        }
+
+        if (e.target.id === 'btn-v28-untracked') {
+          auditoriaNoRastreada.set(auditoriaNoRastreada.get() + 1);
+          pintarEstadoUntrack('sinRastrear');
+        } else if (e.target.id === 'btn-v28-tracked') {
+          contadorRastreado.set(contadorRastreado.get() + 1);
+        } else if (e.target.id === 'btn-v28-lifecycle') {
+          const snap =
+            typeof this.obtenerCicloDeVida === 'function'
+              ? this.obtenerCicloDeVida()
+              : { componente: 'demo-laboratorio-signals', faseActual: 'montado', montado: true, renders: 1 };
+          const out = stage.querySelector('#v28-lifecycle-out');
+          if (out) {
+            out.textContent =
+              `🧬 <${snap.componente}> => fase=${snap.faseActual} | montado=${snap.montado} | renders=${snap.renders} | limpiezas=${snap.limpiezasPendientes ?? 0}`;
+          }
+        } else if (e.target.id === 'btn-v28-debug-toggle') {
+          debugActivoLocal = !debugActivoLocal;
+          e.target.textContent = debugActivoLocal
+            ? '🔊 Modo Consola: { debug: true } Activado'
+            : '🔇 Modo Consola: Silenciosa en Tests/Prod';
+          const out = stage.querySelector('#v28-lifecycle-out');
+          if (out) {
+            out.textContent = debugActivoLocal
+              ? '🔊 Opt-in activo: crearEstadoLocal(0, { debug: true }) imprimirá mutaciones en consola.'
+              : '🔇 Modo limpio: 0 ruido en Vitest, CI y producción.';
+          }
+        }
+      };
+
+      stage.addEventListener('click', onClickV28);
+
+      this._limpiezasPreview.push(
+        stopEfectoV28,
+        () => stage.removeEventListener('click', onClickV28),
+        () => contadorRastreado.destroy(),
+        () => auditoriaNoRastreada.destroy()
       );
     }
   }

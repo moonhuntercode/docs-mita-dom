@@ -4,36 +4,302 @@
 
 ---
 
-<!-- Fuente: changelogs/2026-11-23-v2.8.0.md -->
-# 📝 Changelog v2.8.0 — 2026-11-23 (Ciclo de Vida Completo, Solid 2.0 Async Graph, `sinRastrear`, Subpath Exports y Agent Diagnostics)
+<!-- Fuente: changelogs/2026-11-24-v2.8.0.md -->
+# 📝 Changelog v2.8.0 — 2026-11-24 (Ciclo de Vida Completo, Solid 2.0 Async Graph, `sinRastrear`, Subpath Exports y Laboratorios v2.8)
 
-- **Fecha de lanzamiento:** `2026-11-23`
+- **Fecha de lanzamiento oficial:** `2026-11-24`
+- **Versión:** `v2.8.0` (SemVer **MINOR** — 100% retrocompatible con `v2.7.0`, `0` breaking changes)
 - **Autor:** Victor Code (Bolivia) — `mita-dom`
-- **Compatibilidad:** **100% retrocompatible con `v2.7.0`** (`0` breaking changes; bump MINOR según SemVer).
+- **Informe Técnico Complementario:** [INFORME_TECNICO_V2.8.0_2026-11-24.md](../docs/referencia/INFORME_TECNICO_V2.8.0_2026-11-24.md)
+- **Laboratorio Interactivo:** `/laboratorio` (Lecciones **16** y **17** en vivo)
 
 ---
 
-## ✨ Novedades Principales de `v2.8.0`
+## 📊 Resumen Ejecutivo: `v2.7.0` vs `v2.8.0`
 
-### 1. 🧬 Ciclo de Vida Completo y Unificado en `MitaElement`
-- Orden oficial garantizado sin dobles renders: **`alCrear()` → `alAntesDeRenderizar()` → `render()` (Error Boundary `fallbackUI`/`alError`) → `alMontar()` (DOM listo) → `alCambiarProp()` / `alCambiarAtributo()` → `alActualizar()` → Auto-Limpieza `_limpiezas` + `alDesmontar()`**.
-- Nuevos atajos ergonómicos: `this.vincularTexto(signal, selectorONodo, fn)` (auto-limpiado), `this.solicitarActualizacion(motivo)` y `this.obtenerCicloDeVida()`.
+| Capacidad | `v2.7.0` (`2026-11-22`) | `v2.8.0` (`2026-11-24`) |
+| :--- | :--- | :--- |
+| **Ciclo de Vida `MitaElement`** | `render()` + `disconnectedCallback()` manual | Flujo completo garantizado: `alCrear()` → `alAntesDeRenderizar()` → `render()` (Error Boundary) → `alMontar()` → `alCambiarProp()` → `alActualizar()` → auto-limpieza + `alDesmontar()` + `obtenerCicloDeVida()` |
+| **Reactividad Asíncrona** | `crearFetcherConCacheYEstados` (manual) | **Solid 2.0 Async Graph**: `crearMemoAsincrono()` (auto-cancela *race conditions* con `AbortSignal` + `LONG_HOLD`) + `crearEstadoVinculado()` (Angular 20 `linkedSignal`) |
+| **Mutaciones y Streaming** | Server Actions simples | `crearEstadoOptimistaConRollback()` (React 19) + `crearFuncionServidor()` + `crearFuncionServidorEnVivo()` (`live()` `async function*` / SSE) |
+| **Control de Rastreo y Logs** | Consola siempre verbosa en tests/CI | `sinRastrear(fn)` (`untrack`) contra bucles infinitos + **consola silenciosa por defecto** en `VITEST`/`CI`/`production` (`{ debug: true }` opcional) |
+| **Estrategias de Render** | Configuración por objeto | Cambio en **1 línea**: `definirEstrategiaRenderRuta()` y `cambiarEstrategiaRender()` (`CSR`/`SSR`/`SSG`/`HYBRID`/`RESUMABLE`) |
+| **Imports Granulares** | Solo entrada monolítica `'mita-dom'` | **8 Subpath Exports**: `mita-dom/signals`, `mita-dom/async`, `mita-dom/rust`, `mita-dom/ssr`, `mita-dom/props`, `mita-dom/element`, `mita-dom/ui`, `mita-dom/devtools` |
+| **DX para Agentes IA** | Documentación humana únicamente | `emitirDiagnosticoAgente()` + `skills/reactivity-diagnostics/SKILL.md` empaquetada en NPM |
+| **Build & Testing Ecosistema** | Terser + Legacy (`4.1s`, warnings) | Vite 8 Oxc nativo (`448ms`), Rolldown `codeSplitting` (`< 71 kB`), Vitest 5 `vmThreads`, `0` warnings |
 
-### 2. ⚡ Async Graph (`Solid 2.0`), `linkedSignal` (`Angular 20`), Optimistic Rollback (`React 19`) y Estrategias en 1 Línea (`src/core/asyncGraph.js`)
-- **`crearMemoAsincrono(fnAsync, opts)`:** promesas dentro del grafo reactivo, cancelación automática de *race conditions* con `AbortSignal`, UI *stale* (`estaPendiente()`) y detección `MITA_ESPERA_PROLONGADA` (`LONG_HOLD`).
-- **`crearEstadoVinculado(leerFuente, calcular)`:** estado derivado escribible que se reinicia automáticamente al cambiar su fuente padre.
-- **`crearEstadoOptimistaConRollback(inicial)`:** actualización optimista instantánea con rollback automático si falla el servidor.
-- **`crearFuncionServidor()` y `crearFuncionServidorEnVivo()` (`live()` `async function*` / SSE):** RPC y streaming reactivo directo a Signals.
-- **`definirEstrategiaRenderRuta()` / `cambiarEstrategiaRender()`:** cambia cualquier ruta en 1 línea entre `CSR`, `SSR`, `SSG`, `HYBRID` y `RESUMABLE`.
+---
 
-### 3. 🙈 `sinRastrear(fn)` (`untrack`) y Consola Silenciosa en Tests/Producción
-- **`sinRastrear(fn)`** en `src/core/signals.js`: permite leer o mutar Signals internos dentro de `crearEfecto()` sin auto-suscribirse (evitando bucles infinitos).
-- **Consola limpia por defecto** en `VITEST`, `NODE_TEST_CONTEXT`, `CI` y `production` (activable con `{ debug: true }` o `globalThis.__MITA_DEBUG__ = true`).
+## 🔄 Cambios Detallados con Ejemplos **Antes vs Después**
 
-### 4. 🤖 Built to Be Written by Agents + 📦 Subpath Exports
-- **`emitirDiagnosticoAgente()` + `skills/reactivity-diagnostics/SKILL.md`** incluida en el paquete NPM (`"files": ["skills"]`).
-- **Subpath Exports granulares** en `package.json`: `mita-dom/signals`, `mita-dom/async`, `mita-dom/rust`, `mita-dom/ssr`, `mita-dom/props`, `mita-dom/element`, `mita-dom/ui`, `mita-dom/devtools`.
-- **Auto-Documentación categorizada estilo `react.dev/reference/react`** (`22` módulos) + Glosario A–Z + Guía Express 5 / Routing / Data Fetching / Alias / Vite 8 Oxc.
+### 1. 🧬 Ciclo de Vida Unificado en `MitaElement` (`alCrear`, `render`, `alMontar`, `alCambiarProp`, `alDesmontar`)
+
+Se unificó el ciclo de vida oficial para evitar dobles renders manuales y fugas de memoria. Además se agregaron `this.vincularTexto()`, `this.solicitarActualizacion(motivo)` y `this.obtenerCicloDeVida()`.
+
+#### ❌ Antes (`v2.7.0`)
+```js
+import { MitaElement, crearEstadoLocal, vincularTexto } from 'mita-dom';
+
+export class MiContador extends MitaElement {
+  constructor() {
+    super();
+    this._limpiezas = [];
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.contador = crearEstadoLocal(0);
+    this.innerHTML = '<button class="btn">0</button>';
+    const stop = vincularTexto(this.contador, this.querySelector('.btn'), (n) => `Clics: ${n}`);
+    this._limpiezas.push(stop);
+  }
+
+  disconnectedCallback() {
+    this._limpiezas.forEach((fn) => fn());
+    this.contador.destroy();
+  }
+}
+```
+
+#### ✅ Después (`v2.8.0`)
+```js
+import { MitaElement, crearEstadoLocal } from 'mita-dom';
+
+export class MiContador extends MitaElement {
+  static get observedAttributes() {
+    return ['color-acento'];
+  }
+
+  // 1. Antes del DOM: inicializa Signals
+  alCrear() {
+    this.contador = crearEstadoLocal(0);
+  }
+
+  // 2. Pinta Light DOM una sola vez (protegido por Error Boundary automático)
+  render() {
+    this.innerHTML = '<button type="button" class="btn">0</button>';
+  }
+
+  // 3. DOM garantizado: enlaza texto y eventos con limpieza automática al desmontar
+  alMontar() {
+    this.vincularTexto(this.contador, '.btn', (n) => `Clics: ${n}`);
+
+    const btn = this.querySelector('.btn');
+    const alClick = () => this.contador.set(this.contador.get() + 1);
+    btn?.addEventListener('click', alClick);
+    this.registrarLimpieza(() => btn?.removeEventListener('click', alClick));
+  }
+
+  // 4. Reacción granular a atributos observados en camelCase
+  alCambiarProp(prop, _antes, valorNuevo) {
+    if (prop === 'colorAcento') {
+      this.querySelector('.btn')?.style.setProperty('border-color', valorNuevo);
+    }
+  }
+
+  // 5. Inspección instantánea de salud del ciclo de vida
+  inspeccionar() {
+    return this.obtenerCicloDeVida();
+    // => { etiqueta: 'mi-contador', fase: 'montado', montado: true, renderizado: true, limpiezasPendientes: 2 }
+  }
+
+  // 6. Limpieza adicional opcional (todas las suscripciones registradas ya fueron liberadas)
+  alDesmontar() {
+    this.contador.destroy();
+  }
+}
+```
+
+---
+
+### 2. ⚡ Solid 2.0 Async Graph (`crearMemoAsincrono`) + Angular 20 `linkedSignal` (`crearEstadoVinculado`)
+
+Permite escribir cascadas asíncronas declarativas sin condiciones de carrera (*race conditions*), manteniendo el valor anterior (*stale*) mientras carga el nuevo y reiniciando selecciones hijas automáticamente cuando cambia el padre.
+
+#### ❌ Antes (`v2.7.0`)
+```js
+let abortCtrl = null;
+departamento.suscribir(async (dep) => {
+  if (abortCtrl) abortCtrl.abort();
+  abortCtrl = new AbortController();
+  try {
+    const res = await fetch(`/api/ciudades?dep=${dep}`, { signal: abortCtrl.signal });
+    const lista = await res.json();
+    ciudades.set(lista);
+    ciudadActiva.set(lista[0] || '');
+  } catch (err) {
+    if (err.name !== 'AbortError') console.error(err);
+  }
+});
+```
+
+#### ✅ Después (`v2.8.0`)
+```js
+import { crearEstadoLocal } from 'mita-dom/signals';
+import { crearMemoAsincrono, crearEstadoVinculado } from 'mita-dom/async';
+
+const departamento = crearEstadoLocal('Santa Cruz');
+
+// Cancela automáticamente requests viejos con AbortSignal y detecta LONG_HOLD
+const ciudades = crearMemoAsincrono(
+  async (signalAbort) => {
+    const dep = departamento.get();
+    const res = await fetch(`/api/ciudades?dep=${encodeURIComponent(dep)}`, { signal: signalAbort });
+    return res.json();
+  },
+  { valorInicial: [], umbralEsperaProlongadaMs: 2500, nombre: 'ciudades:bolivia' }
+);
+
+// linkedSignal: seleccionable por el usuario, se resetea solo si cambia la lista padre
+const ciudadActiva = crearEstadoVinculado(
+  () => ciudades.estado.get().valor || [],
+  (lista) => lista[0] || ''
+);
+```
+
+---
+
+### 3. 📡 Optimistic Rollback (React 19) + Live Server Functions (`async function*` / SSE)
+
+Mutaciones instantáneas con reversión garantizada si el backend falla, y streams reactivos en tiempo real directos a Signals.
+
+#### ❌ Antes (`v2.7.0`)
+```js
+const anterior = likes.get();
+likes.set(anterior + 1);
+try {
+  const confirmado = await apiGuardarLike();
+  likes.set(confirmado);
+} catch (err) {
+  likes.set(anterior); // Rollback manual repetido en cada botón
+}
+```
+
+#### ✅ Después (`v2.8.0`)
+```js
+import {
+  crearEstadoOptimistaConRollback,
+  crearFuncionServidor,
+  crearFuncionServidorEnVivo
+} from 'mita-dom/async';
+
+// 1. Optimistic UI + Rollback automático en caso de error de red/SQL
+const likes = crearEstadoOptimistaConRollback(25);
+await likes.aplicarConServidor(likes.valor() + 1, () => apiGuardarLike());
+
+// 2. Server Function RPC con metadatos de servidor
+const guardarPedido = crearFuncionServidor('pedidos/crear', async (payload) => {
+  return { ok: true, id: Date.now(), ...payload };
+});
+
+// 3. Live Stream (async function* / SSE conectado a Signal)
+const pedidosEnVivo = crearFuncionServidorEnVivo('cocina/pedidos', async function* () {
+  yield '🧾 Pedido #208 recibido';
+  yield '🔥 En parrilla (Keperí)';
+  yield '✅ Listo para entregar';
+});
+await pedidosEnVivo.iniciar();
+```
+
+---
+
+### 4. 🙈 `sinRastrear(fn)` (`untrack`) y Consola Silenciosa en Tests / Producción
+
+Evita suscripciones accidentales dentro de `crearEfecto()` y mantiene las salidas de Vitest / CI / Producción 100% limpias sin truncamiento de logs.
+
+#### ❌ Antes (`v2.7.0`)
+```js
+// Riesgo de bucle infinito si un efecto lee y muta el mismo Signal o lee un contador auxiliar
+crearEfecto(() => {
+  const total = filtro.get();
+  const auditoria = contadorAuditoria.get(); // ❌ Suscribe el efecto también a contadorAuditoria
+  contadorAuditoria.set(auditoria + 1);      // 💥 Auto-disparo / ruido en consola
+});
+```
+
+#### ✅ Después (`v2.8.0`)
+```js
+import { crearEstadoLocal, crearEfecto, sinRastrear } from 'mita-dom/signals';
+
+const filtro = crearEstadoLocal('remoto');
+const contadorAuditoria = crearEstadoLocal(0);
+
+// Solo se ejecuta cuando cambia `filtro`; leer/mutar `contadorAuditoria` NO dispara el efecto
+const detener = crearEfecto(() => {
+  const valorFiltro = filtro.get();
+  sinRastrear(() => {
+    contadorAuditoria.set(contadorAuditoria.get() + 1);
+  });
+  console.debug('Filtro aplicado:', valorFiltro);
+});
+
+// Consola silenciosa por defecto en VITEST/CI/production; activa trazas solo cuando las pidas:
+const estadoConTraza = crearEstadoLocal(0, { debug: true });
+```
+
+---
+
+### 5. 🌐 Cambio de Estrategia de Render en 1 Línea (`CSR` / `SSR` / `SSG` / `HYBRID` / `RESUMABLE`)
+
+#### ❌ Antes (`v2.7.0`)
+```js
+// Requería crear e instanciar manualmente un controlador completo por ruta y reconfigurarlo
+```
+
+#### ✅ Después (`v2.8.0`)
+```js
+import { definirEstrategiaRenderRuta, cambiarEstrategiaRender } from 'mita-dom/async';
+
+// Declaración inicial (1 línea)
+definirEstrategiaRenderRuta('/empleos', 'SSR', { cacheSegundos: 60 });
+
+// Cambio en caliente o por entorno (CSR | SSR | SSG | HYBRID | RESUMABLE)
+const resultado = cambiarEstrategiaRender('/empleos', 'RESUMABLE', { cacheSegundos: 120 });
+// resultado.detalles.servidorExpress => instrucciones listas para Express 5
+```
+
+---
+
+### 6. 📦 Subpath Exports Granulares (Mejor Tree-Shaking y Organización)
+
+#### ❌ Antes (`v2.7.0`)
+```js
+// Todo pasaba por el barril raíz:
+import { crearEstadoLocal, crearEfecto } from 'mita-dom';
+```
+
+#### ✅ Después (`v2.8.0` — compatible con ambos estilos)
+```js
+import { crearEstadoLocal, crearEfecto, sinRastrear } from 'mita-dom/signals';
+import { crearMemoAsincrono, crearEstadoVinculado, cambiarEstrategiaRender } from 'mita-dom/async';
+import { MitaElement } from 'mita-dom/element';
+import { crearEstadoReactivoInmutable, crearAmbitoConLimpiezaAutomatica } from 'mita-dom/rust';
+import { renderizarVistaUniversal, MitaMeta } from 'mita-dom/ssr';
+import { pasarPropsAElemento, leerPropsDeElemento } from 'mita-dom/props';
+import { crearControladorPaginacion, crearFormularioReactivoConSignals } from 'mita-dom/ui';
+import { ejecutarConsejeroMitaDoc, calcularRecomendacionSemVer } from 'mita-dom/devtools';
+```
+
+---
+
+### 7. 🤖 Built to Be Written by Agents (`emitirDiagnosticoAgente` + `SKILL.md`)
+
+```js
+import { emitirDiagnosticoAgente } from 'mita-dom/async';
+
+const diag = emitirDiagnosticoAgente('MITA_LECTURA_SIN_RASTREO', {
+  origen: '<mi-tarjeta> -> render()',
+  silencioso: true
+});
+// => { codigo: 'MITA_LECTURA_SIN_RASTREO', solucion: '...', guiaAgente: 'skills/reactivity-diagnostics/SKILL.md' }
+```
+
+---
+
+## 🧪 Verificación QA Real (`2026-11-24`)
+
+- **`mita-dom@2.8.0`**: `69/69` tests en verde (`11` suites), `0` errores ESLint, `0` errores Stylelint, `npm pack --dry-run` limpio (`skills/`, `bin/`, `types/`, `dist/`).
+- **`docs-mita-dom` (`example-mita-spa-01-js@2.8.0`)**: `17` laboratorios interactivos vivos, Vite 8 Oxc build `< 500ms`, Rolldown `codeSplitting` (`index.js` `< 75 kB`), `0` warnings de bundle, `0` warnings de Vitest `vmThreads`, `npm run test:vercel` 100% paridad NPM.
 
 ---
 
