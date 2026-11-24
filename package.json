@@ -1,6 +1,6 @@
 {
   "name": "example-mita-spa-01-js",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,6 +16,7 @@
     "test:ui": "vitest --ui",
     "test:css": "node scripts/check-unused-css.js",
     "test:bundle": "node scripts/check-bundle-size.js",
+    "test:vercel": "node scripts/check-npm-parity.js",
     "qa": "node scripts/sync-docs.js && npm run lint && npm run test:css && npm run test && npm run build && npm run test:bundle"
   },
   "devDependencies": {
@@ -31,6 +32,6 @@
   },
   "dependencies": {
     "marked": "^18.2.1",
-    "mita-dom": "^2.7.0"
+    "mita-dom": "^2.8.0"
   }
 }

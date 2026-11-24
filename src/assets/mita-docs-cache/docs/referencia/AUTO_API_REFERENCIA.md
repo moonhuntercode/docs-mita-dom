@@ -1,6 +1,6 @@
-# 🤖 Referencia de API Auto-Generada — MitaDOM v2.7.0
+# 🤖 Referencia de API Auto-Generada — MitaDOM v2.8.0
 
-- **Versión:** `v2.7.0`
+- **Versión:** `v2.8.0`
 - **Fecha de Auto-Generación:** `2026-11-24`
 - **Comando:** `npm run docs:auto` (`scripts/auto-docs.js`)
 - **Guía Profunda + Equivalencias `react.dev/reference/react` + Glosario:** `docs/referencia/REFERENCIA_COMPLETA_REACT_A_MITADOM_GLOSARIO_Y_PROFUNDIZACION_2026-11-23.md`

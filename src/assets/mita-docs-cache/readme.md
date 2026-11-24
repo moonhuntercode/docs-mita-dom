@@ -1,10 +1,10 @@
-# MitaDOM v2.7.0 🚀
+# MitaDOM v2.8.0 🚀
 
-MitaDOM es una librería hiper-ligera, sin dependencias de runtime, para crear **Web Components Nativos** usando JavaScript puro (Vanilla JS) con reactividad granular por Signals, protección de memoria estilo Rust (`rustGuard`), estrategias universales (`CSR`/`SSR`/`SSG`/`Hybrid`), `@defer`, `Signal Forms` y CLI (`npx mita`).
+MitaDOM es una librería hiper-ligera, sin dependencias de runtime, para crear **Web Components Nativos** usando JavaScript puro (Vanilla JS) con reactividad granular por Signals, ciclo de vida completo en español (`MitaElement`), Async Graph estilo Solid 2.0 (`crearMemoAsincrono`, `crearFuncionServidorEnVivo`), `linkedSignal`, `sinRastrear`, protección de memoria estilo Rust (`rustGuard`), estrategias universales en 1 línea (`CSR`/`SSR`/`SSG`/`Hybrid`/`Resumable`), `@defer`, `Signal Forms`, Subpath Exports, Agent Repair Guide (`skills/`) y CLI (`npx mita`).
 
-- 📚 **Documentación Oficial y 15 Laboratorios Interactivos:** [docs-mita-dom.vercel.app](https://docs-mita-dom.vercel.app/)
+- 📚 **Documentación Oficial y 16 Laboratorios Interactivos:** [docs-mita-dom.vercel.app](https://docs-mita-dom.vercel.app/)
 - 🛠️ **Guía de Contribución, SemVer y Release:** [CONTRIBUTING.md](./CONTRIBUTING.md)
-- 📝 **Changelog v2.7.0 (Antes vs Después):** [changelogs/2026-11-22-v2.7.0.md](./changelogs/2026-11-22-v2.7.0.md)
+- 📝 **Changelog v2.8.0 (Antes vs Después):** [changelogs/2026-11-23-v2.8.0.md](./changelogs/2026-11-23-v2.8.0.md)
 
 ```bash
 npm install mita-dom
