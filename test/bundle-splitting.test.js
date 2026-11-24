@@ -41,7 +41,7 @@ describe('Code Splitting y Presupuesto de Bundle (0 Warnings Vite > 500 kB)', ()
     expect(viteCfg).not.toMatch(/^\s*chunkSizeWarningLimit\s*:/m);
     expect(viteCfg).not.toMatch(/^\s*minify\s*:\s*['"]terser['"]/m);
     expect(viteCfg).toMatch(/^\s*minify\s*:\s*true/m);
-    expect(viteCfg).toContain('MITA_LEGACY');
+    expect(viteCfg).not.toContain('@vitejs/plugin-legacy');
 
     const vitestCfg = fs.readFileSync(path.resolve(__dirname, '../vitest.config.js'), 'utf8');
     expect(vitestCfg).toMatch(/pool\s*:\s*['"]vmThreads['"]/);

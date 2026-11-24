@@ -30,7 +30,7 @@ function listarArchivosJs(dir, lista = []) {
 
 function extraerImportsMitaDom(codigo) {
   const simbolos = new Set();
-  const regex = /import\s*\{([\s\S]*?)\}\s*from\s*['"]mita-dom['"]/g;
+  const regex = /^import\s*\{([^}]+)\}\s*from\s*['"]mita-dom['"]/gm;
   let match;
   while ((match = regex.exec(codigo)) !== null) {
     match[1]
@@ -39,7 +39,9 @@ function extraerImportsMitaDom(codigo) {
       .filter(Boolean)
       .forEach((item) => {
         const nombreReal = item.split(/\s+as\s+/i)[0].trim();
-        if (nombreReal) simbolos.add(nombreReal);
+        if (/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(nombreReal)) {
+          simbolos.add(nombreReal);
+        }
       });
   }
   return simbolos;

@@ -5,7 +5,6 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 import { mitaHmrPlugin } from 'mita-dom';
-import legacy from '@vitejs/plugin-legacy';
 import mitaTelemetryPlugin from './vite-plugin-mita-telemetry.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -17,8 +16,6 @@ const aliasMitaDom = fs.existsSync(localMitaDomSrc)
     ? { 'mita-dom': localMitaDomDist }
     : {};
 
-const habilitarLegacy = process.env.MITA_LEGACY === 'true';
-
 export default defineConfig({
   resolve: {
     alias: aliasMitaDom
@@ -28,16 +25,7 @@ export default defineConfig({
   },
   plugins: [
     mitaTelemetryPlugin(),
-    mitaHmrPlugin(),
-    // Opt-in vía `npm run build:legacy` (MITA_LEGACY=true) para no frenar el build nativo en Rust (Rolldown/Oxc)
-    ...(habilitarLegacy
-      ? [
-          legacy({
-            targets: ['defaults', 'not IE 11'],
-            polyfills: ['es.promise.finally', 'es/map', 'es/set']
-          })
-        ]
-      : [])
+    mitaHmrPlugin()
   ],
 
   // Evitar que Vite limpie la consola constantemente, así podemos leer advertencias/errores

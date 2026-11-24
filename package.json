@@ -8,7 +8,6 @@
     "dev": "vite",
     "prebuild": "node scripts/sync-docs.js",
     "build": "vite build",
-    "build:legacy": "node -e \"import('child_process').then(c => c.execSync('npx vite build', { stdio: 'inherit', env: { ...process.env, MITA_LEGACY: 'true' } }))\"",
     "preview": "vite preview",
     "lint": "eslint .",
     "test": "vitest run",
@@ -17,16 +16,14 @@
     "test:css": "node scripts/check-unused-css.js",
     "test:bundle": "node scripts/check-bundle-size.js",
     "test:vercel": "node scripts/check-npm-parity.js",
-    "qa": "node scripts/sync-docs.js && npm run lint && npm run test:css && npm run test && npm run build && npm run test:bundle"
+    "qa": "node scripts/sync-docs.js && npm run lint && npm run test:css && npm run test:vercel && npm run test && npm run build && npm run test:bundle"
   },
   "devDependencies": {
-    "@vitejs/plugin-legacy": "^8.2.4",
     "@vitest/ui": "^5.1.1",
     "eslint": "^10.15.0",
     "fake-indexeddb": "^6.2.8",
     "globals": "^17.14.0",
     "jsdom": "^29.1.1",
-    "terser": "^5.51.4",
     "vite": "^8.3.8",
     "vitest": "^5.1.1"
   },
