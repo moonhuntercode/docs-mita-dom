@@ -1,47 +1,419 @@
 import { MitaElement } from '../../utils/MitaElement.js';
 import { marked } from 'marked';
-import { estadoDocActivo } from '../../store/docsStore.js';
+import {
+  filtrarColeccion,
+  renderCondicional,
+  crearAmbitoConLimpiezaAutomatica,
+  ejecutarConsejeroMitaDoc
+} from 'mita-dom';
+import {
+  estadoDocActivo,
+  estadoDocsLocales,
+  estadoPreferenciasLectura,
+  estadoAdminDocs,
+  gestorPoliticasDocs,
+  gestorGamificacionDocs,
+  ajustarTamanoLetraDocs,
+  guardarDocEnDbLocal,
+  eliminarDocDeDbLocal,
+  construirSnapshotFileSystem,
+  sincronizarDbLocalConFileSystem,
+  restaurarBackupEnDbLocal
+} from '../../store/docsStore.js';
+import '../ui/mita-dialog.js';
 
 import htmlTemplate from './mita-docs.html?raw';
 import './mita-docs.css';
 
-import { DOCS_MAP } from './docsRegistry.js';
+function escaparHtml(texto) {
+  return String(texto ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function transformarBloquesCodigo(html) {
+  return html.replace(/<pre><code class="language-([^"]+)">([\s\S]*?)<\/code><\/pre>/g, (_match, lang, code) => {
+    return `<mita-code-editor lenguaje="${lang}" archivo="ejemplo.${lang}"><pre><code class="language-${lang}">${code}</code></pre></mita-code-editor>`;
+  });
+}
+
+function extraerPrimerTitulo(markdown, fallback) {
+  const match = String(markdown || '').match(/^#\s+(.+)$/m);
+  return match ? match[1].trim() : fallback;
+}
 
 export class MitaDocs extends MitaElement {
   constructor() {
     super();
+    this.ambitoMemoria = crearAmbitoConLimpiezaAutomatica('<mita-docs>');
+    this._docsMap = {};
   }
 
   async render() {
+    this.ambitoMemoria.reiniciarAmbitoParaNuevoRender();
     this.innerHTML = htmlTemplate;
+    this.iniciarControlesLecturaVisual();
+    this.iniciarDashboardAdminCondicional();
     this.iniciarLogica();
     this.iniciarLogicaUX();
+    this.iniciarBuscadorYAdminLocal();
+
+    this._cargaDocsPromesa = import('./docsRegistry.js')
+      .then(({ DOCS_MAP }) => {
+        if (!this.isConnected) return;
+        this._docsMap = DOCS_MAP;
+        if (typeof this._repintarDocumentoActivo === 'function') {
+          this._repintarDocumentoActivo(estadoDocActivo.get());
+        }
+      })
+      .catch(() => {
+        // Ignorar si el componente ya fue desmontado durante teardown de tests
+      });
+    await this._cargaDocsPromesa;
+  }
+
+  iniciarControlesLecturaVisual() {
+    const btnDec = this.querySelector('#btn-font-decrease');
+    const btnRes = this.querySelector('#btn-font-reset');
+    const btnInc = this.querySelector('#btn-font-increase');
+    const btnComf = this.querySelector('#btn-reading-comfort');
+    const btnToggleAdmin = this.querySelector('#btn-toggle-admin-docs');
+    const outFont = this.querySelector('#out-font-size');
+    const container = this.querySelector('#markdown-container');
+    const btnMarkRead = this.querySelector('#btn-mark-doc-read');
+    const btnHighlight = this.querySelector('#btn-add-highlight');
+    const inputHighlight = this.querySelector('#input-highlight-term');
+    const btnAdvisor = this.querySelector('#btn-docs-run-advisor');
+    const btnCookiesAccept = this.querySelector('#btn-docs-cookies-accept');
+    const btnCookiesEssential = this.querySelector('#btn-docs-cookies-essential');
+    const pillCookies = this.querySelector('#docs-cookies-pill');
+    const txtCookies = this.querySelector('#docs-cookies-text');
+
+    this.ambitoMemoria.vincularSignalConLimpieza(
+      gestorPoliticasDocs.estado,
+      (st) => {
+        if (pillCookies) {
+          pillCookies.textContent = st.cookiesAnaliticas
+            ? '🟢 Cookies + Analíticas ON'
+            : '🛡️ Solo Cookies Esenciales';
+        }
+        if (txtCookies) {
+          txtCookies.textContent = `${st.textoTerminos} (${st.eventosAnalitica.length} eventos registrados)`;
+        }
+      },
+      'cookies-banner-docs'
+    );
+
+    this.ambitoMemoria.escucharEventoDomConLimpieza(btnCookiesAccept, 'click', () => {
+      gestorPoliticasDocs.aceptarTodo();
+    });
+    this.ambitoMemoria.escucharEventoDomConLimpieza(btnCookiesEssential, 'click', () => {
+      gestorPoliticasDocs.soloEsenciales();
+    });
+    this.ambitoMemoria.escucharEventoDomConLimpieza(btnAdvisor, 'click', () => {
+      const diag = ejecutarConsejeroMitaDoc({ raizDom: this });
+      if (this.$localBadge) {
+        this.$localBadge.hidden = false;
+        this.$localBadge.textContent = `🩺 Mita Doc Advisor (${diag.puntajeSalud}/100): ${diag.estadoGeneral} — ${diag.aciertos[0] || ''}`;
+      }
+    });
+
+    const actualizarBarraGamificacion = () => {
+      const totalCatalogo = this.obtenerCatalogoUnificado().length || 28;
+      const res = gestorGamificacionDocs.obtenerResumenGamificacion(totalCatalogo, gestorPoliticasDocs);
+      const docActual = estadoDocActivo.get();
+      const yaLeido = (gestorGamificacionDocs.estado.get().documentosLeidos || []).includes(docActual);
+
+      const badgeLvl = this.querySelector('#gamif-badge-level');
+      const progTxt = this.querySelector('#gamif-progress-text');
+      const precTxt = this.querySelector('#gamif-precision-out');
+
+      if (badgeLvl) badgeLvl.textContent = `${res.nivelActual} • ${res.puntosXP} XP`;
+      if (progTxt) {
+        progTxt.textContent = `📚 ${res.leidosCount}/${res.totalCatalogoDocs} leídas (${res.porcentajeProgreso}%) • 🖍️ ${res.totalResaltados}`;
+      }
+      if (precTxt) {
+        precTxt.textContent = `📊 Precisión: ${res.segundosLecturaAcumulados}s activos`;
+      }
+      if (btnMarkRead) {
+        btnMarkRead.textContent = yaLeido ? '✅ Guía Completada' : '✅ Marcar Leída (+50 XP)';
+      }
+    };
+
+    this.ambitoMemoria.vincularSignalConLimpieza(
+      gestorGamificacionDocs.estado,
+      () => actualizarBarraGamificacion(),
+      'gamificacion-lectura'
+    );
+
+    this.ambitoMemoria.escucharEventoDomConLimpieza(btnMarkRead, 'click', () => {
+      gestorGamificacionDocs.marcarDocumentoComoLeido(estadoDocActivo.get(), 35);
+      if (estadoAdminDocs.get().autoGuardado) {
+        sincronizarDbLocalConFileSystem().catch(() => {});
+      }
+    });
+
+    this.ambitoMemoria.escucharEventoDomConLimpieza(btnHighlight, 'click', () => {
+      const seleccionNavegador =
+        typeof window !== 'undefined' && window.getSelection
+          ? String(window.getSelection()?.toString() || '').trim()
+          : '';
+      const termino = (inputHighlight?.value || '').trim() || seleccionNavegador;
+      if (!termino) return;
+      gestorGamificacionDocs.agregarResaltadoDeTexto(estadoDocActivo.get(), termino, 'amarillo');
+      if (inputHighlight) inputHighlight.value = '';
+      // Re-aplicar resaltado en vivo sobre el contenedor actual
+      if (this.$container) {
+        this.$container.innerHTML = gestorGamificacionDocs.aplicarResaltadosEnHtml(
+          estadoDocActivo.get(),
+          this.$container.innerHTML
+        );
+      }
+    });
+
+    this.ambitoMemoria.vincularSignalConLimpieza(
+      estadoPreferenciasLectura,
+      (prefs) => {
+        const size = prefs.fontSizePx || 16;
+        this.style.setProperty('--docs-font-size', `${size}px`);
+        if (container) {
+          container.style.fontSize = `${size}px`;
+          container.classList.toggle('docs-comfort-mode', Boolean(prefs.modoComodo));
+        }
+        if (outFont) outFont.textContent = `${size}px`;
+        if (btnComf) {
+          btnComf.textContent = prefs.modoComodo ? '📖 Lectura Cómoda: ON' : '📖 Lectura Cómoda';
+        }
+      },
+      'preferencias-lectura'
+    );
+
+    this.ambitoMemoria.vincularSignalConLimpieza(
+      estadoAdminDocs,
+      (adm) => {
+        if (btnToggleAdmin) {
+          btnToggleAdmin.textContent = adm.esAdmin ? '🛡️ Modo Admin: ON' : '🛡️ Modo Admin: OFF';
+        }
+      },
+      'toggle-admin-label'
+    );
+
+    this.ambitoMemoria.escucharEventoDomConLimpieza(btnDec, 'click', () => ajustarTamanoLetraDocs(-2));
+    this.ambitoMemoria.escucharEventoDomConLimpieza(btnRes, 'click', () => ajustarTamanoLetraDocs(0));
+    this.ambitoMemoria.escucharEventoDomConLimpieza(btnInc, 'click', () => ajustarTamanoLetraDocs(2));
+    this.ambitoMemoria.escucharEventoDomConLimpieza(btnComf, 'click', () => {
+      estadoPreferenciasLectura.patch({ modoComodo: !estadoPreferenciasLectura.get().modoComodo });
+    });
+    this.ambitoMemoria.escucharEventoDomConLimpieza(btnToggleAdmin, 'click', () => {
+      estadoAdminDocs.patch({ esAdmin: !estadoAdminDocs.get().esAdmin });
+    });
+  }
+
+  iniciarDashboardAdminCondicional() {
+    const slot = this.querySelector('#docs-admin-dashboard-slot');
+    if (!slot) return;
+
+    const detenerCond = renderCondicional({
+      estado: estadoAdminDocs,
+      contenedor: slot,
+      cuando: (adm) => adm.esAdmin === true,
+      mostrar: (adm) => {
+        const localesCount = Object.keys(estadoDocsLocales.get() || {}).length;
+        const totalDocs = this.obtenerCatalogoUnificado().length;
+        const politicas = gestorPoliticasDocs.estado.get();
+        const saludMemoria = this.ambitoMemoria.auditarSaludDeMemoria();
+
+        return `
+          <aside id="docs-admin-dashboard" class="docs-admin-dashboard" aria-label="Dashboard exclusivo de administración de documentación">
+            <header class="docs-admin-head">
+              <h3>🛡️ Dashboard Exclusivo Admin — Auto-Documentación, DB Local y File System</h3>
+              <label>
+                <input type="checkbox" id="chk-admin-autosave" ${adm.autoGuardado ? 'checked' : ''} />
+                <span>💾 Auto-guardar en File System</span>
+              </label>
+            </header>
+
+            <ul class="docs-admin-kpis">
+              <li class="docs-admin-kpi">
+                <small>Catálogo Total</small>
+                <strong>${totalDocs} guías activas</strong>
+              </li>
+              <li class="docs-admin-kpi">
+                <small>Overrides DB Local + Repo</small>
+                <strong>${localesCount} documentos</strong>
+              </li>
+              <li class="docs-admin-kpi">
+                <small>Última Sync File System</small>
+                <strong>${escaparHtml(adm.ultimaSincronizacionFs)}</strong>
+              </li>
+              <li class="docs-admin-kpi">
+                <small>Rust Memory Guard</small>
+                <strong>${saludMemoria.recursosActivosCount} recursos seguros</strong>
+              </li>
+            </ul>
+
+            <menu class="docs-actions-menu">
+              <li>
+                <button type="button" id="btn-edit-doc-local" class="btn-secundario docs-action-btn">
+                  ✏️ Editar Doc Actual
+                </button>
+              </li>
+              <li>
+                <button type="button" id="btn-new-doc-local" class="btn-secundario docs-action-btn">
+                  ➕ Nuevo Doc
+                </button>
+              </li>
+              <li>
+                <button type="button" id="btn-restore-doc-local" class="btn-secundario docs-action-btn">
+                  ↺ Restaurar Original
+                </button>
+              </li>
+              <li>
+                <button type="button" id="btn-sync-fs-now" class="btn-primario docs-action-btn">
+                  🔄 Sincronizar con File System (Git Pull/Repo)
+                </button>
+              </li>
+              <li>
+                <button type="button" id="btn-backup-manual-json" class="btn-secundario docs-action-btn">
+                  📥 Backup Manual (.json)
+                </button>
+              </li>
+            </menu>
+
+            <details class="docs-admin-policies">
+              <summary><strong>🍪 Auto-Administrar Términos y Condiciones + URL Guía en la Nube</strong></summary>
+              <form id="form-admin-terminos-docs" class="docs-admin-form">
+                <label class="docs-admin-label">
+                  Texto de Términos y Condiciones:
+                  <input type="text" id="input-admin-terminos-txt" class="docs-inline-input" value="${escaparHtml(politicas.textoTerminos)}" required />
+                </label>
+                <label class="docs-admin-label">
+                  URL de Guía en la Nube / Repositorio:
+                  <input type="url" id="input-admin-guia-url" class="docs-inline-input" value="${escaparHtml(politicas.urlGuiaNube)}" required />
+                </label>
+                <button type="submit" class="btn-primario docs-action-btn">💾 Actualizar Términos y Sincronizar</button>
+              </form>
+            </details>
+
+            <output id="docs-admin-status-out" class="docs-local-badge">${escaparHtml(adm.mensajeEstado)}</output>
+          </aside>
+        `;
+      },
+      sino: () => '',
+      siempreActualizar: true
+    });
+
+    this.registrarLimpieza(detenerCond);
+
+    this.ambitoMemoria.escucharEventoDomConLimpieza(slot, 'click', (e) => {
+      const target = e.target;
+      if (!target) return;
+      if (target.id === 'btn-edit-doc-local') {
+        this.abrirModalEditor(estadoDocActivo.get(), false);
+      } else if (target.id === 'btn-new-doc-local') {
+        this.abrirModalEditor('', true);
+      } else if (target.id === 'btn-restore-doc-local') {
+        eliminarDocDeDbLocal(estadoDocActivo.get());
+      } else if (target.id === 'btn-sync-fs-now') {
+        sincronizarDbLocalConFileSystem();
+      } else if (target.id === 'btn-backup-manual-json') {
+        this.descargarBackupManualJson();
+      }
+    });
+
+    this.ambitoMemoria.escucharEventoDomConLimpieza(slot, 'change', (e) => {
+      if (e.target && e.target.id === 'chk-admin-autosave') {
+        estadoAdminDocs.patch({
+          autoGuardado: Boolean(e.target.checked),
+          mensajeEstado: e.target.checked
+            ? '💾 Auto-guardado automático activado.'
+            : '⏸️ Auto-guardado pausado (usa Backup Manual o Sincronizar).'
+        });
+      }
+    });
+
+    this.ambitoMemoria.escucharEventoDomConLimpieza(slot, 'submit', (e) => {
+      if (e.target && e.target.id === 'form-admin-terminos-docs') {
+        e.preventDefault();
+        const txt = slot.querySelector('#input-admin-terminos-txt')?.value || '';
+        const url = slot.querySelector('#input-admin-guia-url')?.value || '';
+        gestorPoliticasDocs.actualizarTerminosYPoliticas({
+          textoTerminos: txt,
+          urlGuiaNube: url
+        });
+        sincronizarDbLocalConFileSystem();
+      }
+    });
+  }
+
+  descargarBackupManualJson() {
+    const snapshot = construirSnapshotFileSystem();
+    if (typeof Blob === 'undefined' || typeof URL.createObjectURL !== 'function') return snapshot;
+    const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mita-docs-db-backup-${snapshot.sincronizadoEn}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    estadoAdminDocs.patch({
+      mensajeEstado: `📥 Backup manual descargado: mita-docs-db-backup-${snapshot.sincronizadoEn}.json`
+    });
+    return snapshot;
+  }
+
+  obtenerCatalogoUnificado() {
+    const locales = estadoDocsLocales.get() || {};
+    const mapa = { ...(this._docsMap || {}) };
+
+    for (const clave of Object.keys(locales)) {
+      mapa[clave] = {
+        idDoc: clave,
+        categoria: locales[clave].categoria || 'local',
+        contenido: locales[clave].contenido,
+        esLocal: true,
+        actualizadoEn: locales[clave].actualizadoEn
+      };
+    }
+
+    return Object.values(mapa).map((doc) => ({
+      idDoc: doc.idDoc,
+      categoria: doc.esLocal ? 'local' : doc.categoria,
+      categoriaOriginal: doc.categoria,
+      titulo: extraerPrimerTitulo(doc.contenido, doc.idDoc),
+      contenido: doc.contenido,
+      esLocal: Boolean(doc.esLocal),
+      actualizadoEn: doc.actualizadoEn || null
+    }));
   }
 
   iniciarLogica() {
     this.$container = this.querySelector('#markdown-container');
+    this.$localBadge = this.querySelector('#docs-local-badge');
 
-    // Cargar Changelogs dinámicamente usando Vite Glob Imports
-    const changelogFiles = import.meta.glob('../../assets/mita-docs-cache/changelogs/*.md', { query: '?raw', import: 'default' });
+    const changelogFiles = import.meta.glob('../../assets/mita-docs-cache/changelogs/*.md', {
+      query: '?raw',
+      import: 'default'
+    });
 
-    // Suscribirse al Estado Global para Renderizar Markdown Quirúrgicamente
-    estadoDocActivo.suscribir(async (idDoc) => {
+    const pintarDocumentoActivo = async (idDoc) => {
       if (idDoc === 'changelog') {
+        if (this.$localBadge) this.$localBadge.hidden = true;
         this.$container.innerHTML = '<h3>Cargando Registro de Cambios...</h3>';
         try {
-          let fullChangelog = '# 🔄 Registro de Cambios (Changelog)\n\nHistorial completo de versiones de MitaDOM extraído automáticamente.\n\n';
-
-          // Ordenamos los archivos por nombre (fecha) de forma descendente (más nuevo primero)
+          let fullChangelog =
+            '# 🔄 Registro de Cambios (Changelog)\n\nHistorial completo de versiones de MitaDOM extraído automáticamente.\n\n';
           const paths = Object.keys(changelogFiles).sort().reverse();
 
           for (const path of paths) {
             const getMarkdown = changelogFiles[path];
-            // @ts-ignore
             const mdContent = await getMarkdown();
             fullChangelog += mdContent + '\n\n---\n\n';
           }
 
-          this.$container.innerHTML = marked.parse(fullChangelog);
+          this.$container.innerHTML = transformarBloquesCodigo(marked.parse(fullChangelog));
         } catch (err) {
           console.error(err);
           this.renderErrorUI(err, 'Error al cargar los changelogs.');
@@ -49,76 +421,195 @@ export class MitaDocs extends MitaElement {
         return;
       }
 
-      const contenidoRaw = DOCS_MAP[idDoc]?.contenido;
+      const locales = estadoDocsLocales.get() || {};
+      const docLocal = locales[idDoc];
+      const contenidoRaw = docLocal?.contenido || this._docsMap?.[idDoc]?.contenido;
+
+      if (this.$localBadge) {
+        this.$localBadge.hidden = !docLocal;
+        if (docLocal) {
+          this.$localBadge.textContent = `🗄️ Viendo versión sincronizada en DB Local + File System (${docLocal.actualizadoEn || 'hoy'}). Activa Modo Admin para editarla o restaurar el archivo original.`;
+        }
+      }
 
       if (!contenidoRaw) {
-        console.error(`[MitaDocs] ❌ Error 404: El archivo Markdown '${idDoc}.md' no existe o no pudo ser renderizado.`);
         this.$container.innerHTML = `
-          <div style="text-align: center; padding: 3rem 1rem;">
-            <h1 style="font-size: 4rem; margin: 0; color: var(--color-primario);">404</h1>
-            <h2 style="margin-top: 0.5rem; margin-bottom: 2rem;">Documento no encontrado</h2>
-            <p style="opacity: 0.8; margin-bottom: 2rem;">
-              El documento <strong>"${idDoc}.md"</strong> no existe o no ha sido sincronizado en el registro de documentación.
+          <section style="text-align: center; padding: 3rem 1rem;">
+            <h1 style="font-size: 3.5rem; margin: 0; color: var(--color-primario);">404</h1>
+            <h2>Documento no encontrado</h2>
+            <p style="opacity: 0.8; margin-bottom: 1.5rem;">
+              El documento <strong>"${idDoc}.md"</strong> no existe en caché ni en tu DB Local.
             </p>
-            <button onclick="window.navigation.navigate('/')" class="btn-primario" style="padding: 0.8rem 1.5rem; font-size: 1.1rem; cursor: pointer;">
-              🏠 Volver al Inicio
+            <button type="button" id="btn-create-missing-doc" class="btn-primario" style="padding: 0.7rem 1.3rem; cursor: pointer;">
+              ➕ Crear "${idDoc}" en DB Local + File System
             </button>
-            <button onclick="window.navigation.navigate('/docs/readme')" class="btn-doc" style="margin-left: 1rem; padding: 0.8rem 1.5rem; font-size: 1.1rem; cursor: pointer; background: transparent; border: 1px solid var(--color-borde); color: var(--color-texto);">
-              📚 Ver Índice
-            </button>
-          </div>
+          </section>
         `;
+        const btnCrearMissing = this.querySelector('#btn-create-missing-doc');
+        if (btnCrearMissing) {
+          btnCrearMissing.addEventListener('click', () => this.abrirModalEditor(idDoc, true));
+        }
         return;
       }
 
       try {
-        let html = marked.parse(contenidoRaw);
-        // Reemplazar bloques de código generados por Marked.js por nuestro <mita-code-editor>
-        html = html.replace(/<pre><code class="language-([^"]+)">([\s\S]*?)<\/code><\/pre>/g, (match, lang, code) => {
-          return `<mita-code-editor lenguaje="${lang}" archivo="ejemplo.${lang}"><pre><code class="language-${lang}">${code}</code></pre></mita-code-editor>`;
-        });
-
-        this.$container.innerHTML = html;
-        console.log(`%c[MitaDocs] ✅ Documento Markdown '${idDoc}.md' renderizado con éxito.`, 'color: #3b82f6; font-weight: bold;');
+        const htmlBase = transformarBloquesCodigo(marked.parse(contenidoRaw));
+        const htmlConResaltados = gestorGamificacionDocs.aplicarResaltadosEnHtml(idDoc, htmlBase);
+        this.$container.innerHTML = htmlConResaltados;
       } catch (err) {
-        console.error(`[MitaDocs] ❌ Error Crítico de Renderizado (Markdown Parser) en '${idDoc}.md'`, err);
         this.renderErrorUI(err, `Error al parsear el documento "${idDoc}"`);
       }
+    };
+
+    this._repintarDocumentoActivo = pintarDocumentoActivo;
+
+    this.escucharEstado(estadoDocActivo, (idDoc) => {
+      pintarDocumentoActivo(idDoc);
     });
 
-    // Event Delegation: Interceptar clics en enlaces nativos de Markdown
+    this.escucharEstado(estadoDocsLocales, () => {
+      pintarDocumentoActivo(estadoDocActivo.get());
+    });
+
     this.$container.addEventListener('click', (e) => {
-      // @ts-ignore
       const $enlace = e.target.closest('a');
       if (!$enlace) return;
 
       const href = $enlace.getAttribute('href');
-
-      // Si es un enlace interno a otro Markdown (ej. "./FILOSOFIA.md" o "../FUNDAMENTOS.md")
       if (href && href.toLowerCase().endsWith('.md')) {
-        e.preventDefault(); // Detenemos la navegación por defecto (que daría 404)
-
-        // Extraemos solo el nombre base sin extensión y lo pasamos a minúsculas
-        // Ej: "./FILOSOFIA.md" -> "filosofia"
+        e.preventDefault();
         const partes = href.split('/');
         const archivo = partes[partes.length - 1];
         const idDoc = archivo.replace(/\.md$/i, '').toLowerCase();
 
-        // Si el documento existe en nuestro DOCS_MAP, navegamos usando Navigation API nativa
-        if (DOCS_MAP[idDoc]) {
-          // @ts-ignore
+        if (this._docsMap?.[idDoc] || (estadoDocsLocales.get() || {})[idDoc]) {
           if (window.navigation) {
-            // @ts-ignore
             window.navigation.navigate(`/docs/${idDoc}`);
           } else {
-            // Fallback
             estadoDocActivo.set(idDoc);
           }
-        } else {
-          console.warn(`Enlace a documento no encontrado: ${idDoc}`);
         }
       }
     });
+  }
+
+  iniciarBuscadorYAdminLocal() {
+    const inputSearch = this.querySelector('#docs-inline-search');
+    const selectCat = this.querySelector('#docs-category-filter');
+    const panelResultados = this.querySelector('#docs-filter-results');
+    const modal = this.querySelector('#modal-admin-doc');
+    const form = this.querySelector('#form-admin-doc');
+    const btnCancel = this.querySelector('#btn-cancel-admin-doc');
+
+    const actualizarFiltro = () => {
+      if (!panelResultados) return;
+      const busqueda = inputSearch ? inputSearch.value.trim() : '';
+      const categoria = selectCat ? selectCat.value : 'todos';
+
+      if (!busqueda && categoria === 'todos') {
+        panelResultados.hidden = true;
+        panelResultados.innerHTML = '';
+        return;
+      }
+
+      const catalogo = this.obtenerCatalogoUnificado();
+      const resultados = filtrarColeccion(catalogo, {
+        busqueda,
+        categoria,
+        campoCategoria: 'categoria',
+        camposTexto: ['idDoc', 'titulo', 'contenido']
+      }).slice(0, 12);
+
+      panelResultados.hidden = false;
+      if (resultados.length === 0) {
+        panelResultados.innerHTML = `<p style="margin:0;">Sin coincidencias para "${busqueda}" en la categoría seleccionada.</p>`;
+        return;
+      }
+
+      panelResultados.innerHTML = `
+        <strong>🔎 ${resultados.length} documentos encontrados (haz clic para abrir):</strong>
+        <ul class="docs-filter-grid">
+          ${resultados
+            .map(
+              (r) => `
+            <li>
+              <button type="button" class="docs-filter-item-btn" data-open-doc="${r.idDoc}">
+                <span>📄 <strong>${r.titulo}</strong></span>
+                <small>${r.esLocal ? '🗄️ DB Local + FS' : r.categoriaOriginal}</small>
+              </button>
+            </li>
+          `
+            )
+            .join('')}
+        </ul>
+      `;
+    };
+
+    if (inputSearch) inputSearch.addEventListener('input', actualizarFiltro);
+    if (selectCat) selectCat.addEventListener('change', actualizarFiltro);
+
+    if (panelResultados) {
+      panelResultados.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-open-doc]');
+        if (!btn) return;
+        const destino = btn.getAttribute('data-open-doc');
+        if (destino) {
+          estadoDocActivo.set(destino);
+          panelResultados.hidden = true;
+        }
+      });
+    }
+
+    if (btnCancel && modal) {
+      btnCancel.addEventListener('click', () => modal.cerrar());
+    }
+
+    if (form && modal) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const idInput = this.querySelector('#admin-doc-id');
+        const titleInput = this.querySelector('#admin-doc-title');
+        const catSelect = this.querySelector('#admin-doc-category');
+        const contentArea = this.querySelector('#admin-doc-content');
+
+        const guardado = guardarDocEnDbLocal(idInput.value, {
+          titulo: titleInput.value,
+          categoria: catSelect.value,
+          contenido: contentArea.value
+        });
+
+        modal.cerrar();
+        if (guardado) {
+          estadoDocActivo.set(guardado.idDoc);
+        }
+      });
+    }
+  }
+
+  abrirModalEditor(idDoc, esNuevo = false) {
+    const modal = this.querySelector('#modal-admin-doc');
+    const idInput = this.querySelector('#admin-doc-id');
+    const titleInput = this.querySelector('#admin-doc-title');
+    const catSelect = this.querySelector('#admin-doc-category');
+    const contentArea = this.querySelector('#admin-doc-content');
+    if (!modal || !idInput || !titleInput || !catSelect || !contentArea) return;
+
+    if (esNuevo) {
+      idInput.value = idDoc || 'nuevo_documento_local';
+      titleInput.value = 'Nueva Guía Local MitaDOM';
+      catSelect.value = 'local';
+      contentArea.value = `# Nueva Guía Local MitaDOM\n\nDocumento administrado desde la DB Local + File System (\`src/assets/mita-docs-db.json\`).\n\n\`\`\`javascript\nimport { crearEstadoReactivoInmutable } from 'mita-dom';\nconst estado = crearEstadoReactivoInmutable('doc:demo', { listo: true });\n\`\`\``;
+    } else {
+      const locales = estadoDocsLocales.get() || {};
+      const existente = locales[idDoc] || this._docsMap?.[idDoc];
+      const contenido = existente?.contenido || `# ${idDoc}\n`;
+      idInput.value = idDoc;
+      titleInput.value = extraerPrimerTitulo(contenido, idDoc);
+      catSelect.value = existente?.categoria || 'local';
+      contentArea.value = contenido;
+    }
+
+    modal.abrir();
   }
 
   iniciarLogicaUX() {
@@ -127,13 +618,17 @@ export class MitaDocs extends MitaElement {
 
     if (this.$btnCopyIA) {
       this.$btnCopyIA.addEventListener('click', () => {
-        // Obtenemos el texto limpio de todo el contenedor de markdown actual
         const texto = this.$container.innerText;
-        navigator.clipboard.writeText(texto).then(() => {
-          const originalText = this.$btnCopyIA.innerHTML;
-          this.$btnCopyIA.innerHTML = '✅ ¡Copiado para IA!';
-          setTimeout(() => { this.$btnCopyIA.innerHTML = originalText; }, 2000);
-        }).catch(err => console.error('Error al copiar:', err));
+        navigator.clipboard
+          .writeText(texto)
+          .then(() => {
+            const originalText = this.$btnCopyIA.innerHTML;
+            this.$btnCopyIA.innerHTML = '✅ ¡Copiado para IA!';
+            setTimeout(() => {
+              this.$btnCopyIA.innerHTML = originalText;
+            }, 2000);
+          })
+          .catch((err) => console.error('Error al copiar:', err));
       });
     }
 
@@ -160,95 +655,43 @@ export class MitaDocs extends MitaElement {
             h1, h2, h3 { color: #111; border-bottom: 1px solid #ccc; padding-bottom: 0.5rem; page-break-after: avoid; }
             pre { background: #f4f4f4; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.9em; page-break-inside: avoid; }
             code { font-family: monospace; background: #eee; padding: 0.1rem 0.3rem; border-radius: 3px; }
-            img { max-width: 100%; height: auto; }
-            blockquote { border-left: 4px solid #007bff; margin-left: 0; padding-left: 1rem; color: #555; }
-            table { border-collapse: collapse; width: 100%; margin-bottom: 1rem; page-break-inside: avoid; }
-            th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; }
-            th { background: #f8f9fa; }
             .page-break { page-break-after: always; }
-            @media print {
-              body { font-size: 11pt; max-width: 100%; padding: 0; margin: 0; }
-              a { text-decoration: none; color: #000; }
-            }
           </style>
         </head>
         <body>
-          <div style="text-align: center; padding: 4rem 0;" class="page-break">
-            <h1 style="font-size: 3rem; border: none;">Libro de Documentación: MitaDOM</h1>
-            <p style="font-size: 1.2rem; color: #666;">Generado automáticamente (Production Ready)</p>
-          </div>
     `;
 
-    const docs = Object.values(DOCS_MAP).sort((a, b) => a.categoria.localeCompare(b.categoria) || a.idDoc.localeCompare(b.idDoc));
-    
-    docs.forEach(doc => {
-      // Ignorar changelogs para no engordar el PDF
+    const docs = this.obtenerCatalogoUnificado();
+    docs.forEach((doc) => {
       if (doc.categoria === 'changelogs') return;
-
-      const parsedHtml = marked.parse(doc.contenido);
-      htmlConsolidado += `
-        <div class="doc-section page-break">
-          <div style="font-size: 0.8rem; color: #666; text-transform: uppercase; margin-bottom: 1rem; border-bottom: 1px dashed #ccc; padding-bottom: 0.5rem;">Categoría: ${doc.categoria} | ID: ${doc.idDoc}</div>
-          ${parsedHtml}
-        </div>
-      `;
+      htmlConsolidado += `<section class="doc-section page-break">${marked.parse(doc.contenido)}</section>`;
     });
 
-    htmlConsolidado += `
-        </body>
-      </html>
-    `;
-
+    htmlConsolidado += `</body></html>`;
     printWindow.document.open();
     printWindow.document.write(htmlConsolidado);
     printWindow.document.close();
-
     printWindow.onload = () => {
       printWindow.focus();
       printWindow.print();
     };
   }
 
-  /**
-   * Renderiza una interfaz de error robusta con Stack Trace y botón de copiar
-   */
   renderErrorUI(error, titulo) {
-    const stackTrace = error.stack || error.message || 'Error desconocido sin stacktrace.';
-
+    const stackTrace = error.stack || error.message || 'Error desconocido.';
     this.$container.innerHTML = `
-      <div class="docs-error-container" style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-        <h2 style="color: #ef4444; margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
-          ⚠️ ${titulo}
-        </h2>
-        <p style="color: var(--color-texto); opacity: 0.9; margin-bottom: 1rem;">
-          Se ha producido un error técnico. Si eres desarrollador, revisa los detalles a continuación:
-        </p>
-        <div style="position: relative;">
-          <button id="btn-copy-error" class="btn-primario" style="position: absolute; top: 0.5rem; right: 0.5rem; padding: 0.3rem 0.6rem; font-size: 0.8rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);">
-            📋 Copiar Stacktrace
-          </button>
-          <pre style="background: #111827; padding: 1rem; border-radius: 6px; overflow-x: auto; color: #f87171; font-family: monospace; font-size: 0.85rem; margin: 0; white-space: pre-wrap;"><code>${stackTrace}</code></pre>
-        </div>
-      </div>
+      <section class="docs-error-container" style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 1.5rem; border-radius: 8px;">
+        <h2 style="color: #ef4444; margin-top: 0;">⚠️ ${titulo}</h2>
+        <button id="btn-copy-error" class="btn-primario">📋 Copiar Stacktrace</button>
+        <pre><code>${stackTrace}</code></pre>
+      </section>
     `;
+  }
 
-    // Lógica para copiar al portapapeles
-    const btnCopy = this.$container.querySelector('#btn-copy-error');
-    if (btnCopy) {
-      btnCopy.addEventListener('click', () => {
-        navigator.clipboard.writeText(stackTrace).then(() => {
-          btnCopy.innerHTML = '✅ ¡Copiado!';
-          btnCopy.style.background = '#10b981';
-          setTimeout(() => {
-            btnCopy.innerHTML = '📋 Copiar Stacktrace';
-            btnCopy.style.background = 'rgba(0,0,0,0.1)';
-          }, 2000);
-        }).catch(err => {
-          console.error('Error al copiar:', err);
-          btnCopy.innerHTML = '❌ Error';
-        });
-      });
-    }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.ambitoMemoria.liberarMemoriaCompleta();
+    restaurarBackupEnDbLocal({});
   }
 }
 

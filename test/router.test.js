@@ -1,9 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { iniciarRouter } from '../src/router/router.js';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { iniciarRouter, esperarNavegacionActual } from '../src/router/router.js';
 import { rutaActual } from 'mita-dom';
 import { Logger } from '../src/utils/logger.js';
 
 describe('Advanced Router (Lazy Loading & Guards)', () => {
+    let detenerRouter = null;
+
     beforeEach(() => {
         vi.clearAllMocks();
         
@@ -23,14 +25,25 @@ describe('Advanced Router (Lazy Loading & Guards)', () => {
         window.scrollTo = vi.fn();
     });
 
+    afterEach(async () => {
+        // Esperar cualquier carga diferida de vista o layout antes de desmontar JSDOM
+        await esperarNavegacionActual();
+        if (typeof detenerRouter === 'function') {
+            detenerRouter();
+            detenerRouter = null;
+        }
+        rutaActual.suscriptores.clear();
+    });
+
     it('Navigation Guard: Bloquea el acceso a /admin/logs si no hay token', async () => {
         // Redefinimos alert para que no trabe el test
         window.alert = vi.fn();
         
-        iniciarRouter();
+        detenerRouter = iniciarRouter();
 
         // Simulamos navegación a una ruta protegida sin token en localStorage
-        await rutaActual.set('/admin/logs');
+        rutaActual.set('/admin/logs');
+        await esperarNavegacionActual();
 
         expect(Logger.warn).toHaveBeenCalledWith(
             expect.stringContaining('[Router Guard] Acceso denegado a /admin/logs')
@@ -46,10 +59,10 @@ describe('Advanced Router (Lazy Loading & Guards)', () => {
         localStorage.setItem('mita_token', 'true');
         window.alert = vi.fn();
         
-        iniciarRouter();
+        detenerRouter = iniciarRouter();
 
         rutaActual.set('/admin/logs');
-        await new Promise(r => setTimeout(r, 50));
+        await esperarNavegacionActual();
 
         // El Guard NO debe haberse disparado (no redirige a perfil)
         expect(Logger.warn).not.toHaveBeenCalledWith(

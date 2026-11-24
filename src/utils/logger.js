@@ -41,7 +41,7 @@ export const Logger = {
   },
 
   signalUpdate: (nombreSignal, valor) => {
-    if (isDev) {
+    if (isDev && !import.meta.env.VITEST) {
       console.groupCollapsed(`🔄 Signal Mutado: [${nombreSignal}]`);
       console.log('Nuevo valor:', valor);
       console.trace('Origen de la mutación');

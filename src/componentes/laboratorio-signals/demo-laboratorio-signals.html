@@ -1,0 +1,312 @@
+<section class="lab-layout">
+  <!-- Barra de contexto ultra-clara de la lección activa -->
+  <header class="lab-context-bar" aria-labelledby="lab-active-title">
+    <section class="lab-context-copy">
+      <p class="lab-eyebrow" id="lab-active-step">Lección 1 de 4 • Mita-DOM v2.7</p>
+      <h1 id="lab-active-title">Compartir Estado entre 3 Componentes</h1>
+      <p id="lab-active-goal" class="lab-context-goal"></p>
+      <p id="lab-active-try" class="lab-context-try"></p>
+    </section>
+
+    <menu class="lab-context-actions">
+      <li>
+        <button type="button" id="btn-open-lessons" class="lab-outline-btn">
+          📚 Lecciones y Buscador (Aside)
+        </button>
+      </li>
+      <li>
+        <button type="button" id="btn-complete-lab-challenge" class="lab-outline-btn">
+          🎯 Completar Reto (+50 XP)
+        </button>
+      </li>
+      <li>
+        <output id="lab-gamif-pill" class="lab-outline-btn">🌱 50 XP</output>
+      </li>
+      <li>
+        <a href="/docs/guia_framework_opinionado_props_defer_y_signal_forms_2026-11-22" class="lab-outline-btn">
+          🏛️ Guía Framework Opinionado
+        </a>
+      </li>
+    </menu>
+  </header>
+
+  <!-- Hub de Rutas de Aprendizaje (Inspirado en angular.dev/tutorials y react.dev/learn) -->
+  <nav class="lab-tracks-hub" aria-label="Rutas oficiales de tutoriales interactivos">
+    <button type="button" class="lab-outline-btn" data-track-leccion="props">
+      👩‍🔬 1. Passing Props (React.dev Avatar)
+    </button>
+    <button type="button" class="lab-outline-btn" data-track-leccion="angular">
+      🅰️ 2. @defer + Signal Forms (Angular.dev)
+    </button>
+    <button type="button" class="lab-outline-btn" data-track-leccion="compartir">
+      📡 3. Signals &amp; Flujo Gráfico
+    </button>
+    <button type="button" class="lab-outline-btn" data-track-leccion="rustguard">
+      🦀 4. Rust Memory Guard &amp; CLI
+    </button>
+    <button type="button" class="lab-outline-btn" data-track-leccion="crudvistas">
+      🗂️ 5. CRUD Multi-Categoría &amp; Vistas
+    </button>
+    <button type="button" class="lab-outline-btn" data-track-leccion="comunidad">
+      🛡️ 6. Moderación "DC" &amp; Chat Gate (3s)
+    </button>
+  </nav>
+
+  <!-- Sandbox Split Semántico (Inspirado en react.dev/learn) -->
+  <section class="sandbox-card" aria-labelledby="lab-active-title">
+    <header class="sandbox-toolbar">
+      <nav class="sandbox-tabs" role="tablist" aria-label="Archivos del ejemplo" id="sandbox-tabs"></nav>
+      <menu class="sandbox-actions">
+        <li>
+          <button type="button" id="btn-sb-download" class="sandbox-action-btn" title="Descargar archivo .js">
+            ⬇ Descargar
+          </button>
+        </li>
+        <li>
+          <button type="button" id="btn-sb-reload" class="sandbox-action-btn" title="Recargar vista previa">
+            ↻ Recargar
+          </button>
+        </li>
+        <li>
+          <button type="button" id="btn-sb-reset" class="sandbox-action-btn" title="Restaurar código y estados">
+            ✕ Reiniciar
+          </button>
+        </li>
+      </menu>
+    </header>
+
+    <section class="sandbox-workspace" id="sandbox-workspace">
+      <article class="sandbox-pane-editor" aria-label="Editor de código interactivo">
+        <header class="pane-banner">
+          <strong>💻 1. Código Editable</strong>
+          <small>Edita, formatea o copia el archivo seleccionado</small>
+        </header>
+        <section id="sandbox-editor-slot"></section>
+      </article>
+
+      <aside class="sandbox-pane-preview" aria-label="Vista previa interactiva en vivo">
+        <header class="preview-header">
+          <strong id="preview-heading">⚡ 2. Vista Previa en Vivo</strong>
+          <output id="preview-status" class="preview-pill">● Reactivo</output>
+        </header>
+        <section id="sandbox-preview-slot" class="preview-stage"></section>
+      </aside>
+    </section>
+
+    <footer class="sandbox-footer">
+      <button type="button" id="btn-sb-expand" class="sandbox-expand-btn" aria-expanded="false">
+        ⌄ Mostrar más
+      </button>
+    </footer>
+  </section>
+
+  <!-- Mapa de referencia rápida 100% Responsive con ejemplos y botón "Probar" -->
+  <section class="lab-summary-docs" aria-labelledby="lab-cheatsheet-title">
+    <header class="lab-summary-head">
+      <h2 id="lab-cheatsheet-title">📚 Referencia Rápida Mita-DOM v2.7</h2>
+      <p>Cada tarjeta incluye su sintaxis real y un acceso directo para probarla en el Sandbox de arriba.</p>
+    </header>
+
+    <ul class="lab-cheatsheet-grid" id="lab-cheatsheet-grid">
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>crearEstadoLocal(valor)</code></h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="local">▶ Probar</button>
+          </header>
+          <p>Estado privado de un solo Web Component (contadores, filtros, pestañas).</p>
+          <pre class="cheatsheet-code"><code>const ui = crearEstadoLocal({ clicks: 0 });
+ui.patch({ clicks: ui.get().clicks + 1 });</code></pre>
+        </article>
+      </li>
+
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>crearEstadoCompartido(...)</code></h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="compartir">▶ Probar</button>
+          </header>
+          <p>Comparte datos entre 2+ componentes con <code>persistirLocal</code>, <code>descripcion</code> y <code>reglas</code>.</p>
+          <pre class="cheatsheet-code"><code>crearEstadoCompartido('empleos:cfg', { habilitado: true }, { persistirLocal: true });</code></pre>
+        </article>
+      </li>
+
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>obtenerEstadoCompartido(nombre)</code></h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="compartir">▶ Probar</button>
+          </header>
+          <p>Conecta cualquier componente hermano o hijo al mismo Signal sin props drilling.</p>
+          <pre class="cheatsheet-code"><code>const cfg = obtenerEstadoCompartido('empleos:cfg');
+cfg.patch({ habilitado: false });</code></pre>
+        </article>
+      </li>
+
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>renderCondicional({ ... })</code></h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="condicional">▶ Probar</button>
+          </header>
+          <p>Monta o destruye nodos reales del DOM según una condición (sin <code>display: none</code>).</p>
+          <pre class="cheatsheet-code"><code>this.mostrarSi({ estado: cfg, contenedor: el, cuando: (c) =&gt; c.habilitado, mostrar: () =&gt; '&lt;form&gt;...&lt;/form&gt;' });</code></pre>
+        </article>
+      </li>
+
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>vincularTexto(sig, nodo, fmt)</code></h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="local">▶ Probar</button>
+          </header>
+          <p>Actualiza únicamente <code>textContent</code> preservando el mismo TextNode (0 XSS).</p>
+          <pre class="cheatsheet-code"><code>const stop = vincularTexto(ui, span, (e) =&gt; `Clicks: ${e.clicks}`);</code></pre>
+        </article>
+      </li>
+
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>crearEfecto(fn)</code> + <code>.derivar(fn)</code></h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="efectos">▶ Probar</button>
+          </header>
+          <p>Auto-rastrea múltiples Signals con limpieza <code>detener()</code> y auditoría <code>listarEstadosCompartidos()</code>.</p>
+          <pre class="cheatsheet-code"><code>const total = items.derivar((l) =&gt; l.length);
+const stop = crearEfecto(() =&gt; console.log(total.get()));</code></pre>
+        </article>
+      </li>
+
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>&lt;mi-componente&gt;</code> 100% Re-usable</h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="reusables">▶ Probar</button>
+          </header>
+          <p>Atributos HTML (props) + estado local aislado por instancia + eventos hacia arriba con <code>CustomEvent</code>.</p>
+          <pre class="cheatsheet-code"><code>&lt;lab-tarjeta-reusable titulo="Empleos" variante="exito" texto-accion="Publicar"&gt;&lt;/lab-tarjeta-reusable&gt;</code></pre>
+        </article>
+      </li>
+
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>Antes v2.6</code> vs <code>Después v2.7</code></h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="comparativa">▶ Probar</button>
+          </header>
+          <p>Compara código viejo vs código nuevo y ejecuta las 4 pruebas en vivo de las mejoras de hoy.</p>
+          <pre class="cheatsheet-code"><code>// Antes: 2 suscribir + 2 desuscribir
+// Hoy: const stop = crearEfecto(() =&gt; ...);</code></pre>
+        </article>
+      </li>
+
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>crearControlSpam()</code> + <code>&lt;mita-dialog&gt;</code></h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="chat">▶ Probar</button>
+          </header>
+          <p>Escudo Anti-Spam para chats, filtración <code>filtrarColeccion()</code> y modal reusable para publicar novedades.</p>
+          <pre class="cheatsheet-code"><code>const guard = crearControlSpam({ cooldownMs: 1200, bloquearLinks: true });</code></pre>
+        </article>
+      </li>
+
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>renderizarVistaUniversal()</code> + <code>MitaMeta</code></h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="estrategias">▶ Probar</button>
+          </header>
+          <p>Soporta <code>SSR</code>, <code>SSG</code>, <code>Hybrid</code> (Islas <code>mita-client="only"</code> / <code>mita-server="only"</code>) y <code>SPA</code>.</p>
+          <pre class="cheatsheet-code"><code>const { html, head } = await renderizarVistaUniversal(Vista, { modo: 'hybrid' });</code></pre>
+        </article>
+      </li>
+
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>crearControladorAuth()</code> + Cookies</h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="authcookies">▶ Probar</button>
+          </header>
+          <p>FormBuilder declarativo para Login/Registro/Logout condicional y <code>crearGestorConsentimiento()</code> para analíticas.</p>
+          <pre class="cheatsheet-code"><code>auth.montarFlujoCondicional(el);
+consent.registrarAnalitica('page_view');</code></pre>
+        </article>
+      </li>
+
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>Rust Memory Guard</code> + <code>npx mita</code> CLI</h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="rustguard">▶ Probar</button>
+          </header>
+          <p>Borrow Checker inmutable (<code>&amp;T</code> / <code>&amp;mut T</code>), RAII <code>Drop</code> contra fugas, generador CLI y Test Runner en vivo.</p>
+          <pre class="cheatsheet-code"><code>const ambito = crearAmbitoConLimpiezaAutomatica('&lt;mi-vista&gt;');
+ambito.liberarMemoriaCompleta();</code></pre>
+        </article>
+      </li>
+
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>CRUD Multi-Categoría</code> + Modos por Vista</h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="crudvistas">▶ Probar</button>
+          </header>
+          <p>CRUD completo con FormBuilder Re-usable para buscar/registrar y control granular <code>Hybrid/SSR/SSG/CSR</code> por ruta.</p>
+          <pre class="cheatsheet-code"><code>const crud = crearControladorCrudCategorias();
+vistas.cambiarModoDeVistaEnCaliente('/empleos', 'hybrid');</code></pre>
+        </article>
+      </li>
+
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>Paginación UI</code> + <code>Chat Gate (3s)</code> + <code>Filtro "DC"</code></h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="comunidad">▶ Probar</button>
+          </header>
+          <p>Ventana de aceptación antes de entrar al chat, perfiles sin cuenta (regla 15 días), bloqueo "DC" y reportes con pruebas.</p>
+          <pre class="cheatsheet-code"><code>chat.intentarEntrarASalaOChat('grupo-empleos');
+mod.publicarAnuncio({ titulo, categoria });</code></pre>
+        </article>
+      </li>
+
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>pasarPropsAElemento()</code> (Avatar Científicos)</h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="props">▶ Probar</button>
+          </header>
+          <p>Pasa objetos complejos <code>person</code> y números <code>size</code> a Web Components igual que en <code>react.dev/learn</code>.</p>
+          <pre class="cheatsheet-code"><code>pasarPropsAElemento(avatarEl, {
+  size: 100,
+  person: { name: 'Katsuko Saruhashi', imageId: 'YfeOqp2' }
+});</code></pre>
+        </article>
+      </li>
+
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>@defer</code> + <code>Signal Forms</code> (Angular.dev)</h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="angular">▶ Probar</button>
+          </header>
+          <p>Vistas diferidas con <code>@placeholder</code> / <code>@loading</code> y formularios reactivos impulsados por Signals.</p>
+          <pre class="cheatsheet-code"><code>renderizarVistaDiferida({ contenedor, disparador: 'interaccion' });
+crearFormularioReactivoConSignals({ nombre: { requerido: true } });</code></pre>
+        </article>
+      </li>
+
+      <li>
+        <article class="cheatsheet-card">
+          <header class="cheatsheet-card-head">
+            <h3><code>Server Actions</code> + <code>Fetch (Click/Auto)</code> + <code>Mita Doc</code></h3>
+            <button type="button" class="cheatsheet-try-btn" data-ir-leccion="fullstack">▶ Probar</button>
+          </header>
+          <p>Express + ORM Server Actions, Data Fetching bajo demanda vs automático, mapa visual de Estrategias y SemVer Advisor.</p>
+          <pre class="cheatsheet-code"><code>crearControladorFetchingPorModo({ modoDisparo: 'al-hacer-click' });
+crearAccionServidorIsomorfica('empleos/crearORM', fn);</code></pre>
+        </article>
+      </li>
+    </ul>
+  </section>
+</section>

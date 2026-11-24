@@ -1,0 +1,19 @@
+{
+  "version": "2.7.0",
+  "sincronizadoEn": "2026-11-22",
+  "descripcion": "Snapshot de la Base de Datos Local de Documentación y Políticas sincronizado con el File System del repositorio Git (disponible tras cada git pull).",
+  "politicasTerminos": {
+    "versionTerminos": "2026-11-22",
+    "textoTerminos": "Acepto los Términos y Condiciones de MitaDOM v2.7, el almacenamiento local sincronizado con File System y las políticas de privacidad.",
+    "urlGuiaNube": "https://github.com/moonhuntercode/mita-dom/tree/main/docs"
+  },
+  "documentosLocales": {
+    "guia_rapida_filesystem": {
+      "idDoc": "guia_rapida_filesystem",
+      "titulo": "🗄️ Guía Sincronizada en File System (Git Repo)",
+      "categoria": "local",
+      "actualizadoEn": "2026-11-22",
+      "contenido": "# 🗄️ Guía Sincronizada en File System (Git Repo)\n\nEste documento vive tanto en tu **DB Local** (`localStorage` + `IndexedDB`) como en el archivo físico del repositorio `src/assets/mita-docs-db.json`.\n\n## ¿Por qué sincronizar DB Local con File System?\n\n1. **Visible en cada `git pull`**: cualquier miembro del equipo recibe las últimas guías, checklists, términos y condiciones editados desde el Dashboard de Administración.\n2. **Auto-guardado + Backup Manual**: puedes activar el auto-guardado o descargar/restaurar un archivo `.json` en cualquier momento.\n\n```javascript\nimport { crearEstadoReactivoInmutable, mutarEstadoConHistorial } from 'mita-dom';\n\nconst estadoRepo = crearEstadoReactivoInmutable('docs:repo_sync', { sincronizado: true });\nmutarEstadoConHistorial(estadoRepo, { sincronizado: true }, 'Sincronización con File System exitosa');\n```"
+    }
+  }
+}

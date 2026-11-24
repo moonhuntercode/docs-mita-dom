@@ -1,63 +1,153 @@
-.docs-nav-container {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--color-borde);
-  display: flex;
-  flex-direction: column;
-}
+@scope (mita-docs-nav) {
+  .docs-nav-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
 
-.docs-nav-container h3 {
-  margin-top: 0;
-  color: var(--color-primario);
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
-}
+  .docs-nav-container {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-borde);
+    display: grid;
+    gap: 0.85rem;
+  }
 
-#docs-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  width: 100%;
-}
+  .docs-nav-header {
+    display: grid;
+    gap: 0.65rem;
+  }
 
-.nav-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
+  .docs-nav-container h3 {
+    margin: 0;
+    color: var(--color-primario);
+    font-size: 1.05rem;
+  }
 
-.nav-group h4 {
-  margin: 0 0 0.5rem 0;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  color: var(--color-texto);
-  opacity: 0.6;
-  letter-spacing: 1px;
-}
+  .docs-nav-search-box {
+    display: block;
+  }
 
-.btn-doc {
-  background: transparent;
-  color: var(--color-texto);
-  border: 1px solid transparent;
-  text-align: left;
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: 500;
-  font-size: 0.95rem;
-  text-decoration: none;
-  display: block;
-}
+  .docs-nav-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.55rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-borde);
+    background: rgba(0, 0, 0, 0.25);
+    color: var(--color-texto);
+    font-size: 0.85rem;
+  }
 
-.btn-doc:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--color-borde);
-}
+  .docs-nav-search-input:focus {
+    outline: 2px solid var(--color-primario);
+    outline-offset: 1px;
+  }
 
-.btn-doc.activo {
-  background: var(--color-primario);
-  color: white;
-  border-color: var(--color-primario);
-  font-weight: bold;
+  #docs-nav {
+    display: grid;
+    gap: 0.65rem;
+    width: 100%;
+  }
+
+  .nav-section-title {
+    margin: 0.6rem 0 0.1rem 0;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+  }
+
+  .nav-section-aprende {
+    margin-top: 0;
+    color: #8b5cf6;
+  }
+
+  .nav-section-referencia {
+    color: #10b981;
+  }
+
+  .nav-section-evolucion {
+    color: #f59e0b;
+  }
+
+  .docs-accordion {
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    overflow: hidden;
+  }
+
+  .docs-accordion-summary {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-texto);
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .docs-accordion-summary::after {
+    content: '▸';
+    font-size: 0.82rem;
+    transition: transform 0.2s ease;
+  }
+
+  .docs-accordion[open] > .docs-accordion-summary::after {
+    transform: rotate(90deg);
+  }
+
+  .docs-accordion-list {
+    list-style: none;
+    margin: 0;
+    padding: 0.3rem;
+    display: grid;
+    gap: 0.2rem;
+    border-top: 1px solid var(--color-borde);
+  }
+
+  .btn-doc {
+    background: transparent;
+    color: var(--color-texto);
+    border: 1px solid transparent;
+    text-align: left;
+    padding: 0.5rem 0.7rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    font-weight: 500;
+    font-size: 0.86rem;
+    text-decoration: none;
+    display: block;
+    overflow-wrap: anywhere;
+  }
+
+  .btn-doc:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--color-borde);
+  }
+
+  .btn-doc.activo {
+    background: var(--color-primario);
+    color: #ffffff;
+    border-color: var(--color-primario);
+    font-weight: 700;
+  }
+
+  .docs-nav-empty {
+    margin: 0;
+    padding: 0.5rem;
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--text-secondary, #94a3b8);
+  }
 }

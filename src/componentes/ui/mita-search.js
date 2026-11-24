@@ -3,14 +3,29 @@ import { SearchEngine } from '../../utils/SearchEngine.js';
 import { navegarA } from 'mita-dom';
 import htmlTemplate from './mita-search.html?raw';
 import './mita-search.css';
-import { DOCS_MAP } from '../mita-docs/docsRegistry.js';
 
 export class MitaSearch extends MitaElement {
   constructor() {
     super();
-    this.motorBusqueda = new SearchEngine(DOCS_MAP);
+    this.motorBusqueda = null;
+    this._promesaMotor = null;
     this.debounceTimer = null;
     this.filtroActivo = 'all';
+  }
+
+  /**
+   * ⚡ Carga diferida (Code Splitting) del índice de documentación Markdown.
+   * Evita incluir ~380 KB de documentos en el bundle inicial `index.js`.
+   */
+  async asegurarMotorBusqueda() {
+    if (this.motorBusqueda) return this.motorBusqueda;
+    if (!this._promesaMotor) {
+      this._promesaMotor = import('../mita-docs/docsRegistry.js').then(({ DOCS_MAP }) => {
+        this.motorBusqueda = new SearchEngine(DOCS_MAP);
+        return this.motorBusqueda;
+      });
+    }
+    return this._promesaMotor;
   }
 
   async render() {
@@ -26,33 +41,33 @@ export class MitaSearch extends MitaElement {
     this.$filters = this.querySelectorAll('.filter-tag');
     this.$btnClose = this.querySelector('#search-close-btn');
 
-    // Manejar Cierre Explicito
     if (this.$btnClose) {
       this.$btnClose.addEventListener('click', () => {
-        this.$btnClose.textContent = "Cerrando...";
+        this.$btnClose.textContent = 'Cerrando...';
         setTimeout(() => {
           this.cerrarDropdown();
-          this.$btnClose.textContent = "Cerrar ✕";
+          this.$btnClose.textContent = 'Cerrar ✕';
           this.$input.blur();
         }, 150);
       });
     }
 
-    // Manejar Focus / Blur
     this.$input.addEventListener('focus', () => {
       this.$wrapper.classList.add('is-focused');
       this.abrirDropdown();
+      // Precargamos el índice al enfocar para que el primer tecleo sea instantáneo
+      this.asegurarMotorBusqueda().catch(() => {});
     });
 
-    // Usar mousedown en document para detectar clics fuera del buscador
-    document.addEventListener('mousedown', (e) => {
+    const onDocMouseDown = (e) => {
       if (!this.contains(e.target)) {
         this.cerrarDropdown();
       }
-    });
+    };
+    document.addEventListener('mousedown', onDocMouseDown);
+    this.registrarLimpieza(() => document.removeEventListener('mousedown', onDocMouseDown));
 
-    // Escuchar atajo global Ctrl+K
-    window.addEventListener('keydown', (e) => {
+    const onWindowKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         this.$input.focus();
@@ -61,29 +76,29 @@ export class MitaSearch extends MitaElement {
         this.cerrarDropdown();
         this.$input.blur();
       }
-    });
+    };
+    window.addEventListener('keydown', onWindowKeyDown);
+    this.registrarLimpieza(() => window.removeEventListener('keydown', onWindowKeyDown));
 
-    // Escuchar input con debounce
     this.$input.addEventListener('input', (e) => {
       const valor = e.target.value;
-      
+
       clearTimeout(this.debounceTimer);
       this.debounceTimer = setTimeout(() => {
         this.realizarBusqueda(valor);
       }, 300);
     });
+    this.registrarLimpieza(() => clearTimeout(this.debounceTimer));
 
-    // Escuchar cuando el usuario borra todo usando la X nativa del input[type="search"]
     this.$input.addEventListener('search', (e) => {
       if (!e.target.value) {
         this.realizarBusqueda('');
       }
     });
 
-    // Filtros Rápidos
-    this.$filters.forEach(tag => {
+    this.$filters.forEach((tag) => {
       tag.addEventListener('click', (e) => {
-        this.$filters.forEach(f => f.classList.remove('active'));
+        this.$filters.forEach((f) => f.classList.remove('active'));
         e.target.classList.add('active');
         this.filtroActivo = e.target.dataset.filter;
         this.realizarBusqueda(this.$input.value);
@@ -95,7 +110,7 @@ export class MitaSearch extends MitaElement {
   abrirDropdown() {
     this.$dropdown.style.display = 'flex';
     if (!this.$input.value) {
-      this.$results.innerHTML = '<div class="search-empty">Empieza a escribir para buscar...</div>';
+      this.$results.innerHTML = '<p class="search-empty">Empieza a escribir para buscar...</p>';
     } else {
       this.realizarBusqueda(this.$input.value);
     }
@@ -106,41 +121,45 @@ export class MitaSearch extends MitaElement {
     this.$wrapper.classList.remove('is-focused');
   }
 
-  realizarBusqueda(query) {
+  async realizarBusqueda(query) {
     if (!query || query.trim().length < 2) {
-      this.$results.innerHTML = '<div class="search-empty">Empieza a escribir para buscar...</div>';
+      this.$results.innerHTML = '<p class="search-empty">Empieza a escribir para buscar...</p>';
       return;
     }
 
-    const todosLosResultados = this.motorBusqueda.buscar(query);
-    
-    // Aplicar filtro si no es 'all'
-    const resultados = todosLosResultados.filter(res => {
+    if (!this.motorBusqueda) {
+      this.$results.innerHTML = '<p class="search-empty">⏳ Cargando índice de documentación...</p>';
+    }
+
+    const motor = await this.asegurarMotorBusqueda();
+    const todosLosResultados = motor.buscar(query);
+
+    const resultados = todosLosResultados.filter((res) => {
       if (this.filtroActivo === 'all') return true;
       return res.categoria === this.filtroActivo;
     });
 
     if (resultados.length === 0) {
-      this.$results.innerHTML = '<div class="search-empty">No se encontraron resultados para "' + query + '" en esta categoría.</div>';
+      this.$results.innerHTML = `<p class="search-empty">No se encontraron resultados para "${query}" en esta categoría.</p>`;
       return;
     }
 
-    // Renderizar resultados
     const fragmento = document.createDocumentFragment();
-    
-    resultados.forEach(res => {
+
+    resultados.forEach((res) => {
       const btn = document.createElement('button');
+      btn.type = 'button';
       btn.className = 'search-result-item';
       btn.innerHTML = `
         <span class="search-result-title">📄 ${res.titulo}</span>
         <span class="search-result-snippet">${res.extracto}</span>
       `;
-      
+
       btn.addEventListener('click', () => {
         this.cerrarDropdown();
         navegarA('/docs/' + res.idDoc);
       });
-      
+
       fragmento.appendChild(btn);
     });
 
@@ -149,5 +168,6 @@ export class MitaSearch extends MitaElement {
   }
 }
 
-// Registrar el Custom Element
-customElements.define('mita-search', MitaSearch);
+if (!customElements.get('mita-search')) {
+  customElements.define('mita-search', MitaSearch);
+}

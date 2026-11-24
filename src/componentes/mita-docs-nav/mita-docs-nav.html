@@ -1,65 +1,115 @@
-<div class="docs-nav-container">
-  <h3>📚 Índice</h3>
-  <nav id="docs-nav">
-    <h4 class="nav-section-title" style="margin-top: 0; color: #8b5cf6;">🎓 APRENDE</h4>
-    <div class="nav-group">
-      <h4>📖 Conceptos Base</h4>
-      <a href="/docs/readme" class="btn-doc">MitaDOM (Readme)</a>
-      <a href="/docs/filosofia" class="btn-doc">🧘 Filosofía y Misión</a>
-      <a href="/docs/fundamentos_web" class="btn-doc">🌐 Fundamentos Web y Git</a>
-      <a href="/docs/keywords" class="btn-doc">📖 Glosario y Keywords</a>
-      <a href="/docs/javascript_moderno" class="btn-doc">🚀 JS Moderno (ES6+)</a>
-      <a href="/docs/css_moderno" class="btn-doc">🎨 CSS3 Moderno</a>
-      <a href="/docs/signals_profundo" class="btn-doc">📡 Signals en Profundidad</a>
-      <a href="/docs/fundamentos" class="btn-doc">🏗️ Fundamentos Reactivos</a>
-      <a href="/docs/pixel_perfect" class="btn-doc">📏 Pixel Perfect y UX/UI</a>
-      <a href="/docs/performance" class="btn-doc">⚡ Optimización y Performance</a>
-    </div>
+<section class="docs-nav-container" aria-labelledby="docs-nav-heading">
+  <header class="docs-nav-header">
+    <h3 id="docs-nav-heading">📚 Índice de Docs</h3>
+    <search class="docs-nav-search-box">
+      <label for="docs-nav-search" class="docs-nav-sr-only">Buscar en la documentación</label>
+      <input
+        type="search"
+        id="docs-nav-search"
+        class="docs-nav-search-input"
+        placeholder="🔍 Buscar guía, API o Signal..."
+        autocomplete="off"
+      />
+    </search>
+  </header>
 
-    <div class="nav-group">
-      <h4>🔀 Flujo y Componentes</h4>
-      <a href="/docs/web_components_nativos" class="btn-doc">🌐 Web Components Nativos</a>
-      <a href="/docs/web_components_patterns" class="btn-doc">🧩 Patrones Estructurales</a>
-      <a href="/docs/conditional_rendering" class="btn-doc">🔀 Renderizado Condicional</a>
-      <a href="/docs/teleport" class="btn-doc">🚀 Teleport y Estado Global</a>
-    </div>
+  <nav id="docs-nav" aria-label="Índice completo de documentación">
+    <p class="nav-section-title nav-section-aprende">🎓 APRENDE</p>
 
-    <div class="nav-group">
-      <h4>🗺️ Enrutamiento y Datos</h4>
-      <a href="/docs/enrutamiento_spa" class="btn-doc">🧭 Enrutamiento Avanzado</a>
-      <a href="/docs/rutas_dinamicas_y_patrones" class="btn-doc">🛤️ Rutas Dinámicas (URLPattern)</a>
-      <a href="/docs/navigation_api" class="btn-doc">🚀 API de Navegación Nata</a>
-      <a href="/docs/control-acceso" class="btn-doc">🔒 Control de Acceso (Guards)</a>
-      <a href="/docs/datos_y_apis" class="btn-doc">📡 Datos y APIs</a>
-    </div>
+    <details class="docs-accordion" open>
+      <summary class="docs-accordion-summary">📖 Conceptos Base</summary>
+      <ul class="docs-accordion-list">
+        <li><a href="/docs/readme" class="btn-doc">MitaDOM (Readme)</a></li>
+        <li><a href="/docs/filosofia" class="btn-doc">🧘 Filosofía y Misión</a></li>
+        <li><a href="/docs/decada_estable" class="btn-doc">⏳ Filosofía: Década Estable</a></li>
+        <li><a href="/docs/fundamentos_web" class="btn-doc">🌐 Fundamentos Web y Git</a></li>
+        <li><a href="/docs/keywords" class="btn-doc">📖 Glosario Arquitectura, CLI y Rust</a></li>
+        <li><a href="/docs/javascript_moderno" class="btn-doc">🚀 JS Moderno (ES6+)</a></li>
+        <li><a href="/docs/css_moderno" class="btn-doc">🎨 CSS3 Moderno</a></li>
+        <li><a href="/docs/signals_profundo" class="btn-doc">📡 Signals en Profundidad</a></li>
+        <li><a href="/docs/fundamentos" class="btn-doc">🏗️ Fundamentos Reactivos</a></li>
+        <li><a href="/docs/pixel_perfect" class="btn-doc">📏 Pixel Perfect y UX/UI</a></li>
+        <li><a href="/docs/performance" class="btn-doc">⚡ Optimización y Performance</a></li>
+      </ul>
+    </details>
 
-    <h4 class="nav-section-title" style="margin-top: 1.5rem; color: #10b981;">📖 REFERENCIA</h4>
-    <div class="nav-group">
-      <h4>🏛️ Arquitectura API</h4>
-      <a href="/docs/arquitectura" class="btn-doc">🏛️ Arquitectura Core</a>
-      <a href="/docs/guia_estados_crud" class="btn-doc">📦 API de Estados y CRUD</a>
-      <a href="/docs/ecosistema_vite" class="btn-doc">⚡ Ecosistema Vite y HMR</a>
-    </div>
+    <details class="docs-accordion" open>
+      <summary class="docs-accordion-summary">🔀 Flujo y Componentes</summary>
+      <ul class="docs-accordion-list">
+        <li><a href="/docs/web_components_nativos" class="btn-doc">🌐 Web Components Nativos</a></li>
+        <li><a href="/docs/web_components_patterns" class="btn-doc">🧩 Patrones Estructurales</a></li>
+        <li><a href="/docs/paradigmas_componentes" class="btn-doc">🏛️ Paradigmas de Componentes</a></li>
+        <li><a href="/docs/granular_light_dom" class="btn-doc">⚡ Granular Light DOM</a></li>
+        <li><a href="/docs/anti_patrones" class="btn-doc">🚫 Anti-Patrones a Evitar</a></li>
+        <li><a href="/docs/conditional_rendering" class="btn-doc">🔀 Renderizado Condicional</a></li>
+        <li><a href="/docs/teleport" class="btn-doc">🚀 Teleport y Estado Global</a></li>
+      </ul>
+    </details>
 
-    <div class="nav-group">
-      <h4>🌐 Web APIs Modernas</h4>
-      <a href="/docs/web_apis" class="btn-doc">⚙️ Temporal, Navigation, Dialog</a>
-    </div>
+    <details class="docs-accordion">
+      <summary class="docs-accordion-summary">🗺️ Enrutamiento y Datos</summary>
+      <ul class="docs-accordion-list">
+        <li><a href="/docs/enrutamiento_spa" class="btn-doc">🧭 Enrutamiento Avanzado</a></li>
+        <li><a href="/docs/rutas_dinamicas_y_patrones" class="btn-doc">🛤️ Rutas Dinámicas (URLPattern)</a></li>
+        <li><a href="/docs/navigation_api" class="btn-doc">🚀 API de Navegación Nativa</a></li>
+        <li><a href="/docs/navegacion_animada" class="btn-doc">✨ Navegación Animada</a></li>
+        <li><a href="/docs/control-acceso" class="btn-doc">🔒 Control de Acceso (Guards)</a></li>
+        <li><a href="/docs/datos_y_apis" class="btn-doc">📡 Datos y APIs</a></li>
+      </ul>
+    </details>
 
-    <div class="nav-group">
-      <h4>🧩 Librería UI (Componentes)</h4>
-      <a href="/docs/guia_componentes" class="btn-doc">Guía de Componentes Base</a>
-      <a href="/docs/ejemplos" class="btn-doc">💡 Ejemplos Prácticos</a>
-    </div>
+    <p class="nav-section-title nav-section-referencia">📖 REFERENCIA</p>
 
-    <div class="nav-group">
-      <h4>🛠️ Testing</h4>
-      <a href="/docs/guia_testing" class="btn-doc">🧪 Pruebas Automáticas</a>
-    </div>
+    <details class="docs-accordion" open>
+      <summary class="docs-accordion-summary">🏛️ Arquitectura API (v2.7)</summary>
+      <ul class="docs-accordion-list">
+        <li><a href="/docs/guia_definitiva_estrategias_render_fullstack_express_orm_y_docker_2026-11-22" class="btn-doc">🌐 Estrategias Render (CSR/SSR/SSG/Hybrid), Express+ORM y Docker</a></li>
+        <li><a href="/docs/contributing" class="btn-doc">📦 CONTRIBUTING y Decisión de Versiones SemVer</a></li>
+        <li><a href="/docs/guia_git_flow_pr_gh_cli_y_release_ecosistema_2026-11-23" class="btn-doc">🚀 Git Flow, Pull Requests, GitHub CLI (gh), NPM y Roadmap</a></li>
+        <li><a href="/docs/guia_ciclo_de_vida_y_solid2_async_graph_2026-11-23" class="btn-doc">🧬 Ciclo de Vida MitaElement + Solid 2.0 Async Graph y Frameworks</a></li>
+        <li><a href="/docs/referencia_completa_react_a_mitadom_glosario_y_profundizacion_2026-11-23" class="btn-doc">📖 Referencia Estilo React.dev → MitaDOM, Profundización y Glosario A–Z</a></li>
+        <li><a href="/docs/guia_express_routing_data_fetching_y_alias_food_show_2026-11-23" class="btn-doc">🚂 Express 5 (food-show-1), Estrategias 1-Línea, Routing, Fetching y Alias</a></li>
+        <li><a href="/docs/guia_framework_opinionado_props_defer_y_signal_forms_2026-11-22" class="btn-doc">🧩 Framework Opinionado: Props (React) + @defer y Signal Forms (Angular)</a></li>
+        <li><a href="/docs/informe_mejoras_antigravity_ide_y_roadmap_ia_2026-11-22" class="btn-doc">🤖 Informe Antigravity IDE Autopilot y Roadmap IA</a></li>
+        <li><a href="/docs/guia_ui_paginacion_mod_chat_y_ahorro_recursos_2026-11-22" class="btn-doc">🛡️ UI Paginación, Chat (3s), Moderación ("DC") y Ahorro BD</a></li>
+        <li><a href="/docs/guia_crud_formbuilder_y_estrategias_por_vista_2026-11-22" class="btn-doc">🗂️ CRUD Multi-Categoría, FormBuilder y Modos por Vista</a></li>
+        <li><a href="/docs/tutorial_maestro_checklist_y_seguimiento_2026-11-22" class="btn-doc">📘 Tutorial Maestro, Checklist y Seguimiento</a></li>
+        <li><a href="/docs/guia_cli_y_rust_memory_guard_2026-11-22" class="btn-doc">🦀 CLI npx mita y Rust Memory Guard</a></li>
+        <li><a href="/docs/bitacora_errores_y_aprendizaje_2026-11-22" class="btn-doc">🧠 Bitácora de Errores y Aprendizaje</a></li>
+        <li><a href="/docs/guia_render_ssr_ssg_auth_y_cookies_2026-11-22" class="btn-doc">🌐 SSR, SSG, Auth FormBuilder y Cookies</a></li>
+        <li><a href="/docs/guia_chat_antispam_y_modales_2026-11-22" class="btn-doc">💬 Chat Anti-Spam, Modales y DB Local</a></li>
+        <li><a href="/docs/guia_reusabilidad_y_comunicacion_2026-11-22" class="btn-doc">🧩 Comunicación y Re-usabilidad (2026-11-22)</a></li>
+        <li><a href="/docs/informe_estados_y_signals_2026-11-22" class="btn-doc">🆕 Informe Signals y Estados (2026-11-22)</a></li>
+        <li><a href="/docs/auto_api_referencia" class="btn-doc">🤖 API Auto-Documentada (v2.7)</a></li>
+        <li><a href="/docs/2026-11-22-v2.7.0" class="btn-doc">📝 Changelog v2.7.0 con Ejemplos</a></li>
+        <li><a href="/docs/render_condicional" class="btn-doc">🔀 Guía renderCondicional</a></li>
+        <li><a href="/docs/arquitectura" class="btn-doc">🏛️ Arquitectura Core</a></li>
+        <li><a href="/docs/arquitectura_opinionada" class="btn-doc">📐 Arquitectura Opinionada</a></li>
+        <li><a href="/docs/guia_estados_crud" class="btn-doc">📦 API de Estados y CRUD</a></li>
+        <li><a href="/docs/ecosistema_vite" class="btn-doc">⚡ Ecosistema Vite y HMR</a></li>
+        <li><a href="/docs/roadmap_v3" class="btn-doc">🗺️ Roadmap v3.0</a></li>
+      </ul>
+    </details>
 
-    <h4 class="nav-section-title" style="margin-top: 1.5rem; color: #f59e0b;">🔄 EVOLUCIÓN</h4>
-    <div class="nav-group">
-      <a href="/docs/changelog" class="btn-doc">📝 Registro de Cambios</a>
-    </div>
+    <details class="docs-accordion">
+      <summary class="docs-accordion-summary">🌐 Web APIs y UI</summary>
+      <ul class="docs-accordion-list">
+        <li><a href="/docs/web_apis" class="btn-doc">⚙️ Temporal, Navigation, Dialog</a></li>
+        <li><a href="/docs/guia_componentes" class="btn-doc">🧩 Guía de Componentes Base</a></li>
+        <li><a href="/docs/ejemplos" class="btn-doc">💡 Ejemplos Prácticos</a></li>
+        <li><a href="/docs/guia_testing" class="btn-doc">🧪 Pruebas Automáticas</a></li>
+      </ul>
+    </details>
+
+    <p class="nav-section-title nav-section-evolucion">🔄 EVOLUCIÓN</p>
+
+    <details class="docs-accordion" open>
+      <summary class="docs-accordion-summary">📝 Historial</summary>
+      <ul class="docs-accordion-list">
+        <li><a href="/docs/changelog" class="btn-doc">📝 Registro de Cambios Consolidado</a></li>
+      </ul>
+    </details>
   </nav>
-</div>
+
+  <p id="docs-nav-empty" class="docs-nav-empty" hidden>No se encontraron documentos para esa búsqueda.</p>
+</section>

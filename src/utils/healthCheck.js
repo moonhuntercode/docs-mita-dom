@@ -1,7 +1,6 @@
 // @ts-check
 import { Logger } from './logger.js';
 import { registroRutas } from '../router/router.js';
-import { DOCS_MAP } from '../componentes/mita-docs/docsRegistry.js';
 
 /**
  * 🩺 Auditoría Silenciosa en Segundo Plano (Health Checker)
@@ -9,6 +8,7 @@ import { DOCS_MAP } from '../componentes/mita-docs/docsRegistry.js';
  */
 export async function runHealthCheck() {
     Logger.info('🩺 Iniciando Health Check en segundo plano...');
+    const { DOCS_MAP } = await import('../componentes/mita-docs/docsRegistry.js');
     
     let errores = 0;
     let exitos = 0;
